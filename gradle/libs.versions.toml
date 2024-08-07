@@ -1,0 +1,62 @@
+[versions]
+ktlint = "1.3.0"
+
+kotlin = "2.0.0"
+kotlinx-coroutines = "1.8.1"
+codegen = "0.107"
+ktor = "2.3.11"
+
+guava = "33.2.1-jre"
+junit4 = "4.13.2"
+junit5 = "5.11.0-M2"
+mockito = "5.12.0"
+mapdb = "3.1.0"
+
+# We will pull in a newer version of jackson because of security fixes
+jackson = "2.17.1"
+
+springBoot = "3.3.0"
+springSecurity = "6.3.0"
+bouncyCastle = "1.77"
+
+[libraries]
+codegen = { group = "net.pwall.json", name = "json-kotlin-schema-codegen", version.ref= "codegen" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-java = { group = "io.ktor", name = "ktor-client-java", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktor" }
+ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson", version.ref = "ktor" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+mapdb = { group = "org.mapdb", name = "mapdb", version.ref = "mapdb" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "kotlinx-coroutines" }
+kotlinx-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
+jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson" }
+jackson-jaxrsJsonProvider = { group = "com.fasterxml.jackson.jaxrs", name = "jackson-jaxrs-json-provider", version.ref = "jackson" }
+spring-security-crypto = { group = "org.springframework.security", name = "spring-security-crypto", version.ref="springSecurity" }
+
+# common test libraries
+junit = { group = "junit", name = "junit", version.ref = "junit4" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+junit5 = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit5" }
+
+[bundles]
+test4 = ["junit", "mockito"]
+test5 = ["junit5", "mockito"]
+ktor-client = ["ktor-client-core", "ktor-client-java"]
+ktor-richClient = ["ktor-client-core", "ktor-client-java", "ktor-client-content-negotiation", "ktor-serialization-jackson"]
+
+[plugins]
+springboot = { id = "org.springframework.boot", version.ref = "springBoot" }
+spring-dependencyManagement = { id = "io.spring.dependency-management", version = "1.1.5" }
+swagger = { id = "com.benjaminsproule.swagger", version = "1.0.14" }
+protobuf = { id = "com.google.protobuf",  version = "0.9.4" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
+licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.8" }
+versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
+node = { id = "com.github.node-gradle.node", version = "7.0.2" }
