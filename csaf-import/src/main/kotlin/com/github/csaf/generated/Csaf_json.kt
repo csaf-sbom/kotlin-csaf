@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
- 
 package com.github.csaf.generated
 
 import java.math.BigDecimal
