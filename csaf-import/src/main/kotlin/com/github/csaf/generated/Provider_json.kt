@@ -7,7 +7,7 @@
  * It is not advisable to modify generated code as any modifications will be lost
  * when the generation process is re-run.
  */
-package fhg.aisec.csaf.generated
+package com.github.csaf.generated
 
 import java.time.OffsetDateTime
 import java.net.URI

@@ -1,4 +1,4 @@
-package fhg.aisec.csaf
+package com.github.csaf
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -36,6 +36,6 @@ fun main() {
 
     val codeGenerator = CodeGenerator()
     codeGenerator.baseDirectoryName = "../csaf-import/src/main/kotlin"
-    codeGenerator.basePackageName = "fhg.aisec.csaf.generated"
+    codeGenerator.basePackageName = "com.github.csaf-sbom.generated"
     codeGenerator.generate(SCHEMA_TARGET_DIR.toFile())
 }
