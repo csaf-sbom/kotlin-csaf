@@ -1,5 +1,16 @@
-/*
- * Copyright (c) 2024, The Authors. All rights reserved.
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id("com.diffplug.spotless")
+}
+
+// automatically run spotless before compiling
+tasks.withType<KotlinCompile> {
+    dependsOn("spotlessApply")
+}
+
+val headerWithStars = """/*
+ * Copyright (c) ${"$"}YEAR, The Authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +25,11 @@
  * limitations under the License.
  *
  */
- 
-package com.github.csaf
+"""
 
-fun main() {
-    println("hello world")
+spotless {
+    kotlin {
+        ktfmt().kotlinlangStyle()
+        licenseHeader(headerWithStars).yearSeparator(" - ")
+    }
 }
