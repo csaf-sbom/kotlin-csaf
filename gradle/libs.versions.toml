@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.0.0"
 codegen = "0.107"
-ktor = "2.3.11"
+ktor = "2.3.12"
 
 [libraries]
 codegen = { group = "net.pwall.json", name = "json-kotlin-schema-codegen", version.ref= "codegen" }
