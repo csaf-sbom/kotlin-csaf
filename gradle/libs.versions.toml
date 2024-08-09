@@ -13,7 +13,7 @@ mockito = "5.12.0"
 mapdb = "3.1.0"
 
 # We will pull in a newer version of jackson because of security fixes
-jackson = "2.17.1"
+jackson = "2.17.2"
 
 springBoot = "3.3.0"
 springSecurity = "6.3.0"
