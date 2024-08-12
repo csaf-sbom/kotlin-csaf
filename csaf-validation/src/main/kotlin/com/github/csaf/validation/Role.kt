@@ -22,13 +22,5 @@ package com.github.csaf.validation
  */
 abstract class Role {
 
-    abstract var requirements: Any
-}
-
-infix fun Requirement.and(other: Requirement): Any {
-    return Any()
-}
-
-infix fun Requirement.or(other: Requirement): Any {
-    return Any()
+    abstract val requirements: Requirement
 }

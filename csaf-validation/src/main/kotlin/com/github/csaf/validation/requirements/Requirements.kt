@@ -29,7 +29,7 @@ import com.github.csaf.validation.ValidationSuccessful
  */
 object ValidCSAFDocument : Requirement {
     override fun check(target: Any): ValidationResult {
-        // TOOD: actually implement the requirement
+        // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
@@ -41,7 +41,98 @@ object ValidCSAFDocument : Requirement {
  */
 object ValidFilename : Requirement {
     override fun check(target: Any): ValidationResult {
-        // TOOD: actually implement the requirement
+        // TODO: actually implement the requirement
         return ValidationFailed(errors = listOf("very bad error"))
+    }
+}
+
+object Requirement8 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement9 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement10 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement11 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement12 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement13 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement14 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement15 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement16 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement17 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement18 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement19 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
+    }
+}
+
+object Requirement20 : Requirement {
+    override fun check(target: Any): ValidationResult {
+        // TODO: actually implement the requirement
+        return ValidationSuccessful
     }
 }

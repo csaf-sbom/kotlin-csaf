@@ -16,22 +16,30 @@
  */
 package com.github.csaf.validation.roles
 
-import com.github.csaf.validation.Role
-import com.github.csaf.validation.and
-import com.github.csaf.validation.requirements.ValidCSAFDocument
-import com.github.csaf.validation.requirements.ValidFilename
+import com.github.csaf.validation.*
+import com.github.csaf.validation.requirements.*
 
 open class CSAFPublisher : Role() {
 
-    override var requirements = ValidCSAFDocument and ValidFilename
+    override val requirements = allOf(ValidCSAFDocument, ValidFilename)
 }
 
-open class CSAFProvider : CSAFPublisher()
+open class CSAFProvider : CSAFPublisher() {
+    override val requirements: Requirement
+        get() =
+            super.requirements +
+                oneOf(Requirement8, Requirement9, Requirement10) +
+                (allOf(Requirement11, Requirement12, Requirement13, Requirement14) or
+                    allOf(Requirement15, Requirement16, Requirement17))
+}
 
-class CSAFTrustedProviderRole : CSAFProvider()
+class CSAFTrustedProviderRole : CSAFProvider() {
+    override val requirements: Requirement
+        get() = super.requirements + allOf(Requirement18, Requirement19, Requirement20)
+}
 
 open class CSAFLister : Role() {
-    override var requirements = ValidCSAFDocument as Any
+    override var requirements: Requirement = ValidCSAFDocument
 }
 
 class CSAFAggregator : CSAFLister()
