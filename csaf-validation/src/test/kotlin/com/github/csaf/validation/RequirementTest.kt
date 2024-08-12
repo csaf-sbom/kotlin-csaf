@@ -22,7 +22,7 @@ import kotlin.test.assertIs
 class RequirementTest {
     @Test
     fun testCheck() {
-        class AlwaysTrue : Requirement() {
+        class AlwaysTrue : Requirement {
             override fun check(target: Any): ValidationResult {
                 return ValidationSuccessful
             }
@@ -31,5 +31,26 @@ class RequirementTest {
         var requirement = AlwaysTrue()
         var result = requirement.check(Any())
         assertIs<ValidationSuccessful>(result)
+    }
+
+    @Test
+    fun testAllOf() {
+        val alwaysFail =
+            object : Requirement {
+                override fun check(target: Any): ValidationResult {
+                    return ValidationFailed()
+                }
+            }
+
+        val alwaysGood =
+            object : Requirement {
+                override fun check(target: Any): ValidationResult {
+                    return ValidationSuccessful
+                }
+            }
+
+        val requirement = allOf(alwaysFail, alwaysGood)
+        val result = requirement.check(Any())
+        assertIs<ValidationFailed>(result)
     }
 }

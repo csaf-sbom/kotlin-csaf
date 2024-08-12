@@ -16,21 +16,22 @@
  */
 package com.github.csaf.validation.roles
 
-import com.github.csaf.validation.and
 import com.github.csaf.validation.Role
+import com.github.csaf.validation.and
 import com.github.csaf.validation.requirements.ValidCSAFDocument
 import com.github.csaf.validation.requirements.ValidFilename
 
 open class CSAFPublisher : Role() {
 
-    var requirements = ValidCSAFDocument and ValidFilename
-
+    override var requirements = ValidCSAFDocument and ValidFilename
 }
 
 open class CSAFProvider : CSAFPublisher()
 
 class CSAFTrustedProviderRole : CSAFProvider()
 
-open class CSAFLister : Role()
+open class CSAFLister : Role() {
+    override var requirements = ValidCSAFDocument as Any
+}
 
 class CSAFAggregator : CSAFLister()

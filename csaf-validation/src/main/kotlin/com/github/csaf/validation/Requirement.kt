@@ -17,6 +17,27 @@
 package com.github.csaf.validation
 
 /** Represents a requirement that the CSAF standard defines in */
-abstract class Requirement {
-    abstract fun check(target: Any): ValidationResult
+interface Requirement {
+    fun check(target: Any): ValidationResult
+}
+
+sealed class LogicalRequirementCombination : Requirement {}
+
+class AllOf(var list: List<Requirement>) : LogicalRequirementCombination() {
+    override fun check(target: Any): ValidationResult {
+        var result: ValidationResult = ValidationSuccessful
+        for (requirement in list) {
+            var tmpResult = requirement.check(target)
+            if (tmpResult is ValidationFailed) {
+                // TODO: accumulate errors instead of last one
+                result = ValidationFailed(tmpResult.errors)
+            }
+        }
+
+        return result
+    }
+}
+
+fun allOf(vararg requirements: Requirement): Requirement {
+    return AllOf(requirements.toList())
 }

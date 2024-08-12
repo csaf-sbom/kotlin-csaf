@@ -27,7 +27,7 @@ import com.github.csaf.validation.ValidationSuccessful
  * See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document
  */
-object ValidCSAFDocument : Requirement() {
+object ValidCSAFDocument : Requirement {
     override fun check(target: Any): ValidationResult {
         // TOOD: actually implement the requirement
         return ValidationSuccessful
@@ -39,7 +39,7 @@ object ValidCSAFDocument : Requirement() {
  *
  * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename
  */
-object ValidFilename : Requirement() {
+object ValidFilename : Requirement {
     override fun check(target: Any): ValidationResult {
         // TOOD: actually implement the requirement
         return ValidationFailed(errors = listOf("very bad error"))
