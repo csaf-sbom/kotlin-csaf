@@ -14,4 +14,23 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation.standards.csaf20
+package com.github.csaf.validation.roles
+
+import com.github.csaf.validation.and
+import com.github.csaf.validation.Role
+import com.github.csaf.validation.requirements.ValidCSAFDocument
+import com.github.csaf.validation.requirements.ValidFilename
+
+open class CSAFPublisher : Role() {
+
+    var requirements = ValidCSAFDocument and ValidFilename
+
+}
+
+open class CSAFProvider : CSAFPublisher()
+
+class CSAFTrustedProviderRole : CSAFProvider()
+
+open class CSAFLister : Role()
+
+class CSAFAggregator : CSAFLister()
