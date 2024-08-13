@@ -30,10 +30,18 @@ jobs:
       run: ./gradlew spotlessCheck -x spotlessApply
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: ./gradlew build koverXmlReport
+
+    - name: Upload Code Coverage
+      uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: true
+        files: ./build/reports/kover/report.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true
 
   dependency-submission:
-
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write

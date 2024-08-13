@@ -2,13 +2,20 @@ plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm")
 
-    // Apply formatting convertions
+    // Apply formatting conventions
     id("buildlogic.kotlin-formatting-conventions")
+
+    // Apply code coverage plugin
+    id("org.jetbrains.kotlinx.kover")
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+}
+
+dependencies {
+    testImplementation(kotlin("test"))
 }
 
 testing {
