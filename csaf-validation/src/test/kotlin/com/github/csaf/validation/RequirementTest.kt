@@ -19,38 +19,53 @@ package com.github.csaf.validation
 import kotlin.test.Test
 import kotlin.test.assertIs
 
+val alwaysFail =
+    object : Requirement {
+        override fun check(ctx: ValidationContext): ValidationResult {
+            return ValidationFailed()
+        }
+    }
+
+val alwaysGood =
+    object : Requirement {
+        override fun check(ctx: ValidationContext): ValidationResult {
+            return ValidationSuccessful
+        }
+    }
+
 class RequirementTest {
     @Test
     fun testCheck() {
-        class AlwaysTrue : Requirement {
-            override fun check(target: Any): ValidationResult {
-                return ValidationSuccessful
-            }
-        }
+        var requirement = alwaysGood
+        var result = requirement.check(ValidationContext())
+        assertIs<ValidationSuccessful>(result)
+    }
 
-        var requirement = AlwaysTrue()
-        var result = requirement.check(Any())
+    @Test
+    fun testAnd() {
+        val requirement = alwaysFail + alwaysGood
+        val result = requirement.check(ValidationContext())
+        assertIs<ValidationFailed>(result)
+    }
+
+    @Test
+    fun testOr() {
+        val requirement = alwaysFail or alwaysGood
+        val result = requirement.check(ValidationContext())
         assertIs<ValidationSuccessful>(result)
     }
 
     @Test
     fun testAllOf() {
-        val alwaysFail =
-            object : Requirement {
-                override fun check(target: Any): ValidationResult {
-                    return ValidationFailed()
-                }
-            }
-
-        val alwaysGood =
-            object : Requirement {
-                override fun check(target: Any): ValidationResult {
-                    return ValidationSuccessful
-                }
-            }
-
-        val requirement = allOf(alwaysFail, alwaysGood)
-        val result = requirement.check(Any())
+        val requirement = allOf(alwaysFail, alwaysGood, alwaysGood, alwaysFail)
+        val result = requirement.check(ValidationContext())
         assertIs<ValidationFailed>(result)
+    }
+
+    @Test
+    fun testOneOf() {
+        val requirement = oneOf(alwaysFail, alwaysGood, alwaysGood, alwaysFail)
+        val result = requirement.check(ValidationContext())
+        assertIs<ValidationSuccessful>(result)
     }
 }

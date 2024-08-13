@@ -16,20 +16,29 @@
  */
 package com.github.csaf.validation
 
-/** Represents a requirement that the CSAF standard defines in */
+/**
+ * Represents a requirement that the CSAF standard defines in
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#71-requirements. Since
+ * requirements are often re-used across different [Role]s, there are some helper functions to
+ * combine requirements, such as [oneOf], [allOf] or [or].
+ */
 interface Requirement {
-    fun check(target: Any): ValidationResult
+    fun check(ctx: ValidationContext): ValidationResult
 }
 
+/**
+ * Creates a new [Requirement] that specifies that all the requirements in [requirements] must be
+ * fulfilled.
+ */
 fun allOf(vararg requirements: Requirement): Requirement {
     return AllOf(requirements.toList())
 }
 
-class AllOf(var list: List<Requirement>) : Requirement {
-    override fun check(target: Any): ValidationResult {
+internal class AllOf(var list: List<Requirement>) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
         var result: ValidationResult = ValidationSuccessful
         for (requirement in list) {
-            var tmpResult = requirement.check(target)
+            var tmpResult = requirement.check(ctx)
             if (tmpResult is ValidationFailed) {
                 // TODO: accumulate errors instead of last one
                 result = ValidationFailed(tmpResult.errors)
@@ -40,13 +49,17 @@ class AllOf(var list: List<Requirement>) : Requirement {
     }
 }
 
+/**
+ * Creates a new [Requirement] that specifies that one the requirements in [requirements] must be
+ * fulfilled.
+ */
 fun oneOf(vararg requirements: Requirement): Requirement {
     return OneOf(requirements.toList())
 }
 
-class OneOf(var list: List<Requirement>) : Requirement {
-    override fun check(target: Any): ValidationResult {
-        return if (list.map { check(target) }.any { it is ValidationSuccessful }) {
+internal class OneOf(var list: List<Requirement>) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        return if (list.map { it.check(ctx) }.any { it is ValidationSuccessful }) {
             ValidationSuccessful
         } else {
             // TODO: populate errors from list
@@ -55,14 +68,18 @@ class OneOf(var list: List<Requirement>) : Requirement {
     }
 }
 
+/**
+ * Creates a new [Requirement] that specifies that either [this] or the [other] requirement must be
+ * fulfilled.
+ */
 infix fun Requirement.or(other: Requirement): Requirement {
     return Or(this, other)
 }
 
-class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(target: Any): ValidationResult {
-        var lhsResult = lhs.check(target)
-        var rhsResult = rhs.check(target)
+internal class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        var lhsResult = lhs.check(ctx)
+        var rhsResult = rhs.check(ctx)
         return when {
             lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
                 return ValidationSuccessful
@@ -83,14 +100,18 @@ class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
     }
 }
 
+/**
+ * Creates a new [Requirement] that specifies that this [this] and the [other] requirement must be
+ * fulfilled.
+ */
 operator fun Requirement.plus(other: Requirement): Requirement {
     return And(this, other)
 }
 
-class And(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(target: Any): ValidationResult {
-        var lhsResult = lhs.check(target)
-        var rhsResult = rhs.check(target)
+internal class And(var lhs: Requirement, var rhs: Requirement) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        var lhsResult = lhs.check(ctx)
+        var rhsResult = rhs.check(ctx)
         return when {
             lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
                 return ValidationSuccessful

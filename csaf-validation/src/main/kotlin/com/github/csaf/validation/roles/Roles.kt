@@ -19,11 +19,19 @@ package com.github.csaf.validation.roles
 import com.github.csaf.validation.*
 import com.github.csaf.validation.requirements.*
 
-open class CSAFPublisherRole : Role() {
+/**
+ * The "CSAF publisher" role. See
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#721-role-csaf-publisher.
+ */
+open class CSAFPublisherRole : Role {
 
     override val requirements = allOf(ValidCSAFDocument, ValidFilename)
 }
 
+/**
+ * The "CSAF provider" role. See
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#722-role-csaf-provider.
+ */
 open class CSAFProviderRole : CSAFPublisherRole() {
     override val requirements: Requirement
         get() =
@@ -33,13 +41,35 @@ open class CSAFProviderRole : CSAFPublisherRole() {
                     allOf(Requirement15, Requirement16, Requirement17))
 }
 
+/**
+ * The "CSAF trusted provider role".
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#723-role-csaf-trusted-provider.
+ */
 class CSAFTrustedProviderRole : CSAFProviderRole() {
     override val requirements: Requirement
         get() = super.requirements + allOf(Requirement18, Requirement19, Requirement20)
 }
 
-open class CSAFListerRole : Role() {
-    override var requirements: Requirement = ValidCSAFDocument
+/**
+ * The "CSAF lister role". See
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#724-role-csaf-lister.
+ */
+open class CSAFListerRole : Role {
+    override var requirements: Requirement = allOf(Requirement6, Requirement21, Requirement22)
 }
 
-class CSAFAggregatorRole : CSAFListerRole()
+/**
+ * The "CSAF aggregator role". See
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#725-role-csaf-aggregator.
+ */
+class CSAFAggregatorRole : CSAFListerRole() {
+    override var requirements: Requirement =
+        allOf(
+            ValidCSAFDocument,
+            ValidFilename,
+            Requirement3,
+            Requirement4,
+            Requirement5,
+            Requirement6
+        ) + allOf(Requirement21, Requirement22, Requirement23)
+}

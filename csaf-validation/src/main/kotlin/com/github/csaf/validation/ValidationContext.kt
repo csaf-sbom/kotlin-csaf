@@ -16,16 +16,7 @@
  */
 package com.github.csaf.validation
 
-/**
- * Represents a CSAF profile according to
- * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles.
- */
-interface Role {
-
-    /**
-     * The list of requirements, that this role needs to fulfill according to the standard. This can
-     * either be a single [Requirement] or a combination thereof using the operators [allOf].
-     * [oneOf], [or].
-     */
-    val requirements: Requirement
+/** This class holds all necessary information that are needed to be checked by a [Requirement]. */
+class ValidationContext {
+    // TODO: add members to be accessed by the requirements
 }
