@@ -19,12 +19,12 @@ package com.github.csaf.validation.roles
 import com.github.csaf.validation.*
 import com.github.csaf.validation.requirements.*
 
-open class CSAFPublisher : Role() {
+open class CSAFPublisherRole : Role() {
 
     override val requirements = allOf(ValidCSAFDocument, ValidFilename)
 }
 
-open class CSAFProvider : CSAFPublisher() {
+open class CSAFProviderRole : CSAFPublisherRole() {
     override val requirements: Requirement
         get() =
             super.requirements +
@@ -33,13 +33,13 @@ open class CSAFProvider : CSAFPublisher() {
                     allOf(Requirement15, Requirement16, Requirement17))
 }
 
-class CSAFTrustedProviderRole : CSAFProvider() {
+class CSAFTrustedProviderRole : CSAFProviderRole() {
     override val requirements: Requirement
         get() = super.requirements + allOf(Requirement18, Requirement19, Requirement20)
 }
 
-open class CSAFLister : Role() {
+open class CSAFListerRole : Role() {
     override var requirements: Requirement = ValidCSAFDocument
 }
 
-class CSAFAggregator : CSAFLister()
+class CSAFAggregatorRole : CSAFListerRole()
