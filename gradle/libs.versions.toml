@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.0.10"
-codegen = "0.107"
+codegen = "0.108"
 ktor = "2.3.12"
 spotless = "6.25.0"
 
