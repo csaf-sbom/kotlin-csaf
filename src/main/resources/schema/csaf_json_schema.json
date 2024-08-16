@@ -83,6 +83,9 @@
           "name"
         ],
         "properties": {
+          "branches": {
+            "$ref": "#/$defs/branches_t"
+          },
           "category": {
             "title": "Category of the branch",
             "description": "Describes the characteristics of the labeled branch.",
