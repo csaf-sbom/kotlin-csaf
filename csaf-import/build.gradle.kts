@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":csaf-schema-codegen"))
+    implementation(project(":csaf-schema"))
 }

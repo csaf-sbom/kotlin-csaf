@@ -9,4 +9,4 @@ plugins {
 }
 
 rootProject.name = "kotlin-csaf"
-include("csaf-schema-codegen", "csaf-import")
+include("csaf-schema", "csaf-import")
