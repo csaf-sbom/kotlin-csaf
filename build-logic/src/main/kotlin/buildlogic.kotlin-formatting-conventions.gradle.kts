@@ -30,6 +30,7 @@ val headerWithStars = """/*
 spotless {
     kotlin {
         target("src/**/*.kt")
+        targetExclude("src/generated-sources/**/*.kt")
         ktfmt().kotlinlangStyle()
         licenseHeader(headerWithStars).yearSeparator(" - ")
     }
