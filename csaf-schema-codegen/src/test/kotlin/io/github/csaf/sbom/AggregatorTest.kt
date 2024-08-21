@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.sbom.generated
+package io.github.csaf.sbom
 
-import fhg.aisec.csaf.sbom.generated.Aggregator
-import fhg.aisec.csaf.sbom.generated.Aggregator.*
+import io.github.csaf.sbom.generated.Aggregator
+import io.github.csaf.sbom.generated.Aggregator.*
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test

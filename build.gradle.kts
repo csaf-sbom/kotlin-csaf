@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     // This merges all our individual kover results into the root project
+    kover(project(":csaf-schema-codegen"))
     kover(project(":csaf-import"))
 }
 
@@ -13,12 +14,3 @@ val serialExecutionService =
     gradle.sharedServices.registerIfAbsent("serialExecution", SerialExecutionService::class.java) {
         this.maxParallelUsages.set(1)
     }
-
-allprojects {
-    group = "io.github.csaf-sbom"
-    version = "1.0-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-    }
-}
