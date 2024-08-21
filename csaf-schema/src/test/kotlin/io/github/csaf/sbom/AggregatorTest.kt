@@ -25,7 +25,7 @@ import kotlin.test.assertNotNull
 
 class AggregatorTest {
     @Test
-    fun testAggregatorClass() {
+    fun testGoodAggregator() {
         val doc =
             Aggregator(
                 aggregator =
