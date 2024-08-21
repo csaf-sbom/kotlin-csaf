@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.generated
+package com.github.csaf.sbom.generated
 
-import com.github.csaf.generated.Aggregator_json.Metadata_t
-import com.github.csaf.generated.Aggregator_json.Publisher
+import fhg.aisec.csaf.sbom.generated.Aggregator
+import fhg.aisec.csaf.sbom.generated.Aggregator.*
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
@@ -25,12 +25,12 @@ import kotlin.test.assertNotNull
 
 class AggregatorTest {
     @Test
-    fun testObject() {
-        var doc =
-            Aggregator_json(
+    fun testAggregatorClass() {
+        val doc =
+            Aggregator(
                 aggregator =
-                    Aggregator_json.Aggregator(
-                        category = Aggregator_json.Category.aggregator,
+                    Aggregator(
+                        category = Category.aggregator,
                         name = "Test Aggregator",
                         namespace = URI("example.com"),
                     ),
@@ -38,13 +38,13 @@ class AggregatorTest {
                 canonical_url = URI("example.com/aggregator.json"),
                 csaf_providers =
                     setOf(
-                        Aggregator_json.Csaf_provider(
+                        CsafProvider(
                             metadata =
-                                Metadata_t(
+                                Metadata(
                                     last_updated = OffsetDateTime.now(),
                                     publisher =
                                         Publisher(
-                                            category = Aggregator_json.Category1.vendor,
+                                            category = Category1.vendor,
                                             name = "Test Aggregator",
                                             namespace = URI("example.com"),
                                         ),
