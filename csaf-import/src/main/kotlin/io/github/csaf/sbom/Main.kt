@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.github.csaf
+package io.github.csaf.sbom
 
 fun main() {
     println("hello world")

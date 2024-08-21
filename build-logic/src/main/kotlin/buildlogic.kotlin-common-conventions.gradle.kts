@@ -9,6 +9,9 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
+group = "io.github.csaf-sbom"
+version = "1.0-SNAPSHOT"
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
