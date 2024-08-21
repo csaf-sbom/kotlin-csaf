@@ -12,7 +12,7 @@ ktor-client-java = { group = "io.ktor", name = "ktor-client-java", version.ref =
 # plugins
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
-kover-gradle = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version = "0.8.0" }
+kover-gradle = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version = "0.8.3" }
 
 [bundles]
 ktor-client = ["ktor-client-core", "ktor-client-java"]
