@@ -35,7 +35,7 @@ configure<JSONSchemaCodegen> {
 tasks.withType(JSONSchemaCodegenTask::class) {
     inputs.file("src/main/resources/codegen-config.json").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("src/main/resources/schema").withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.dir("src/main/generated-sources/kotlin")
+    outputs.dir("build/generated-sources/kotlin")
 }
 
 sourceSets.main {
