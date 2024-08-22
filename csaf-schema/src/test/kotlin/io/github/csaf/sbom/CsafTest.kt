@@ -22,50 +22,76 @@ import java.math.BigDecimal
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class CsafTest {
+
     @Test
-    fun testRevisionLengthFail() {
+    fun testFailCVSSVector() {
         val exception =
             assertFailsWith<IllegalArgumentException> {
-                Csaf(
-                    document =
-                        Csaf.Document(
-                            category = "test",
-                            csaf_version = "2.0",
-                            publisher =
-                                Csaf.Publisher(
-                                    category = Csaf.Category1.vendor,
-                                    name = "Test Aggregator",
-                                    namespace = URI("example.com"),
-                                    contact_details = "Contact me via our website",
-                                ),
-                            title = "Test Title",
-                            tracking =
-                                Tracking(
-                                    aliases = setOf("this"),
-                                    current_release_date = OffsetDateTime.now(),
-                                    id = "test-title",
-                                    initial_release_date = OffsetDateTime.now(),
-                                    revision_history = listOf(),
-                                    status = Csaf.Status.final,
-                                    version = "1",
-                                    generator =
-                                        Csaf.Generator(
-                                            engine =
-                                                Csaf.Engine(
-                                                    name = "test",
-                                                    version = "1.0",
-                                                )
-                                        )
-                                ),
+                Csaf.CvssV2(
+                    version = "2.0",
+                    vectorString = "not-a-vector",
+                    baseScore = BigDecimal.ONE,
+                )
+            }
+        assertContains(exception.message.toString(), "vectorString does not match pattern")
+    }
+
+    @Test
+    fun testFailCVE() {
+        val exception =
+            assertFailsWith<IllegalArgumentException> { Csaf.Vulnerability(cve = "CVE1234") }
+        assertContains(
+            exception.message.toString(),
+            "cve does not match pattern ^CVE-[0-9]{4}-[0-9]{4,}\$"
+        )
+    }
+
+    @Test
+    fun testFailRevisionHistoryLength() {
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                Tracking(
+                    aliases = setOf("this"),
+                    current_release_date = OffsetDateTime.now(),
+                    id = "test-title",
+                    initial_release_date = OffsetDateTime.now(),
+                    revision_history = listOf(),
+                    status = Csaf.Status.final,
+                    version = "1",
+                    generator =
+                        Csaf.Generator(
+                            engine =
+                                Csaf.Engine(
+                                    name = "test",
+                                    version = "1.0",
+                                )
                         )
                 )
             }
         assertEquals("revision_history length < minimum 1 - 0", exception.message)
+    }
+
+    @Test
+    fun testGoodSubBranch() {
+        var branch =
+            Csaf.Branche(
+                branches =
+                    listOf(
+                        Csaf.Branche(
+                            category = Csaf.Category3.vendor,
+                            name = "My Sub Vendor",
+                        )
+                    ),
+                category = Csaf.Category3.vendor,
+                name = "My Vendor"
+            )
+        assertNotNull(branch)
     }
 
     @Test
@@ -89,6 +115,8 @@ class CsafTest {
                                 category = Csaf.Category1.vendor,
                                 name = "Test Aggregator",
                                 namespace = URI("example.com"),
+                                contact_details = "security@example.com",
+                                issuing_authority = "Very authoritative",
                             ),
                         title = "Test Title",
                         tracking =
@@ -167,8 +195,19 @@ class CsafTest {
                                                         filename = "file.txt"
                                                     )
                                                 ),
+                                            sbom_urls =
+                                                listOf(URI("https://example.com/sboms/my-product")),
+                                            skus = listOf("123"),
                                             model_numbers = setOf("123"),
-                                            serial_numbers = setOf("123")
+                                            serial_numbers = setOf("123"),
+                                            x_generic_uris =
+                                                listOf(
+                                                    Csaf.XGenericUri(
+                                                        namespace = URI("https://example.com"),
+                                                        uri =
+                                                            URI("https://example.com/my-extension"),
+                                                    )
+                                                ),
                                         )
                                 )
                             ),
@@ -193,6 +232,7 @@ class CsafTest {
                                     group_id = "test-group-id",
                                     product_ids =
                                         setOf("test-product-name", "test-other-product-name"),
+                                    summary = "Test Group"
                                 )
                             )
                     ),
@@ -212,12 +252,21 @@ class CsafTest {
                                     id = "CWE-123",
                                     name = "Test Cwe",
                                 ),
+                            notes =
+                                listOf(
+                                    Csaf.Note(
+                                        category = Csaf.Category.description,
+                                        text = "This is really bad",
+                                    )
+                                ),
+                            title = "A serious vulnerability in our product",
                             flags =
                                 setOf(
                                     Csaf.Flag(
                                         date = OffsetDateTime.now(),
                                         label = Csaf.Label1.vulnerable_code_not_in_execute_path,
-                                        product_ids = setOf("test-product.name"),
+                                        product_ids = setOf("test-product-name"),
+                                        group_ids = setOf("test-group-name"),
                                     )
                                 ),
                             ids = setOf(Csaf.Id(system_name = "no-idea", text = "some text")),
@@ -291,6 +340,15 @@ class CsafTest {
                                         group_ids = setOf("test-group-id"),
                                         product_ids =
                                             setOf("test-product-name", "test-other-product-name"),
+                                        entitlements = listOf("not-sure-what-this-is"),
+                                    )
+                                ),
+                            references =
+                                listOf(
+                                    Csaf.Reference(
+                                        category = Csaf.Category2.external,
+                                        summary = "Additional reference",
+                                        url = URI("https://example.com/reference")
                                     )
                                 ),
                             threats =

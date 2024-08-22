@@ -32,11 +32,33 @@ class ProviderTest {
                 canonical_url = URI("example.com/publisher.json"),
                 last_updated = OffsetDateTime.now(),
                 metadata_version = "2.0",
+                distributions =
+                    setOf(
+                        Provider.Distribution(
+                            directory_url = URI("example.com/csaf"),
+                            rolie =
+                                Provider.Rolie(
+                                    categories =
+                                        setOf(URI("example.com/csaf/feeds/categories.json")),
+                                    services = setOf(URI("example.com/csaf/feeds/services.json")),
+                                    feeds =
+                                        setOf(
+                                            Provider.Feed(
+                                                tlp_label = Provider.TlpLabel.WHITE,
+                                                url = URI("example.com/csaf/feeds/white/feed.json"),
+                                                summary = "White Advisories"
+                                            )
+                                        )
+                                )
+                        )
+                    ),
                 publisher =
                     Provider.Publisher(
                         category = Provider.Category.vendor,
                         name = "Test Aggregator",
                         namespace = URI("example.com"),
+                        contact_details = "security@example.com",
+                        issuing_authority = "Very authoritative"
                     ),
             )
         assertNotNull(provider)
@@ -50,26 +72,6 @@ class ProviderTest {
                     canonical_url = URI("example.com/publisher.json"),
                     last_updated = OffsetDateTime.now(),
                     metadata_version = "abc",
-                    distributions =
-                        setOf(
-                            Provider.Distribution(
-                                directory_url = URI("example.com/csaf"),
-                                rolie =
-                                    Provider.Rolie(
-                                        feeds =
-                                            setOf(
-                                                Provider.Feed(
-                                                    tlp_label = Provider.TlpLabel.WHITE,
-                                                    url =
-                                                        URI(
-                                                            "example.com/csaf/feeds/white/feed.json"
-                                                        ),
-                                                    summary = "White Advisories"
-                                                )
-                                            )
-                                    )
-                            )
-                        ),
                     publisher =
                         Provider.Publisher(
                             category = Provider.Category.vendor,

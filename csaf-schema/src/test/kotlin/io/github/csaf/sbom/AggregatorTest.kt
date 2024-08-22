@@ -33,12 +33,14 @@ class AggregatorTest {
                         category = Category.aggregator,
                         name = "Test Aggregator",
                         namespace = URI("example.com"),
+                        contact_details = "security@example.com",
+                        issuing_authority = "Very authoritative",
                     ),
                 aggregator_version = "2.0",
                 canonical_url = URI("example.com/aggregator.json"),
-                csaf_providers =
+                csaf_publishers =
                     setOf(
-                        CsafProvider(
+                        CsafPublisher(
                             metadata =
                                 Metadata(
                                     last_updated = OffsetDateTime.now(),
@@ -50,6 +52,27 @@ class AggregatorTest {
                                         ),
                                     url = URI("example.com/publisher.json")
                                 ),
+                            update_interval = "5m",
+                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
+                        ),
+                    ),
+                csaf_providers =
+                    setOf(
+                        CsafProvider(
+                            metadata =
+                                Metadata(
+                                    last_updated = OffsetDateTime.now(),
+                                    publisher =
+                                        Publisher(
+                                            category = Category1.vendor,
+                                            name = "Test Aggregator",
+                                            namespace = URI("example.com"),
+                                            contact_details = "security@example.com",
+                                            issuing_authority = "Very authoritative",
+                                        ),
+                                    url = URI("https://example.com/provider.json")
+                                ),
+                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
                         ),
                     ),
                 last_updated = OffsetDateTime.now(),
