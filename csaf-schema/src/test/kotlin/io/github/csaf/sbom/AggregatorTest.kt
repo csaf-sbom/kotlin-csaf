@@ -21,130 +21,86 @@ import io.github.csaf.sbom.generated.Aggregator.*
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
-import kotlin.test.assertNotNull
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
-@Suppress("UNCHECKED_CAST")
 class AggregatorTest {
-    private fun buildAggregator(map: Map<String, Any?>) =
-        Aggregator(
-            aggregator =
-                Aggregator(
-                    category = Category.aggregator,
-                    name = map["agName"] as String,
-                    namespace = URI("example.com"),
-                    contact_details = map["agContactDetails"] as String?,
-                    issuing_authority = map["agIssuingAuthority"] as String?,
-                ),
-            aggregator_version = map["agVersion"] as String,
-            canonical_url = URI("example.com/aggregator.json"),
-            csaf_publishers =
-                if (map.containsKey("publishers")) {
-                    map["publishers"] as Set<CsafPublisher>?
-                } else {
-                    setOf(
-                        CsafPublisher(
-                            metadata =
-                                Metadata(
-                                    last_updated = OffsetDateTime.now(),
-                                    publisher =
-                                        Publisher(
-                                            category = Category1.vendor,
-                                            name = "Test Aggregator",
-                                            namespace = URI("example.com"),
-                                        ),
-                                    url = URI("example.com/publisher.json")
-                                ),
-                            update_interval = map["updateInterval"] as String,
-                            mirrors = map["pubMirrors"] as Set<URI>?
-                        ),
-                    )
-                },
-            csaf_providers =
-                if (map.containsKey("providers")) {
-                    map["providers"] as Set<CsafProvider>
-                } else {
-                    setOf(
-                        CsafProvider(
-                            metadata =
-                                Metadata(
-                                    last_updated = OffsetDateTime.now(),
-                                    publisher =
-                                        Publisher(
-                                            category = Category1.vendor,
-                                            name = map["pubName"] as String,
-                                            namespace = URI("example.com"),
-                                            contact_details = map["pubContactDetails"] as String?,
-                                            issuing_authority =
-                                                map["pubIssuingAuthority"] as String?
-                                        ),
-                                    url = URI("https://example.com/provider.json")
-                                ),
-                            mirrors = map["provMirrors"] as Set<URI>?
-                        ),
-                    )
-                },
-            last_updated = OffsetDateTime.now(),
-        )
-
     @Test
-    fun testGoodAggregator() {
-        assertDoesNotThrow { buildAggregator(DEFAULTS) }
-    }
-
-    @Test
-    fun testAlternativeValues() {
-        VALID_VALUES.forEach { pair ->
-            assertDoesNotThrow { assertNotNull(buildAggregator(DEFAULTS + mapOf(pair))) }
+    fun testAggregator() {
+        PojoTestHelper.testAll { valGen ->
+            Aggregator(
+                aggregator =
+                    Aggregator(
+                        category = Category.aggregator,
+                        name = valGen(Aggregator.Aggregator::name, "Test Aggregator"),
+                        namespace = URI("example.com"),
+                        contact_details =
+                            valGen(Aggregator.Aggregator::contact_details, "security@example.com"),
+                        issuing_authority =
+                            valGen(Aggregator.Aggregator::issuing_authority, "Very authoritative"),
+                    ),
+                aggregator_version =
+                    valGen(Aggregator::aggregator_version, "2.0", invalidList = listOf("1.0")),
+                canonical_url = URI("example.com/aggregator.json"),
+                csaf_publishers =
+                    valGen(
+                        Aggregator::csaf_publishers,
+                        setOf(
+                            CsafPublisher(
+                                metadata =
+                                    Metadata(
+                                        last_updated = OffsetDateTime.now(),
+                                        publisher =
+                                            Publisher(
+                                                category = Category1.vendor,
+                                                name = "Test Aggregator",
+                                                namespace = URI("example.com"),
+                                            ),
+                                        url = URI("example.com/publisher.json")
+                                    ),
+                                update_interval = valGen(CsafPublisher::update_interval, "5m"),
+                                mirrors =
+                                    valGen(
+                                        CsafPublisher::mirrors,
+                                        setOf(URI("https://mirror.example.com/publisher.json"))
+                                    )
+                            ),
+                        )
+                    ),
+                csaf_providers =
+                    valGen(
+                        Aggregator::csaf_providers,
+                        setOf(
+                            CsafProvider(
+                                metadata =
+                                    Metadata(
+                                        last_updated = OffsetDateTime.now(),
+                                        publisher =
+                                            Publisher(
+                                                category = Category1.vendor,
+                                                name = valGen(Publisher::name, "Test Publisher"),
+                                                namespace = URI("example.com"),
+                                                contact_details =
+                                                    valGen(
+                                                        Publisher::contact_details,
+                                                        "security@example.com"
+                                                    ),
+                                                issuing_authority =
+                                                    valGen(
+                                                        Publisher::issuing_authority,
+                                                        "Very authoritative"
+                                                    ),
+                                            ),
+                                        url = URI("https://example.com/provider.json")
+                                    ),
+                                mirrors =
+                                    valGen(
+                                        CsafProvider::mirrors,
+                                        setOf(URI("https://mirror.example.com/provider.json"))
+                                    )
+                            ),
+                        )
+                    ),
+                last_updated = OffsetDateTime.now(),
+            )
         }
-    }
-
-    @Test
-    fun testIllegalValues() {
-        ILLEGAL_VALUES.forEach { pair ->
-            assertThrows<IllegalArgumentException> { buildAggregator(DEFAULTS + mapOf(pair)) }
-        }
-    }
-
-    companion object {
-        val DEFAULTS: Map<String, Any?> =
-            mapOf(
-                "agName" to "Test Aggregator",
-                "agContactDetails" to "security@example.com",
-                "agIssuingAuthority" to "Very authoritative",
-                "agVersion" to "2.0",
-                "provMirrors" to setOf(URI("https://mirror.example.com/provider.json")),
-                "pubMirrors" to setOf(URI("https://mirror.example.com/provider.json")),
-                "pubName" to "Test Aggregator",
-                "pubContactDetails" to "security@example.com",
-                "pubIssuingAuthority" to "Very authoritative",
-                "updateInterval" to "5m",
-            )
-        val VALID_VALUES: List<Pair<String, Any?>> =
-            listOf(
-                "agContactDetails" to null,
-                "agIssuingAuthority" to null,
-                "publishers" to null,
-                "provMirrors" to null,
-                "pubMirrors" to null,
-                "pubContactDetails" to null,
-                "pubIssuingAuthority" to null,
-            )
-        val ILLEGAL_VALUES: List<Pair<String, Any?>> =
-            listOf(
-                "agName" to "",
-                "agContactDetails" to "",
-                "agIssuingAuthority" to "",
-                "agVersion" to "1.0",
-                "publishers" to emptySet<CsafPublisher>(),
-                "providers" to emptySet<CsafProvider>(),
-                "provMirrors" to emptySet<URI>(),
-                "pubMirrors" to emptySet<URI>(),
-                "pubName" to "",
-                "pubContactDetails" to "",
-                "pubIssuingAuthority" to "",
-                "updateInterval" to "",
-            )
     }
 }
