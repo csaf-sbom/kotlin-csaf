@@ -1,6 +1,17 @@
 pluginManagement {
     // Include 'plugins build' to define convention plugins.
     includeBuild("build-logic")
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == "net.pwall.json") {
+                useModule("com.github.csaf-sbom:json-kotlin-gradle:0.108.2")
+            }
+        }
+    }
+    repositories {
+        gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
+    }
 }
 
 plugins {
