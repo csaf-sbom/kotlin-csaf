@@ -11,16 +11,16 @@ configure<JSONSchemaCodegen> {
     inputs {
         inputFile(file("src/main/resources/schema"))
     }
-    outputDir.set(file("build/generated-sources/kotlin"))
+    outputDir.set(file("src/generated-sources/kotlin"))
 }
 
 // Configure gradle caching manually for json-kotlin-gradle, as the plugin seems to lack support for it.
 tasks.withType(JSONSchemaCodegenTask::class) {
     inputs.file("src/main/resources/codegen-config.json").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("src/main/resources/schema").withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.dir("build/generated-sources/kotlin")
+    outputs.dir("src/generated-sources/kotlin")
 }
 
 sourceSets.main {
-    java.srcDirs("build/generated-sources/kotlin")
+    kotlin.srcDirs("src/generated-sources/kotlin")
 }
