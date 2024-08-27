@@ -22,23 +22,27 @@ import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
+@Suppress("UNCHECKED_CAST")
 class AggregatorTest {
-    @Test
-    fun testGoodAggregator() {
-        val doc =
-            Aggregator(
-                aggregator =
-                    Aggregator(
-                        category = Category.aggregator,
-                        name = "Test Aggregator",
-                        namespace = URI("example.com"),
-                        contact_details = "security@example.com",
-                        issuing_authority = "Very authoritative",
-                    ),
-                aggregator_version = "2.0",
-                canonical_url = URI("example.com/aggregator.json"),
-                csaf_publishers =
+    private fun buildAggregator(map: Map<String, Any?>) =
+        Aggregator(
+            aggregator =
+                Aggregator(
+                    category = Category.aggregator,
+                    name = map["agName"] as String,
+                    namespace = URI("example.com"),
+                    contact_details = map["agContactDetails"] as String?,
+                    issuing_authority = map["agIssuingAuthority"] as String?,
+                ),
+            aggregator_version = map["agVersion"] as String,
+            canonical_url = URI("example.com/aggregator.json"),
+            csaf_publishers =
+                if (map.containsKey("publishers")) {
+                    map["publishers"] as Set<CsafPublisher>?
+                } else {
                     setOf(
                         CsafPublisher(
                             metadata =
@@ -52,11 +56,15 @@ class AggregatorTest {
                                         ),
                                     url = URI("example.com/publisher.json")
                                 ),
-                            update_interval = "5m",
-                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
+                            update_interval = map["updateInterval"] as String,
+                            mirrors = map["pubMirrors"] as Set<URI>?
                         ),
-                    ),
-                csaf_providers =
+                    )
+                },
+            csaf_providers =
+                if (map.containsKey("providers")) {
+                    map["providers"] as Set<CsafProvider>
+                } else {
                     setOf(
                         CsafProvider(
                             metadata =
@@ -65,18 +73,78 @@ class AggregatorTest {
                                     publisher =
                                         Publisher(
                                             category = Category1.vendor,
-                                            name = "Test Aggregator",
+                                            name = map["pubName"] as String,
                                             namespace = URI("example.com"),
-                                            contact_details = "security@example.com",
-                                            issuing_authority = "Very authoritative",
+                                            contact_details = map["pubContactDetails"] as String?,
+                                            issuing_authority =
+                                                map["pubIssuingAuthority"] as String?
                                         ),
                                     url = URI("https://example.com/provider.json")
                                 ),
-                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
+                            mirrors = map["provMirrors"] as Set<URI>?
                         ),
-                    ),
-                last_updated = OffsetDateTime.now(),
+                    )
+                },
+            last_updated = OffsetDateTime.now(),
+        )
+
+    @Test
+    fun testGoodAggregator() {
+        assertDoesNotThrow { buildAggregator(DEFAULTS) }
+    }
+
+    @Test
+    fun testAlternativeValues() {
+        VALID_VALUES.forEach { pair ->
+            assertDoesNotThrow { assertNotNull(buildAggregator(DEFAULTS + mapOf(pair))) }
+        }
+    }
+
+    @Test
+    fun testIllegalValues() {
+        ILLEGAL_VALUES.forEach { pair ->
+            assertThrows<IllegalArgumentException> { buildAggregator(DEFAULTS + mapOf(pair)) }
+        }
+    }
+
+    companion object {
+        val DEFAULTS: Map<String, Any?> =
+            mapOf(
+                "agName" to "Test Aggregator",
+                "agContactDetails" to "security@example.com",
+                "agIssuingAuthority" to "Very authoritative",
+                "agVersion" to "2.0",
+                "provMirrors" to setOf(URI("https://mirror.example.com/provider.json")),
+                "pubMirrors" to setOf(URI("https://mirror.example.com/provider.json")),
+                "pubName" to "Test Aggregator",
+                "pubContactDetails" to "security@example.com",
+                "pubIssuingAuthority" to "Very authoritative",
+                "updateInterval" to "5m",
             )
-        assertNotNull(doc)
+        val VALID_VALUES: List<Pair<String, Any?>> =
+            listOf(
+                "agContactDetails" to null,
+                "agIssuingAuthority" to null,
+                "publishers" to null,
+                "provMirrors" to null,
+                "pubMirrors" to null,
+                "pubContactDetails" to null,
+                "pubIssuingAuthority" to null,
+            )
+        val ILLEGAL_VALUES: List<Pair<String, Any?>> =
+            listOf(
+                "agName" to "",
+                "agContactDetails" to "",
+                "agIssuingAuthority" to "",
+                "agVersion" to "1.0",
+                "publishers" to emptySet<CsafPublisher>(),
+                "providers" to emptySet<CsafProvider>(),
+                "provMirrors" to emptySet<URI>(),
+                "pubMirrors" to emptySet<URI>(),
+                "pubName" to "",
+                "pubContactDetails" to "",
+                "pubIssuingAuthority" to "",
+                "updateInterval" to "",
+            )
     }
 }
