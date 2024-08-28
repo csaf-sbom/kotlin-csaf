@@ -6,10 +6,12 @@ plugins {
 repositories {
     // Use the plugin portal to apply community plugins in convention plugins.
     gradlePluginPortal()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.spotless.gradle)
     implementation(libs.kover.gradle)
+    implementation(libs.kotlin.json.codegen)
 }
