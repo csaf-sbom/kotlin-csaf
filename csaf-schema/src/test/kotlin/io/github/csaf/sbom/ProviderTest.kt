@@ -28,7 +28,7 @@ class ProviderTest {
     fun testProvider() {
         PojoTestHelper.testAll { valGen ->
             Provider(
-                canonical_url = URI("example.com/publisher.json"),
+                canonical_url = URI("example.com/provider.json"),
                 last_updated = OffsetDateTime.now(),
                 metadata_version =
                     valGen(Provider::metadata_version, "2.0", invalidList = listOf("1.0")),
@@ -73,7 +73,7 @@ class ProviderTest {
                         Provider::publisher,
                         Provider.Publisher(
                             category = Provider.Category.vendor,
-                            name = valGen(Provider.Publisher::name, "Test Aggregator"),
+                            name = valGen(Provider.Publisher::name, "Test Publisher"),
                             namespace = URI("example.com"),
                             contact_details =
                                 valGen(Provider.Publisher::contact_details, "security@example.com"),
@@ -106,7 +106,7 @@ class ProviderTest {
         val exception =
             assertFailsWith<IllegalArgumentException> {
                 Provider(
-                    canonical_url = URI("example.com/publisher.json"),
+                    canonical_url = URI("example.com/provider.json"),
                     last_updated = OffsetDateTime.now(),
                     metadata_version = "abc",
                     publisher =

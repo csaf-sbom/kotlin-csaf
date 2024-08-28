@@ -47,8 +47,6 @@ object PojoTestHelper {
                 }
             )
         )
-        println(validValues)
-        println(invalidValues)
         validValues.forEach { (validProperty, value) ->
             assertNotNull(
                 builder(
