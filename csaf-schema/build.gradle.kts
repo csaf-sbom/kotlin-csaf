@@ -3,7 +3,7 @@ import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
-    id("net.pwall.json.json-kotlin") version "0.108.2"
+    id("net.pwall.json.json-kotlin")
 }
 
 configure<JSONSchemaCodegen> {
