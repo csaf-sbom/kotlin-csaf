@@ -21,11 +21,7 @@ import io.github.csaf.sbom.generated.Csaf.Tracking
 import java.math.BigDecimal
 import java.net.URI
 import java.time.OffsetDateTime
-import kotlin.test.Test
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class CsafTest {
 
@@ -79,7 +75,7 @@ class CsafTest {
 
     @Test
     fun testGoodSubBranch() {
-        var branch =
+        val branch =
             Csaf.Branche(
                 branches =
                     listOf(
@@ -96,7 +92,7 @@ class CsafTest {
 
     @Test
     fun testGoodDocument() {
-        var doc =
+        val doc =
             Csaf(
                 document =
                     Csaf.Document(

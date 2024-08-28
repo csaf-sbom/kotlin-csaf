@@ -21,62 +21,86 @@ import io.github.csaf.sbom.generated.Aggregator.*
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 class AggregatorTest {
     @Test
-    fun testGoodAggregator() {
-        val doc =
+    fun testAggregator() {
+        PojoTestHelper.testAll { valGen ->
             Aggregator(
                 aggregator =
                     Aggregator(
                         category = Category.aggregator,
-                        name = "Test Aggregator",
+                        name = valGen(Aggregator.Aggregator::name, "Test Aggregator"),
                         namespace = URI("example.com"),
-                        contact_details = "security@example.com",
-                        issuing_authority = "Very authoritative",
+                        contact_details =
+                            valGen(Aggregator.Aggregator::contact_details, "security@example.com"),
+                        issuing_authority =
+                            valGen(Aggregator.Aggregator::issuing_authority, "Very authoritative"),
                     ),
-                aggregator_version = "2.0",
+                aggregator_version =
+                    valGen(Aggregator::aggregator_version, "2.0", invalidList = listOf("1.0")),
                 canonical_url = URI("example.com/aggregator.json"),
                 csaf_publishers =
-                    setOf(
-                        CsafPublisher(
-                            metadata =
-                                Metadata(
-                                    last_updated = OffsetDateTime.now(),
-                                    publisher =
-                                        Publisher(
-                                            category = Category1.vendor,
-                                            name = "Test Aggregator",
-                                            namespace = URI("example.com"),
-                                        ),
-                                    url = URI("example.com/publisher.json")
-                                ),
-                            update_interval = "5m",
-                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
-                        ),
+                    valGen(
+                        Aggregator::csaf_publishers,
+                        setOf(
+                            CsafPublisher(
+                                metadata =
+                                    Metadata(
+                                        last_updated = OffsetDateTime.now(),
+                                        publisher =
+                                            Publisher(
+                                                category = Category1.vendor,
+                                                name = "Test Aggregator",
+                                                namespace = URI("example.com"),
+                                            ),
+                                        url = URI("example.com/publisher.json")
+                                    ),
+                                update_interval = valGen(CsafPublisher::update_interval, "5m"),
+                                mirrors =
+                                    valGen(
+                                        CsafPublisher::mirrors,
+                                        setOf(URI("https://mirror.example.com/publisher.json"))
+                                    )
+                            ),
+                        )
                     ),
                 csaf_providers =
-                    setOf(
-                        CsafProvider(
-                            metadata =
-                                Metadata(
-                                    last_updated = OffsetDateTime.now(),
-                                    publisher =
-                                        Publisher(
-                                            category = Category1.vendor,
-                                            name = "Test Aggregator",
-                                            namespace = URI("example.com"),
-                                            contact_details = "security@example.com",
-                                            issuing_authority = "Very authoritative",
-                                        ),
-                                    url = URI("https://example.com/provider.json")
-                                ),
-                            mirrors = setOf(URI("https://mirror.example.com/provider.json"))
-                        ),
+                    valGen(
+                        Aggregator::csaf_providers,
+                        setOf(
+                            CsafProvider(
+                                metadata =
+                                    Metadata(
+                                        last_updated = OffsetDateTime.now(),
+                                        publisher =
+                                            Publisher(
+                                                category = Category1.vendor,
+                                                name = valGen(Publisher::name, "Test Publisher"),
+                                                namespace = URI("example.com"),
+                                                contact_details =
+                                                    valGen(
+                                                        Publisher::contact_details,
+                                                        "security@example.com"
+                                                    ),
+                                                issuing_authority =
+                                                    valGen(
+                                                        Publisher::issuing_authority,
+                                                        "Very authoritative"
+                                                    ),
+                                            ),
+                                        url = URI("https://example.com/provider.json")
+                                    ),
+                                mirrors =
+                                    valGen(
+                                        CsafProvider::mirrors,
+                                        setOf(URI("https://mirror.example.com/provider.json"))
+                                    )
+                            ),
+                        )
                     ),
                 last_updated = OffsetDateTime.now(),
             )
-        assertNotNull(doc)
+        }
     }
 }

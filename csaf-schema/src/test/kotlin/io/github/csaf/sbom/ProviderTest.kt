@@ -22,54 +22,91 @@ import java.time.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 
 class ProviderTest {
     @Test
-    fun testGoodProvider() {
-        var provider =
+    fun testProvider() {
+        PojoTestHelper.testAll { valGen ->
             Provider(
-                canonical_url = URI("example.com/publisher.json"),
+                canonical_url = URI("example.com/provider.json"),
                 last_updated = OffsetDateTime.now(),
-                metadata_version = "2.0",
+                metadata_version =
+                    valGen(Provider::metadata_version, "2.0", invalidList = listOf("1.0")),
                 distributions =
-                    setOf(
-                        Provider.Distribution(
-                            directory_url = URI("example.com/csaf"),
-                            rolie =
-                                Provider.Rolie(
-                                    categories =
-                                        setOf(URI("example.com/csaf/feeds/categories.json")),
-                                    services = setOf(URI("example.com/csaf/feeds/services.json")),
-                                    feeds =
-                                        setOf(
-                                            Provider.Feed(
-                                                tlp_label = Provider.TlpLabel.WHITE,
-                                                url = URI("example.com/csaf/feeds/white/feed.json"),
-                                                summary = "White Advisories"
+                    valGen(
+                        Provider::distributions,
+                        setOf(
+                            Provider.Distribution(
+                                directory_url = URI("example.com/csaf"),
+                                rolie =
+                                    Provider.Rolie(
+                                        categories =
+                                            valGen(
+                                                Provider.Rolie::categories,
+                                                setOf(URI("example.com/csaf/feeds/categories.json"))
+                                            ),
+                                        services =
+                                            valGen(
+                                                Provider.Rolie::services,
+                                                setOf(URI("example.com/csaf/feeds/services.json"))
+                                            ),
+                                        feeds =
+                                            valGen(
+                                                Provider.Rolie::feeds,
+                                                setOf(
+                                                    Provider.Feed(
+                                                        tlp_label = Provider.TlpLabel.WHITE,
+                                                        url =
+                                                            URI(
+                                                                "example.com/csaf/feeds/white/feed.json"
+                                                            ),
+                                                        summary = "White Advisories"
+                                                    )
+                                                )
                                             )
-                                        )
-                                )
+                                    )
+                            )
                         )
                     ),
                 publisher =
-                    Provider.Publisher(
-                        category = Provider.Category.vendor,
-                        name = "Test Aggregator",
-                        namespace = URI("example.com"),
-                        contact_details = "security@example.com",
-                        issuing_authority = "Very authoritative"
+                    valGen(
+                        Provider::publisher,
+                        Provider.Publisher(
+                            category = Provider.Category.vendor,
+                            name = valGen(Provider.Publisher::name, "Test Publisher"),
+                            namespace = URI("example.com"),
+                            contact_details =
+                                valGen(Provider.Publisher::contact_details, "security@example.com"),
+                            issuing_authority =
+                                valGen(Provider.Publisher::issuing_authority, "Very authoritative")
+                        )
                     ),
+                public_openpgp_keys =
+                    listOf(
+                        Provider.PublicOpenpgpKey(
+                            url = URI("example.com/key_public.asc"),
+                            fingerprint =
+                                valGen(
+                                    Provider.PublicOpenpgpKey::fingerprint,
+                                    "ABCDEABCDE1234567890ABCDEABCDE1234567890",
+                                    invalidList =
+                                        listOf(
+                                            "12345678901234567890",
+                                            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                                        )
+                                ),
+                        )
+                    )
             )
-        assertNotNull(provider)
+        }
     }
 
     @Test
     fun testFailMetadataVersion() {
-        var exception =
+        val exception =
             assertFailsWith<IllegalArgumentException> {
                 Provider(
-                    canonical_url = URI("example.com/publisher.json"),
+                    canonical_url = URI("example.com/provider.json"),
                     last_updated = OffsetDateTime.now(),
                     metadata_version = "abc",
                     publisher =
@@ -77,13 +114,6 @@ class ProviderTest {
                             category = Provider.Category.vendor,
                             name = "Test Publisher",
                             namespace = URI("example.com"),
-                        ),
-                    public_openpgp_keys =
-                        listOf(
-                            Provider.PublicOpenpgpKey(
-                                url = URI("example.com/key_public.asc"),
-                                fingerprint = "ABC1234ABC1234ABC1234ABC1234ABC1234ABC12",
-                            )
                         )
                 )
             }

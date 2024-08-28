@@ -18,21 +18,21 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    testImplementation(kotlin("reflect"))
 }
 
 testing {
     suites {
         // Configure the built-in test suite
         val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
+            useKotlinTest()
         }
     }
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+kotlin {
+    compilerOptions {
+        jvmToolchain(21)
     }
 }
