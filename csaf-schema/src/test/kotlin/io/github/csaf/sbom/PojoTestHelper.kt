@@ -17,14 +17,14 @@
 package io.github.csaf.sbom
 
 import kotlin.reflect.KProperty1
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 
 object PojoTestHelper {
     fun testAll(builder: (TestValueSource) -> Unit) {
         val validValues = mutableListOf<Pair<KProperty1<*, *>, Any?>>()
         val invalidValues = mutableListOf<Pair<KProperty1<*, *>, Any?>>()
-        assertDoesNotThrow {
+        assertNotNull(
             builder(
                 object : TestValueSource {
                     override fun <T> invoke(
@@ -46,11 +46,11 @@ object PojoTestHelper {
                     }
                 }
             )
-        }
+        )
         println(validValues)
         println(invalidValues)
         validValues.forEach { (validProperty, value) ->
-            assertDoesNotThrow {
+            assertNotNull(
                 builder(
                     object : TestValueSource {
                         override fun <T> invoke(
@@ -64,10 +64,10 @@ object PojoTestHelper {
                         }
                     }
                 )
-            }
+            )
         }
         invalidValues.forEach { (invalidProperty, value) ->
-            assertThrows<IllegalArgumentException> {
+            assertFailsWith(IllegalArgumentException::class) {
                 builder(
                     object : TestValueSource {
                         override fun <T> invoke(
