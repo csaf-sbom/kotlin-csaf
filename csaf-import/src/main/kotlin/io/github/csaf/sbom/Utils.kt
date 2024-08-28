@@ -16,21 +16,19 @@
  */
 package io.github.csaf.sbom
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
-fun main() {
-    //    val loader = CsafLoader()
-    //    runBlocking(Dispatchers.IO) {
-    //        val aggregator =
-    //            loader.fetchAggregator(
-    //                "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
-    //            )
-    //        aggregator.onSuccess { ag ->
-    //            ag.csaf_providers
-    //                .mapAsync { loader.fetchProvider(it.metadata.url.toString()) }
-    //                .forEach { provider ->
-    //                    provider.fold({ println(it.stringifyJSON()) }, { println(it) })
-    //                }
-    //        }
-    //    }
+suspend fun <T, R> Iterable<T>.mapAsync(transformation: suspend (T) -> R): List<R> =
+    coroutineScope {
+        this@mapAsync.map { async { transformation(it) } }.awaitAll()
+    }
+
+suspend fun <T> Result.Companion.of(supplier: suspend () -> T): Result<T> {
+    return try {
+        success(supplier())
+    } catch (t: Throwable) {
+        failure(t)
+    }
 }

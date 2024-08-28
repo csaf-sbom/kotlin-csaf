@@ -3,5 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":csaf-schema"))
+    api(project(":csaf-schema"))
+    implementation(libs.kotlinx.coroutines)
+    implementation(libs.bundles.kjson)
+    implementation(libs.bundles.ktor.client)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
 }
