@@ -9,13 +9,16 @@
  */
 package io.github.csaf.sbom.generated
 
-import java.math.BigDecimal
-import java.time.OffsetDateTime
-import java.net.URI
+import io.github.csaf.sbom.JsonBigDecimal
+
+import io.github.csaf.sbom.JsonOffsetDateTime
+import io.github.csaf.sbom.JsonUri
+import kotlinx.serialization.Serializable
 
 /**
  * Representation of security advisory information as a JSON document.
  */
+@Serializable
 data class Csaf(
     /** Captures the meta-data about this document describing a particular set of security advisories. */
     val document: Document,
@@ -33,6 +36,7 @@ data class Csaf(
     /**
      * Captures the meta-data about this document describing a particular set of security advisories.
      */
+    @Serializable
     data class Document(
         /** Contains a list of acknowledgment elements associated with the whole document. */
         val acknowledgments: List<Acknowledgment>? = null,
@@ -82,6 +86,7 @@ data class Csaf(
     /**
      * Acknowledges contributions by describing those that contributed.
      */
+    @Serializable
     data class Acknowledgment(
         /** Contains the names of contributors being recognized. */
         val names: List<String>? = null,
@@ -90,7 +95,7 @@ data class Csaf(
         /** SHOULD represent any contextual details the document producers wish to make known about the acknowledgment or acknowledged parties. */
         val summary: String? = null,
         /** Specifies a list of URLs or location of the reference to be acknowledged. */
-        val urls: List<URI>? = null
+        val urls: List<JsonUri>? = null
     ) {
 
         init {
@@ -112,9 +117,10 @@ data class Csaf(
     /**
      * Is a vehicle that is provided by the document producer to convey the urgency and criticality with which the one or more vulnerabilities reported should be addressed. It is a document-level metric and applied to the document as a whole — not any specific vulnerability. The range of values in this field is defined according to the document producer's policies and procedures.
      */
+    @Serializable
     data class AggregateSeverity(
         /** Points to the namespace so referenced. */
-        val namespace: URI? = null,
+        val namespace: JsonUri? = null,
         /** Provides a severity which is independent of - and in addition to - any other standard metric for determining the impact or severity of a given vulnerability (such as CVSS). */
         val text: String
     ) {
@@ -128,6 +134,7 @@ data class Csaf(
     /**
      * Describe any constraints on how this document might be shared.
      */
+    @Serializable
     data class Distribution(
         /** Provides a textual description of additional constraints. */
         val text: String? = null,
@@ -145,16 +152,18 @@ data class Csaf(
     /**
      * Provides details about the TLP classification of the document.
      */
+    @Serializable
     data class Tlp(
         /** Provides the TLP label of the document. */
         val label: Label,
         /** Provides a URL where to find the textual description of the TLP version which is used in this document. Default is the URL to the definition by FIRST. */
-        val url: URI = URI("https://www.first.org/tlp/")
+        val url: JsonUri = JsonUri("https://www.first.org/tlp/")
     )
 
     /**
      * Provides the TLP label of the document.
      */
+    @Serializable
     enum class Label {
         AMBER,
         GREEN,
@@ -165,6 +174,7 @@ data class Csaf(
     /**
      * Is a place to put all manner of text blobs related to the current context.
      */
+    @Serializable
     data class Note(
         /** Indicates who is intended to read it. */
         val audience: String? = null,
@@ -189,6 +199,7 @@ data class Csaf(
     /**
      * Contains the information of what kind of note this is.
      */
+    @Serializable
     enum class Category {
         description,
         details,
@@ -202,6 +213,7 @@ data class Csaf(
     /**
      * Provides information about the publisher of the document.
      */
+    @Serializable
     data class Publisher(
         /** Provides information about the category of publisher releasing the document. */
         val category: Category1,
@@ -212,7 +224,7 @@ data class Csaf(
         /** Contains the name of the issuing party. */
         val name: String,
         /** Contains a URL which is under control of the issuing party and can be used as a globally unique identifier for that issuing party. */
-        val namespace: URI
+        val namespace: JsonUri
     ) {
 
         init {
@@ -228,6 +240,7 @@ data class Csaf(
     /**
      * Provides information about the category of publisher releasing the document.
      */
+    @Serializable
     enum class Category1 {
         coordinator,
         discoverer,
@@ -240,13 +253,14 @@ data class Csaf(
     /**
      * Holds any reference to conferences, papers, advisories, and other resources that are related and considered related to either a surrounding part of or the entire document and to be of value to the document consumer.
      */
+    @Serializable
     data class Reference(
         /** Indicates whether the reference points to the same document or vulnerability in focus (depending on scope) or to an external resource. */
         val category: Category2 = Category2.external,
         /** Indicates what this reference refers to. */
         val summary: String,
         /** Provides the URL for the reference. */
-        val url: URI
+        val url: JsonUri
     ) {
 
         init {
@@ -258,6 +272,7 @@ data class Csaf(
     /**
      * Indicates whether the reference points to the same document or vulnerability in focus (depending on scope) or to an external resource.
      */
+    @Serializable
     enum class Category2 {
         external,
         self
@@ -266,17 +281,18 @@ data class Csaf(
     /**
      * Is a container designated to hold all management attributes necessary to track a CSAF document as a whole.
      */
+    @Serializable
     data class Tracking(
         /** Contains a list of alternate names for the same document. */
         val aliases: Set<String>? = null,
         /** The date when the current revision of this document was released */
-        val current_release_date: OffsetDateTime,
+        val current_release_date: JsonOffsetDateTime,
         /** Is a container to hold all elements related to the generation of the document. These items will reference when the document was actually created, including the date it was generated and the entity that generated it. */
         val generator: Generator? = null,
         /** The ID is a simple label that provides for a wide range of numbering values, types, and schemes. Its value SHOULD be assigned and maintained by the original document issuing authority. */
         val id: String,
         /** The date when this document was first published. */
-        val initial_release_date: OffsetDateTime,
+        val initial_release_date: JsonOffsetDateTime,
         /** Holds one revision item for each version of the CSAF document, including the initial one. */
         val revision_history: List<RevisionHistory>,
         /** Defines the draft status of the document. */
@@ -301,9 +317,10 @@ data class Csaf(
     /**
      * Is a container to hold all elements related to the generation of the document. These items will reference when the document was actually created, including the date it was generated and the entity that generated it.
      */
+    @Serializable
     data class Generator(
         /** This SHOULD be the current date that the document was generated. Because documents are often generated internally by a document producer and exist for a nonzero amount of time before being released, this field MAY be different from the Initial Release Date and Current Release Date. */
-        val date: OffsetDateTime? = null,
+        val date: JsonOffsetDateTime? = null,
         /** Contains information about the engine that generated the CSAF document. */
         val engine: Engine
     )
@@ -311,6 +328,7 @@ data class Csaf(
     /**
      * Contains information about the engine that generated the CSAF document.
      */
+    @Serializable
     data class Engine(
         /** Represents the name of the engine that generated the CSAF document. */
         val name: String,
@@ -329,9 +347,10 @@ data class Csaf(
     /**
      * Contains all the information elements required to track the evolution of a CSAF document.
      */
+    @Serializable
     data class RevisionHistory(
         /** The date of the revision entry */
-        val date: OffsetDateTime,
+        val date: JsonOffsetDateTime,
         /** Contains the version string used in an existing document with the same content. */
         val legacy_version: String? = null,
         val number: String,
@@ -351,6 +370,7 @@ data class Csaf(
     /**
      * Defines the draft status of the document.
      */
+    @Serializable
     enum class Status {
         draft,
         final,
@@ -360,6 +380,7 @@ data class Csaf(
     /**
      * Is a container for all fully qualified product names that can be referenced elsewhere in the document.
      */
+    @Serializable
     data class ProductTree(
         val branches: List<Branche>? = null,
         /** Contains a list of full product names. */
@@ -386,6 +407,7 @@ data class Csaf(
     /**
      * Is a part of the hierarchical structure of the product tree.
      */
+    @Serializable
     data class Branche(
         val branches: List<Branche>? = null,
         /** Describes the characteristics of the labeled branch. */
@@ -406,6 +428,7 @@ data class Csaf(
     /**
      * Describes the characteristics of the labeled branch.
      */
+    @Serializable
     enum class Category3 {
         architecture,
         host_name,
@@ -421,6 +444,7 @@ data class Csaf(
         vendor
     }
 
+    @Serializable
     data class Product(
         /** The value should be the product’s full canonical name, including version number and other attributes, as it would be used in a human-friendly document. */
         val name: String,
@@ -439,6 +463,7 @@ data class Csaf(
     /**
      * Provides at least one method which aids in identifying the product in an asset database.
      */
+    @Serializable
     data class ProductIdentificationHelper(
         /** The Common Platform Enumeration (CPE) attribute refers to a method for naming platforms external to this specification. */
         val cpe: String? = null,
@@ -447,9 +472,9 @@ data class Csaf(
         /** Contains a list of full or abbreviated (partial) model numbers. */
         val model_numbers: Set<String>? = null,
         /** The package URL (purl) attribute refers to a method for reliably identifying and locating software packages external to this specification. */
-        val purl: URI? = null,
+        val purl: JsonUri? = null,
         /** Contains a list of URLs where SBOMs for this product can be retrieved. */
-        val sbom_urls: List<URI>? = null,
+        val sbom_urls: List<JsonUri>? = null,
         /** Contains a list of full or abbreviated (partial) serial numbers. */
         val serial_numbers: Set<String>? = null,
         /** Contains a list of full or abbreviated (partial) stock keeping units. */
@@ -491,6 +516,7 @@ data class Csaf(
     /**
      * Contains all information to identify a file based on its cryptographic hash values.
      */
+    @Serializable
     data class Hashe(
         /** Contains a list of cryptographic hashes for this file. */
         val file_hashes: List<FileHashe>,
@@ -508,6 +534,7 @@ data class Csaf(
     /**
      * Contains one hash value and algorithm of the file to be identified.
      */
+    @Serializable
     data class FileHashe(
         /** Contains the name of the cryptographic hash algorithm used to calculate the value. */
         val algorithm: String = "sha256",
@@ -526,16 +553,18 @@ data class Csaf(
     /**
      * Provides a generic extension point for any identifier which is either vendor-specific or derived from a standard not yet supported.
      */
+    @Serializable
     data class XGenericUri(
         /** Refers to a URL which provides the name and knowledge about the specification used or is the namespace in which these values are valid. */
-        val namespace: URI,
+        val namespace: JsonUri,
         /** Contains the identifier itself. */
-        val uri: URI
+        val uri: JsonUri
     )
 
     /**
      * Defines a new logical group of products that can then be referred to in other parts of the document to address a group of products with a single identifier.
      */
+    @Serializable
     data class ProductGroup(
         val group_id: String,
         /** Lists the product_ids of those products which known as one group in the document. */
@@ -558,6 +587,7 @@ data class Csaf(
     /**
      * Establishes a link between two existing full_product_name_t elements, allowing the document producer to define a combination of two products that form a new full_product_name entry.
      */
+    @Serializable
     data class Relationship(
         /** Defines the category of relationship for the referenced component. */
         val category: Category4,
@@ -578,6 +608,7 @@ data class Csaf(
     /**
      * Defines the category of relationship for the referenced component.
      */
+    @Serializable
     enum class Category4 {
         default_component_of,
         external_component_of,
@@ -589,6 +620,7 @@ data class Csaf(
     /**
      * Is a container for the aggregation of all fields that are related to a single vulnerability in the document.
      */
+    @Serializable
     data class Vulnerability(
         /** Contains a list of acknowledgment elements associated with this vulnerability item. */
         val acknowledgments: List<Acknowledgment>? = null,
@@ -597,7 +629,7 @@ data class Csaf(
         /** Holds the MITRE standard Common Weakness Enumeration (CWE) for the weakness associated. */
         val cwe: Cwe? = null,
         /** Holds the date and time the vulnerability was originally discovered. */
-        val discovery_date: OffsetDateTime? = null,
+        val discovery_date: JsonOffsetDateTime? = null,
         /** Contains a list of machine readable flags. */
         val flags: Set<Flag>? = null,
         /** Represents a list of unique labels or tracking IDs for the vulnerability (if such information exists). */
@@ -611,7 +643,7 @@ data class Csaf(
         /** Holds a list of references associated with this vulnerability item. */
         val references: List<Reference>? = null,
         /** Holds the date and time the vulnerability was originally released into the wild. */
-        val release_date: OffsetDateTime? = null,
+        val release_date: JsonOffsetDateTime? = null,
         /** Contains a list of remediations. */
         val remediations: List<Remediation>? = null,
         /** Contains score objects for the current vulnerability. */
@@ -652,6 +684,7 @@ data class Csaf(
     /**
      * Holds the MITRE standard Common Weakness Enumeration (CWE) for the weakness associated.
      */
+    @Serializable
     data class Cwe(
         /** Holds the ID for the weakness associated. */
         val id: String,
@@ -669,9 +702,10 @@ data class Csaf(
     /**
      * Contains product specific information in regard to this vulnerability as a single machine readable flag.
      */
+    @Serializable
     data class Flag(
         /** Contains the date when assessment was done or the flag was assigned. */
-        val date: OffsetDateTime? = null,
+        val date: JsonOffsetDateTime? = null,
         val group_ids: Set<String>? = null,
         /** Specifies the machine readable label. */
         val label: Label1,
@@ -696,6 +730,7 @@ data class Csaf(
     /**
      * Specifies the machine readable label.
      */
+    @Serializable
     enum class Label1 {
         component_not_present,
         inline_mitigations_already_exist,
@@ -707,6 +742,7 @@ data class Csaf(
     /**
      * Contains a single unique label or tracking ID for the vulnerability.
      */
+    @Serializable
     data class Id(
         /** Indicates the name of the vulnerability tracking or numbering system. */
         val system_name: String,
@@ -724,9 +760,10 @@ data class Csaf(
     /**
      * Is a container, that allows the document producers to comment on the level of involvement (or engagement) of themselves or third parties in the vulnerability identification, scoping, and remediation process.
      */
+    @Serializable
     data class Involvement(
         /** Holds the date and time of the involvement entry. */
-        val date: OffsetDateTime? = null,
+        val date: JsonOffsetDateTime? = null,
         /** Defines the category of the involved party. */
         val party: Party,
         /** Defines contact status of the involved party. */
@@ -745,6 +782,7 @@ data class Csaf(
     /**
      * Defines the category of the involved party.
      */
+    @Serializable
     enum class Party {
         coordinator,
         discoverer,
@@ -756,6 +794,7 @@ data class Csaf(
     /**
      * Defines contact status of the involved party.
      */
+    @Serializable
     enum class Status1 {
         completed,
         contact_attempted,
@@ -768,6 +807,7 @@ data class Csaf(
     /**
      * Contains different lists of product_ids which provide details on the status of the referenced product related to the current vulnerability.
      */
+    @Serializable
     data class ProductStatus(
         /** These are the first versions of the releases known to be affected by the vulnerability. */
         val first_affected: Set<String>? = null,
@@ -835,11 +875,12 @@ data class Csaf(
     /**
      * Specifies details on how to handle (and presumably, fix) a vulnerability.
      */
+    @Serializable
     data class Remediation(
         /** Specifies the category which this remediation belongs to. */
         val category: Category5,
         /** Contains the date from which the remediation is available. */
-        val date: OffsetDateTime? = null,
+        val date: JsonOffsetDateTime? = null,
         /** Contains a thorough human-readable discussion of the remediation. */
         val details: String,
         /** Contains a list of entitlements. */
@@ -849,7 +890,7 @@ data class Csaf(
         /** Provides information on category of restart is required by this remediation to become effective. */
         val restart_required: RestartRequired? = null,
         /** Contains the URL where to obtain the remediation. */
-        val url: URI? = null
+        val url: JsonUri? = null
     ) {
 
         init {
@@ -876,6 +917,7 @@ data class Csaf(
     /**
      * Specifies the category which this remediation belongs to.
      */
+    @Serializable
     enum class Category5 {
         mitigation,
         no_fix_planned,
@@ -887,6 +929,7 @@ data class Csaf(
     /**
      * Provides information on category of restart is required by this remediation to become effective.
      */
+    @Serializable
     data class RestartRequired(
         /** Specifies what category of restart is required by this remediation to become effective. */
         val category: Category6,
@@ -904,6 +947,7 @@ data class Csaf(
     /**
      * Specifies what category of restart is required by this remediation to become effective.
      */
+    @Serializable
     enum class Category6 {
         connected,
         dependencies,
@@ -919,9 +963,10 @@ data class Csaf(
     /**
      * Specifies information about (at least one) score of the vulnerability and for which products the given value applies.
      */
+    @Serializable
     data class Score(
         val cvss_v2: CvssV2? = null,
-        val cvss_v3: Any? = null,
+        val cvss_v3: CvssV3? = null,
         val products: Set<String>
     ) {
 
@@ -933,6 +978,7 @@ data class Csaf(
 
     }
 
+    @Serializable
     data class CvssV2(
         /** CVSS Version */
         val version: String,
@@ -943,17 +989,17 @@ data class Csaf(
         val confidentialityImpact: ConfidentialityImpact? = null,
         val integrityImpact: ConfidentialityImpact? = null,
         val availabilityImpact: ConfidentialityImpact? = null,
-        val baseScore: BigDecimal,
+        val baseScore: JsonBigDecimal,
         val exploitability: Exploitability? = null,
         val remediationLevel: RemediationLevel? = null,
         val reportConfidence: ReportConfidence? = null,
-        val temporalScore: BigDecimal? = null,
+        val temporalScore: JsonBigDecimal? = null,
         val collateralDamagePotential: CollateralDamagePotential? = null,
         val targetDistribution: TargetDistribution? = null,
         val confidentialityRequirement: ConfidentialityRequirement? = null,
         val integrityRequirement: ConfidentialityRequirement? = null,
         val availabilityRequirement: ConfidentialityRequirement? = null,
-        val environmentalScore: BigDecimal? = null
+        val environmentalScore: JsonBigDecimal? = null
     ) {
 
         init {
@@ -968,30 +1014,35 @@ data class Csaf(
 
     }
 
+    @Serializable
     enum class AccessVector {
         NETWORK,
         ADJACENT_NETWORK,
         LOCAL
     }
 
+    @Serializable
     enum class AccessComplexity {
         HIGH,
         MEDIUM,
         LOW
     }
 
+    @Serializable
     enum class Authentication {
         MULTIPLE,
         SINGLE,
         NONE
     }
 
+    @Serializable
     enum class ConfidentialityImpact {
         NONE,
         PARTIAL,
         COMPLETE
     }
 
+    @Serializable
     enum class Exploitability {
         UNPROVEN,
         PROOF_OF_CONCEPT,
@@ -1000,6 +1051,7 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
     enum class RemediationLevel {
         OFFICIAL_FIX,
         TEMPORARY_FIX,
@@ -1008,6 +1060,7 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
     enum class ReportConfidence {
         UNCONFIRMED,
         UNCORROBORATED,
@@ -1015,6 +1068,7 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
     enum class CollateralDamagePotential {
         NONE,
         LOW,
@@ -1024,6 +1078,7 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
     enum class TargetDistribution {
         NONE,
         LOW,
@@ -1032,6 +1087,7 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
     enum class ConfidentialityRequirement {
         LOW,
         MEDIUM,
@@ -1039,14 +1095,191 @@ data class Csaf(
         NOT_DEFINED
     }
 
+    @Serializable
+    data class CvssV3(
+        /** CVSS Version */
+        val version: String,
+        val vectorString: String,
+        val attackVector: AttackVector? = null,
+        val attackComplexity: AttackComplexity? = null,
+        val privilegesRequired: PrivilegesRequired? = null,
+        val userInteraction: UserInteraction? = null,
+        val scope: Scope? = null,
+        val confidentialityImpact: ConfidentialityImpact1? = null,
+        val integrityImpact: ConfidentialityImpact1? = null,
+        val availabilityImpact: ConfidentialityImpact1? = null,
+        val baseScore: JsonBigDecimal,
+        val baseSeverity: BaseSeverity,
+        val exploitCodeMaturity: ExploitCodeMaturity? = null,
+        val remediationLevel: RemediationLevel1? = null,
+        val reportConfidence: ReportConfidence1? = null,
+        val temporalScore: JsonBigDecimal? = null,
+        val temporalSeverity: BaseSeverity? = null,
+        val confidentialityRequirement: ConfidentialityRequirement1? = null,
+        val integrityRequirement: ConfidentialityRequirement1? = null,
+        val availabilityRequirement: ConfidentialityRequirement1? = null,
+        val modifiedAttackVector: ModifiedAttackVector? = null,
+        val modifiedAttackComplexity: ModifiedAttackComplexity? = null,
+        val modifiedPrivilegesRequired: ModifiedPrivilegesRequired? = null,
+        val modifiedUserInteraction: ModifiedUserInteraction? = null,
+        val modifiedScope: ModifiedScope? = null,
+        val modifiedConfidentialityImpact: ModifiedConfidentialityImpact? = null,
+        val modifiedIntegrityImpact: ModifiedConfidentialityImpact? = null,
+        val modifiedAvailabilityImpact: ModifiedConfidentialityImpact? = null,
+        val environmentalScore: JsonBigDecimal? = null,
+        val environmentalSeverity: BaseSeverity? = null
+    ) {
+
+        init {
+            require(version in cg_array12) { "version not in enumerated values - $version" }
+            require(cg_regex13.containsMatchIn(vectorString)) { "vectorString does not match pattern $cg_regex13 - $vectorString" }
+            require(baseScore in cg_dec10..cg_dec11) { "baseScore not in range 0..10 - $baseScore" }
+            if (temporalScore != null)
+                require(temporalScore in cg_dec10..cg_dec11) { "temporalScore not in range 0..10 - $temporalScore" }
+            if (environmentalScore != null)
+                require(environmentalScore in cg_dec10..cg_dec11) { "environmentalScore not in range 0..10 - $environmentalScore" }
+        }
+
+    }
+
+    @Serializable
+    enum class AttackVector {
+        NETWORK,
+        ADJACENT_NETWORK,
+        LOCAL,
+        PHYSICAL
+    }
+
+    @Serializable
+    enum class AttackComplexity {
+        HIGH,
+        LOW
+    }
+
+    @Serializable
+    enum class PrivilegesRequired {
+        HIGH,
+        LOW,
+        NONE
+    }
+
+    @Serializable
+    enum class UserInteraction {
+        NONE,
+        REQUIRED
+    }
+
+    @Serializable
+    enum class Scope {
+        UNCHANGED,
+        CHANGED
+    }
+
+    @Serializable
+    enum class ConfidentialityImpact1 {
+        NONE,
+        LOW,
+        HIGH
+    }
+
+    @Serializable
+    enum class BaseSeverity {
+        NONE,
+        LOW,
+        MEDIUM,
+        HIGH,
+        CRITICAL
+    }
+
+    @Serializable
+    enum class ExploitCodeMaturity {
+        UNPROVEN,
+        PROOF_OF_CONCEPT,
+        FUNCTIONAL,
+        HIGH,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class RemediationLevel1 {
+        OFFICIAL_FIX,
+        TEMPORARY_FIX,
+        WORKAROUND,
+        UNAVAILABLE,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ReportConfidence1 {
+        UNKNOWN,
+        REASONABLE,
+        CONFIRMED,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ConfidentialityRequirement1 {
+        LOW,
+        MEDIUM,
+        HIGH,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedAttackVector {
+        NETWORK,
+        ADJACENT_NETWORK,
+        LOCAL,
+        PHYSICAL,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedAttackComplexity {
+        HIGH,
+        LOW,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedPrivilegesRequired {
+        HIGH,
+        LOW,
+        NONE,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedUserInteraction {
+        NONE,
+        REQUIRED,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedScope {
+        UNCHANGED,
+        CHANGED,
+        NOT_DEFINED
+    }
+
+    @Serializable
+    enum class ModifiedConfidentialityImpact {
+        NONE,
+        LOW,
+        HIGH,
+        NOT_DEFINED
+    }
+
     /**
      * Contains the vulnerability kinetic information. This information can change as the vulnerability ages and new information becomes available.
      */
+    @Serializable
     data class Threat(
         /** Categorizes the threat according to the rules of the specification. */
         val category: Category7,
         /** Contains the date when the assessment was done or the threat appeared. */
-        val date: OffsetDateTime? = null,
+        val date: JsonOffsetDateTime? = null,
         /** Represents a thorough human-readable discussion of the threat. */
         val details: String,
         val group_ids: Set<String>? = null,
@@ -1072,6 +1305,7 @@ data class Csaf(
     /**
      * Categorizes the threat according to the rules of the specification.
      */
+    @Serializable
     enum class Category7 {
         exploit_status,
         impact,
@@ -1091,8 +1325,12 @@ data class Csaf(
         private val cg_regex7 = Regex("^CVE-[0-9]{4}-[0-9]{4,}\$")
         private val cg_regex8 = Regex("^CWE-[1-9]\\d{0,5}\$")
         private val cg_regex9 = Regex("^((AV:[NAL]|AC:[LMH]|Au:[MSN]|[CIA]:[NPC]|E:(U|POC|F|H|ND)|RL:(OF|TF|W|U|ND)|RC:(UC|UR|C|ND)|CDP:(N|L|LM|MH|H|ND)|TD:(N|L|M|H|ND)|[CIA]R:(L|M|H|ND))/)*(AV:[NAL]|AC:[LMH]|Au:[MSN]|[CIA]:[NPC]|E:(U|POC|F|H|ND)|RL:(OF|TF|W|U|ND)|RC:(UC|UR|C|ND)|CDP:(N|L|LM|MH|H|ND)|TD:(N|L|M|H|ND)|[CIA]R:(L|M|H|ND))\$")
-        private val cg_dec10 = BigDecimal.ZERO
-        private val cg_dec11 = BigDecimal("10")
+        private val cg_dec10 = JsonBigDecimal.ZERO
+        private val cg_dec11 = JsonBigDecimal("10")
+        private val cg_array12 = setOf(
+            "3.1"
+        )
+        private val cg_regex13 = Regex("^CVSS:3[.]1/((AV:[NALP]|AC:[LH]|PR:[NLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])/)*(AV:[NALP]|AC:[LH]|PR:[NLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\$")
     }
 
 }

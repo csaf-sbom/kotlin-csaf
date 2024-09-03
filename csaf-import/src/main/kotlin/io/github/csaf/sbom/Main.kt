@@ -16,21 +16,30 @@
  */
 package io.github.csaf.sbom
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+
+private val json = Json { prettyPrint = true }
 
 fun main() {
-    //    val loader = CsafLoader()
-    //    runBlocking(Dispatchers.IO) {
-    //        val aggregator =
-    //            loader.fetchAggregator(
-    //                "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
-    //            )
-    //        aggregator.onSuccess { ag ->
-    //            ag.csaf_providers
-    //                .mapAsync { loader.fetchProvider(it.metadata.url.toString()) }
-    //                .forEach { provider ->
-    //                    provider.fold({ println(it.stringifyJSON()) }, { println(it) })
-    //                }
-    //        }
-    //    }
+    val loader = CsafLoader()
+    runBlocking(Dispatchers.IO) {
+        val aggregator =
+            loader.fetchAggregator(
+                "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
+            )
+        aggregator
+            .onSuccess { ag ->
+                ag.csaf_providers
+                    .mapAsync { loader.fetchProvider(it.metadata.url.toString()) }
+                    .forEach { provider ->
+                        provider
+                            .onSuccess { println(json.encodeToString(it)) }
+                            .onFailure { it.printStackTrace() }
+                    }
+            }
+            .onFailure { it.printStackTrace() }
+    }
 }

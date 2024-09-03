@@ -1,3 +1,15 @@
 {
-  "packageName": "io.github.csaf.sbom.generated"
+  "packageName": "io.github.csaf.sbom.generated",
+  "annotations": {
+    "classes": {
+      "kotlinx.serialization.Serializable": null
+    }
+  },
+  "customClasses": {
+    "format": {
+      "uri": "io.github.csaf.sbom.JsonUri",
+      "date-time": "io.github.csaf.sbom.JsonOffsetDateTime"
+    }
+  },
+  "decimalClassName": "io.github.csaf.sbom.JsonBigDecimal"
 }

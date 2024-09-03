@@ -18,16 +18,16 @@ package io.github.csaf.sbom
 
 import io.github.csaf.sbom.generated.Aggregator
 import io.github.csaf.sbom.generated.Provider
-import io.kjson.ktor.kjson
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
 
 class CsafLoader(engine: HttpClientEngine = Java.create()) {
-    private val httpClient = HttpClient(engine) { install(ContentNegotiation) { kjson() } }
+    private val httpClient = HttpClient(engine) { install(ContentNegotiation) { json() } }
 
     suspend fun fetchAggregator(url: String): Result<Aggregator> =
         Result.of { httpClient.get(url).body() }
