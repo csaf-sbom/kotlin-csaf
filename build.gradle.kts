@@ -6,6 +6,7 @@ dependencies {
     // This merges all our individual kover results into the root project
     kover(project(":csaf-schema"))
     kover(project(":csaf-import"))
+    kover(project(":csaf-validator"))
 }
 
 // Create and register ExecutionService which enforces serial execution of assigned tasks.
