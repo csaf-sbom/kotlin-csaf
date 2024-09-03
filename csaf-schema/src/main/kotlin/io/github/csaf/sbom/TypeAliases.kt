@@ -16,10 +16,10 @@
  */
 package io.github.csaf.sbom
 
-import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.net.URI
 import java.time.OffsetDateTime
+import kotlinx.serialization.Serializable
 
 typealias JsonUri = @Serializable(UriSerializer::class) URI
 
