@@ -36,3 +36,13 @@ kotlin {
         jvmToolchain(21)
     }
 }
+
+kover {
+    reports {
+        filters {
+            excludes {
+                annotatedBy("io.github.csaf.sbom.KoverIgnore")
+            }
+        }
+    }
+}

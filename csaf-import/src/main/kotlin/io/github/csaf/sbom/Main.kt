@@ -21,9 +21,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-private val json = Json { prettyPrint = true }
-
+@KoverIgnore("Entry point for testing purposes only")
 fun main() {
+    val json = Json { prettyPrint = true }
     val loader = CsafLoader()
     runBlocking(Dispatchers.IO) {
         val aggregator =
