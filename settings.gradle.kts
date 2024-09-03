@@ -13,4 +13,4 @@ plugins {
 }
 
 rootProject.name = "kotlin-csaf"
-include("csaf-schema", "csaf-import", "csaf-validator")
+include("csaf-schema", "csaf-import", "csaf-validation")
