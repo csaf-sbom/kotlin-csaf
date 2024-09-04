@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-import io.github.csaf.sbom.mapAsync
-import io.github.csaf.sbom.of
+package io.github.csaf.sbom
+
 import kotlin.test.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest

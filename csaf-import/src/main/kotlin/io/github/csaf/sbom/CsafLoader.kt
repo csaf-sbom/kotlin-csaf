@@ -26,12 +26,32 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 
+/**
+ * A helper class with async functions to retrieve certain kinds of CSAF-related data.
+ *
+ * @param engine An instance of HttpClientEngine for HTTP(S) data retrieval via Ktor. Defaults to
+ *   the JVM-native HTTP client.
+ */
 class CsafLoader(engine: HttpClientEngine = Java.create()) {
     private val httpClient = HttpClient(engine) { install(ContentNegotiation) { json() } }
 
+    /**
+     * Fetch and parse an aggregator JSON document from a given URL.
+     *
+     * @param url The URL where the aggregator document is found.
+     * @return An instance of `Aggregator`, wrapped in a `Result` monad, if successful. A failed
+     *   `Result` wrapping the thrown `Throwable` in case of an error.
+     */
     suspend fun fetchAggregator(url: String): Result<Aggregator> =
         Result.of { httpClient.get(url).body() }
 
+    /**
+     * Fetch and parse a provider JSON document from a given URL.
+     *
+     * @param url The URL where the provider document is found.
+     * @return An instance of `Provider`, wrapped in a `Result` monad, if successful. A failed
+     *   `Result` wrapping the thrown `Throwable` in case of an error.
+     */
     suspend fun fetchProvider(url: String): Result<Provider> =
         Result.of { httpClient.get(url).body() }
 }
