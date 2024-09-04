@@ -9,25 +9,27 @@
  */
 package io.github.csaf.sbom.generated
 
-import java.time.OffsetDateTime
-import java.net.URI
+import io.github.csaf.sbom.JsonOffsetDateTime
+import io.github.csaf.sbom.JsonUri
+import kotlinx.serialization.Serializable
 
 /**
  * Representation of information where to find CSAF providers as a JSON document.
  */
+@Serializable
 data class Aggregator(
     /** Provides information about the aggregator. */
     val aggregator: Aggregator,
     /** Gives the version of the CSAF aggregator specification which the document was generated for. */
     val aggregator_version: String,
     /** Contains the URL for this document. */
-    val canonical_url: URI,
+    val canonical_url: JsonUri,
     /** Contains a list with information from CSAF providers. */
     val csaf_providers: Set<CsafProvider>,
     /** Contains a list with information from CSAF publishers. */
     val csaf_publishers: Set<CsafPublisher>? = null,
     /** Holds the date and time when the document was last updated. */
-    val last_updated: OffsetDateTime
+    val last_updated: JsonOffsetDateTime
 ) {
 
     init {
@@ -40,6 +42,7 @@ data class Aggregator(
     /**
      * Provides information about the aggregator.
      */
+    @Serializable
     data class Aggregator(
         /** Provides information about the category of aggregator. */
         val category: Category,
@@ -50,7 +53,7 @@ data class Aggregator(
         /** Contains the name of the aggregator. */
         val name: String,
         /** Contains a URL which is under control of the aggregator and can be used as a globally unique identifier for that aggregator. */
-        val namespace: URI
+        val namespace: JsonUri
     ) {
 
         init {
@@ -66,6 +69,7 @@ data class Aggregator(
     /**
      * Provides information about the category of aggregator.
      */
+    @Serializable
     enum class Category {
         aggregator,
         lister
@@ -74,11 +78,12 @@ data class Aggregator(
     /**
      * Contains information from a CSAF provider.
      */
+    @Serializable
     data class CsafProvider(
         /** Contains the metadata of a single CSAF provider. */
         val metadata: Metadata,
         /** Contains a list of URLs or mirrors for this CSAF provider. */
-        val mirrors: Set<URI>? = null
+        val mirrors: Set<JsonUri>? = null
     ) {
 
         init {
@@ -91,20 +96,22 @@ data class Aggregator(
     /**
      * Contains the metadata of a single CSAF provider.
      */
+    @Serializable
     data class Metadata(
         /** Holds the date and time when this entry was last updated. */
-        val last_updated: OffsetDateTime,
+        val last_updated: JsonOffsetDateTime,
         /** Provides information about the issuing party for this entry. */
         val publisher: Publisher,
         /** Contains the role of the issuing party according to section 7 in the CSAF standard. */
         val role: Role = Role.csaf_provider,
         /** Contains the URL of the provider-metadata.json for that entry. */
-        val url: URI
+        val url: JsonUri
     )
 
     /**
      * Provides information about the issuing party for this entry.
      */
+    @Serializable
     data class Publisher(
         /** Provides information about the category of publisher releasing the document. */
         val category: Category1,
@@ -115,7 +122,7 @@ data class Aggregator(
         /** Contains the name of the issuing party. */
         val name: String,
         /** Contains a URL which is under control of the issuing party and can be used as a globally unique identifier for that issuing party. */
-        val namespace: URI
+        val namespace: JsonUri
     ) {
 
         init {
@@ -131,6 +138,7 @@ data class Aggregator(
     /**
      * Provides information about the category of publisher releasing the document.
      */
+    @Serializable
     enum class Category1 {
         coordinator,
         discoverer,
@@ -143,6 +151,7 @@ data class Aggregator(
     /**
      * Contains the role of the issuing party according to section 7 in the CSAF standard.
      */
+    @Serializable
     enum class Role {
         csaf_publisher,
         csaf_provider,
@@ -152,11 +161,12 @@ data class Aggregator(
     /**
      * Contains information from a CSAF publisher.
      */
+    @Serializable
     data class CsafPublisher(
         /** Contains the metadata of a single CSAF publisher extracted from one of its CSAF documents. */
         val metadata: Metadata,
         /** Contains a list of URLs or mirrors for this CSAF publisher. */
-        val mirrors: Set<URI>? = null,
+        val mirrors: Set<JsonUri>? = null,
         /** Contains information about how often the CSAF publisher is checked for new CSAF documents. */
         val update_interval: String
     ) {

@@ -9,19 +9,21 @@
  */
 package io.github.csaf.sbom.generated
 
-import java.time.OffsetDateTime
-import java.net.URI
+import io.github.csaf.sbom.JsonOffsetDateTime
+import io.github.csaf.sbom.JsonUri
+import kotlinx.serialization.Serializable
 
 /**
  * Representation of metadata information of a CSAF provider as a JSON document.
  */
+@Serializable
 data class Provider(
     /** Contains the URL for this document. */
-    val canonical_url: URI,
+    val canonical_url: JsonUri,
     /** Contains a list of used distribution mechanisms. */
     val distributions: Set<Distribution>? = null,
     /** Holds the date and time when the document was last updated. */
-    val last_updated: OffsetDateTime,
+    val last_updated: JsonOffsetDateTime,
     /** Decides whether this file should be linked in the list of a CSAF aggregator. */
     val list_on_CSAF_aggregators: Boolean = true,
     /** Gives the version of the CSAF provider metadata specification which the document was generated for. */
@@ -45,9 +47,10 @@ data class Provider(
     /**
      * Contains the information of a used distribution mechanism.
      */
+    @Serializable
     data class Distribution(
         /** Contains the base url for the directory distribution. */
-        val directory_url: URI? = null,
+        val directory_url: JsonUri? = null,
         /** Contains all information for ROLIE distribution. */
         val rolie: Rolie? = null
     )
@@ -55,13 +58,14 @@ data class Provider(
     /**
      * Contains all information for ROLIE distribution.
      */
+    @Serializable
     data class Rolie(
         /** Contains a list of URLs which contain ROLIE category documents. */
-        val categories: Set<URI>? = null,
+        val categories: Set<JsonUri>? = null,
         /** Contains a list of information about ROLIE feeds. */
         val feeds: Set<Feed>,
         /** Contains a list of URLs which contain ROLIE service documents. */
-        val services: Set<URI>? = null
+        val services: Set<JsonUri>? = null
     ) {
 
         init {
@@ -77,18 +81,20 @@ data class Provider(
     /**
      * Contains information about the ROLIE feed.
      */
+    @Serializable
     data class Feed(
         /** Contains a summary of the feed. */
         val summary: String? = null,
         /** Provides the TLP label for the feed. */
         val tlp_label: TlpLabel,
         /** Contains the URL of the feed. */
-        val url: URI
+        val url: JsonUri
     )
 
     /**
      * Provides the TLP label for the feed.
      */
+    @Serializable
     enum class TlpLabel {
         UNLABELED,
         WHITE,
@@ -100,11 +106,12 @@ data class Provider(
     /**
      * Contains all information about an OpenPGP key used to sign CSAF documents.
      */
+    @Serializable
     data class PublicOpenpgpKey(
         /** Contains the fingerprint of the OpenPGP key. */
         val fingerprint: String? = null,
         /** Contains the URL where the key can be retrieved. */
-        val url: URI
+        val url: JsonUri
     ) {
 
         init {
@@ -119,6 +126,7 @@ data class Provider(
     /**
      * Provides information about the publisher of the CSAF documents in this repository.
      */
+    @Serializable
     data class Publisher(
         /** Provides information about the category of publisher releasing the document. */
         val category: Category,
@@ -129,7 +137,7 @@ data class Provider(
         /** Contains the name of the issuing party. */
         val name: String,
         /** Contains a URL which is under control of the issuing party and can be used as a globally unique identifier for that issuing party. */
-        val namespace: URI
+        val namespace: JsonUri
     ) {
 
         init {
@@ -145,6 +153,7 @@ data class Provider(
     /**
      * Provides information about the category of publisher releasing the document.
      */
+    @Serializable
     enum class Category {
         coordinator,
         discoverer,
@@ -157,6 +166,7 @@ data class Provider(
     /**
      * Contains the role of the issuing party according to section 7 in the CSAF standard.
      */
+    @Serializable
     enum class Role {
         csaf_publisher,
         csaf_provider,

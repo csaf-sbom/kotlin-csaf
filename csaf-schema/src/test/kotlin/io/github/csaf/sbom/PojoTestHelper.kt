@@ -19,11 +19,89 @@ package io.github.csaf.sbom
 import kotlin.reflect.KProperty1
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import org.opentest4j.AssertionFailedError
+
+typealias TestPair<R> = Pair<KProperty1<*, R>, R>
 
 object PojoTestHelper {
+
+    fun testAllNew(builder: (TestValueSourceNew) -> Unit) {
+        val validValues = mutableListOf<Pair<String, *>>()
+        val invalidValues = mutableListOf<Pair<String, *>>()
+        assertNotNull(
+            builder(
+                object : TestValueSourceNew {
+                    override fun <T> invoke(
+                        defaultValue: T,
+                        nullable: Boolean,
+                        validList: List<T>?,
+                        invalidList: List<T>?
+                    ): T {
+                        Thread.currentThread().stackTrace[3].toString().let { i ->
+                            validList?.forEach { validValues += i to it }
+                            invalidList?.forEach { invalidValues += i to it }
+                            when (defaultValue!!::class) {
+                                String::class -> invalidValues += i to ""
+                                Set::class -> invalidValues += i to emptySet<Any>()
+                                List::class -> invalidValues += i to emptyList<Any>()
+                            }
+                            if (nullable) {
+                                validValues += i to null
+                            }
+                        }
+                        return defaultValue
+                    }
+                }
+            )
+        )
+        validValues.forEach { (vi, value) ->
+            assertNotNull(
+                builder(
+                    object : TestValueSourceNew {
+                        override fun <T> invoke(
+                            defaultValue: T,
+                            nullable: Boolean,
+                            validList: List<T>?,
+                            invalidList: List<T>?
+                        ): T {
+                            Thread.currentThread().stackTrace[3].toString().let { i ->
+                                @Suppress("UNCHECKED_CAST")
+                                return if (i == vi) value as T else defaultValue
+                            }
+                        }
+                    }
+                )
+            )
+        }
+        invalidValues.forEach { (ii, value) ->
+            try {
+                assertFailsWith(IllegalArgumentException::class) {
+                    builder(
+                        object : TestValueSourceNew {
+                            override fun <T> invoke(
+                                defaultValue: T,
+                                nullable: Boolean,
+                                validList: List<T>?,
+                                invalidList: List<T>?
+                            ): T {
+                                Thread.currentThread().stackTrace[3].toString().let { i ->
+                                    @Suppress("UNCHECKED_CAST")
+                                    return if (i == ii) value as T else defaultValue
+                                }
+                            }
+                        }
+                    )
+                }
+            } catch (afe: AssertionFailedError) {
+                println("Expected IAE for $ii with value $value, but it passed without error.")
+                throw afe
+            }
+        }
+    }
+
     fun testAll(builder: (TestValueSource) -> Unit) {
-        val validValues = mutableListOf<Pair<KProperty1<*, *>, Any?>>()
-        val invalidValues = mutableListOf<Pair<KProperty1<*, *>, Any?>>()
+        val validValues = mutableListOf<TestPair<*>>()
+        val invalidValues = mutableListOf<TestPair<*>>()
         assertNotNull(
             builder(
                 object : TestValueSource {

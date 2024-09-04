@@ -10,7 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.kotlin.gradle.plugin)
+    implementation(libs.kotlin.gradle)
+    implementation(libs.kotlin.serialization)
     implementation(libs.spotless.gradle)
     implementation(libs.kover.gradle)
     implementation(libs.kotlin.json.codegen)

@@ -4,6 +4,12 @@ import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
 plugins {
     id("buildlogic.kotlin-library-conventions")
     id("net.pwall.json.json-kotlin")
+    kotlin("plugin.serialization")
+}
+
+dependencies {
+    implementation(libs.kotlinx.json)
+    testImplementation(libs.mockito.kotlin)
 }
 
 configure<JSONSchemaCodegen> {
