@@ -29,6 +29,9 @@ interface Requirement {
 /**
  * Creates a new [Requirement] that specifies that all the requirements in [requirements] must be
  * fulfilled.
+ *
+ * @param requirements the requirements to be fulfilled.
+ * @return a new combined [Requirement] that is fulfilled if all its sub-requirements are fulfilled.
  */
 fun allOf(vararg requirements: Requirement): Requirement {
     return AllOf(requirements.toList())
@@ -52,6 +55,10 @@ internal class AllOf(var list: List<Requirement>) : Requirement {
 /**
  * Creates a new [Requirement] that specifies that one the requirements in [requirements] must be
  * fulfilled.
+ *
+ * @param requirements the requirements to chose from.
+ * @return a new combined [Requirement] that is fulfilled if one of its sub-requirements are
+ *   fulfilled.
  */
 fun oneOf(vararg requirements: Requirement): Requirement {
     return OneOf(requirements.toList())
@@ -71,6 +78,10 @@ internal class OneOf(var list: List<Requirement>) : Requirement {
 /**
  * Creates a new [Requirement] that specifies that either [this] or the [other] requirement must be
  * fulfilled.
+ *
+ * @param other the other requirements
+ * @return a combined [Requirement] that is fulfilled if either this or the [other] requirement is
+ *   fulfilled.
  */
 infix fun Requirement.or(other: Requirement): Requirement {
     return Or(this, other)
@@ -103,6 +114,9 @@ internal class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
 /**
  * Creates a new [Requirement] that specifies that this [this] and the [other] requirement must be
  * fulfilled.
+ *
+ * @param other the other requirements
+ * @return a combined [Requirement] that is fulfilled if this and the [other] is fulfilled.
  */
 operator fun Requirement.plus(other: Requirement): Requirement {
     return And(this, other)
