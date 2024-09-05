@@ -14,18 +14,18 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation
+package io.github.csaf.validation
+
+/** Result defines the result of a requirement check. It */
+sealed interface ValidationResult
+
+/** A successful validation. */
+object ValidationSuccessful : ValidationResult
 
 /**
- * Represents a CSAF profile according to
- * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles.
+ * A [ValidationResult] that represents a failed validation, with extra information why it failed.
  */
-interface Role {
-
-    /**
-     * The list of requirements, that this role needs to fulfill according to the standard. This can
-     * either be a single [Requirement] or a combination thereof using the operators [allOf].
-     * [oneOf], [or].
-     */
-    val requirements: Requirement
-}
+data class ValidationFailed(
+    /** Any errors encountered during the validation. */
+    var errors: List<Any> = emptyList()
+) : ValidationResult {}

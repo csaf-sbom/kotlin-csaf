@@ -14,17 +14,18 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation
+package io.github.csaf.validation
 
-import io.github.csaf.sbom.generated.Aggregator
-import io.github.csaf.sbom.generated.Csaf.Document
-import io.github.csaf.sbom.generated.Provider
+/**
+ * Represents a CSAF profile according to
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles.
+ */
+interface Role {
 
-/** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-class ValidationContext {
-    // TODO: add members to be accessed by the requirements
-    // TODO: this is probably not the final context, we probably want to have sub-contexts
-    var aggregator: Aggregator? = null
-    var provider: Provider? = null
-    var document: Document? = null
+    /**
+     * The list of requirements, that this role needs to fulfill according to the standard. This can
+     * either be a single [Requirement] or a combination thereof using the operators [allOf].
+     * [oneOf], [or].
+     */
+    val requirements: Requirement
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation
+package io.github.csaf.validation
 
 import kotlin.test.Test
 import kotlin.test.assertIs

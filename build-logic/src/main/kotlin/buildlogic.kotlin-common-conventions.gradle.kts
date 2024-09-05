@@ -42,6 +42,7 @@ kover {
         filters {
             excludes {
                 annotatedBy("io.github.csaf.sbom.KoverIgnore")
+                packages("io.github.csaf.sbom.generated")
             }
         }
     }

@@ -14,10 +14,36 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation.roles
+package io.github.csaf.validation.roles
 
-import com.github.csaf.validation.*
-import com.github.csaf.validation.requirements.*
+import io.github.csaf.validation.Requirement
+import io.github.csaf.validation.Role
+import io.github.csaf.validation.allOf
+import io.github.csaf.validation.oneOf
+import io.github.csaf.validation.or
+import io.github.csaf.validation.plus
+import io.github.csaf.validation.requirements.Requirement10
+import io.github.csaf.validation.requirements.Requirement11
+import io.github.csaf.validation.requirements.Requirement12
+import io.github.csaf.validation.requirements.Requirement13
+import io.github.csaf.validation.requirements.Requirement14
+import io.github.csaf.validation.requirements.Requirement15
+import io.github.csaf.validation.requirements.Requirement16
+import io.github.csaf.validation.requirements.Requirement17
+import io.github.csaf.validation.requirements.Requirement18
+import io.github.csaf.validation.requirements.Requirement19
+import io.github.csaf.validation.requirements.Requirement20
+import io.github.csaf.validation.requirements.Requirement21
+import io.github.csaf.validation.requirements.Requirement22
+import io.github.csaf.validation.requirements.Requirement23
+import io.github.csaf.validation.requirements.Requirement3
+import io.github.csaf.validation.requirements.Requirement4
+import io.github.csaf.validation.requirements.Requirement5
+import io.github.csaf.validation.requirements.Requirement6
+import io.github.csaf.validation.requirements.Requirement8
+import io.github.csaf.validation.requirements.Requirement9
+import io.github.csaf.validation.requirements.ValidCSAFDocument
+import io.github.csaf.validation.requirements.ValidFilename
 
 /**
  * The "CSAF publisher" role. See
