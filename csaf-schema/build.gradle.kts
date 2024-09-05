@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinx.json)
+    api(libs.kotlinx.json)
     testImplementation(libs.mockito.kotlin)
 }
 

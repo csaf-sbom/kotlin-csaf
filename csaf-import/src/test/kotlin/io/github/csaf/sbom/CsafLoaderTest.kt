@@ -16,21 +16,13 @@
  */
 package io.github.csaf.sbom
 
-import io.github.csaf.sbom.generated.Aggregator
-import io.github.csaf.sbom.generated.Provider
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
 
 class CsafLoaderTest {
     private val mockEngine = MockEngine { request ->
-        println(request.url.fullPath)
         respond(
             content =
                 javaClass.classLoader.getResource(request.url.fullPath.substring(1))!!.readText(),
@@ -56,9 +48,6 @@ class CsafLoaderTest {
             "The name field of the loaded aggregator does not contain the expected value."
         )
 
-        val json = Json.encodeToString(Aggregator.serializer(), lister)
-        assertTrue(json.isNotEmpty())
-
         val failedResult = loader.fetchAggregator("https://dummy/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
@@ -81,9 +70,6 @@ class CsafLoaderTest {
             provider.publisher.name,
             "The publisher name field of the loaded provider does not contain the expected value."
         )
-
-        val json = Json.encodeToString(Provider.serializer(), provider)
-        assertTrue(json.isNotEmpty())
 
         val failedResult = loader.fetchProvider("https://dummy/does-not-exist.json")
         assertFalse(

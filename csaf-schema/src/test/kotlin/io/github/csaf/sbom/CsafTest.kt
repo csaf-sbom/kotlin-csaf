@@ -20,7 +20,9 @@ import io.github.csaf.sbom.generated.Csaf
 import io.github.csaf.sbom.generated.Csaf.Tracking
 import java.math.BigDecimal
 import java.net.URI
+import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlin.test.*
 
 class CsafTest {
@@ -54,9 +56,9 @@ class CsafTest {
             assertFailsWith<IllegalArgumentException> {
                 Tracking(
                     aliases = setOf("this"),
-                    current_release_date = OffsetDateTime.now(),
+                    current_release_date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                     id = "test-title",
-                    initial_release_date = OffsetDateTime.now(),
+                    initial_release_date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                     revision_history = listOf(),
                     status = Csaf.Status.final,
                     version = "1",
@@ -140,14 +142,20 @@ class CsafTest {
                                                     )
                                             )
                                         ),
-                                    current_release_date = OffsetDateTime.now(),
+                                    current_release_date =
+                                        OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                                     id = valGen("test-title", false),
-                                    initial_release_date = OffsetDateTime.now(),
+                                    initial_release_date =
+                                        OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                                     revision_history =
                                         valGen(
                                             listOf(
                                                 Csaf.RevisionHistory(
-                                                    date = OffsetDateTime.now(),
+                                                    date =
+                                                        OffsetDateTime.ofInstant(
+                                                            Instant.EPOCH,
+                                                            ZoneOffset.UTC
+                                                        ),
                                                     number =
                                                         valGen(
                                                             "1.0.0-alpha1",
@@ -299,7 +307,11 @@ class CsafTest {
                                 flags =
                                     setOf(
                                         Csaf.Flag(
-                                            date = OffsetDateTime.now(),
+                                            date =
+                                                OffsetDateTime.ofInstant(
+                                                    Instant.EPOCH,
+                                                    ZoneOffset.UTC
+                                                ),
                                             label = Csaf.Label1.vulnerable_code_not_in_execute_path,
                                             product_ids = setOf("test-product-name"),
                                             group_ids = setOf("test-group-name"),
