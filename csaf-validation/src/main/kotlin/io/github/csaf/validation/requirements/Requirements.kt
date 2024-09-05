@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation.requirements
+package io.github.csaf.validation.requirements
 
-import com.github.csaf.validation.Requirement
-import com.github.csaf.validation.ValidationContext
-import com.github.csaf.validation.ValidationFailed
-import com.github.csaf.validation.ValidationResult
-import com.github.csaf.validation.ValidationSuccessful
+import io.github.csaf.validation.Requirement
+import io.github.csaf.validation.ValidationContext
+import io.github.csaf.validation.ValidationFailed
+import io.github.csaf.validation.ValidationResult
+import io.github.csaf.validation.ValidationSuccessful
 
 /**
  * Represents Requirement 1: Valid CSAF document.

@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation.roles
+package io.github.csaf.validation.roles
 
-import com.github.csaf.validation.ValidationContext
-import com.github.csaf.validation.ValidationFailed
+import io.github.csaf.validation.ValidationContext
+import io.github.csaf.validation.ValidationFailed
 import kotlin.test.Test
 import kotlin.test.assertIs
 

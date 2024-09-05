@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation
+package io.github.csaf.validation
 
-/** Result defines the result of a requirement check. It */
-sealed interface ValidationResult
+import io.github.csaf.sbom.generated.Aggregator
+import io.github.csaf.sbom.generated.Csaf.Document
+import io.github.csaf.sbom.generated.Provider
 
-/** A successful validation. */
-object ValidationSuccessful : ValidationResult
-
-/**
- * A [ValidationResult] that represents a failed validation, with extra information why it failed.
- */
-data class ValidationFailed(
-    /** Any errors encountered during the validation. */
-    var errors: List<Any> = emptyList()
-) : ValidationResult {}
+/** This class holds all necessary information that are needed to be checked by a [Requirement]. */
+class ValidationContext {
+    // TODO: add members to be accessed by the requirements
+    // TODO: this is probably not the final context, we probably want to have sub-contexts
+    var aggregator: Aggregator? = null
+    var provider: Provider? = null
+    var document: Document? = null
+}

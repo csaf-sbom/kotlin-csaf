@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.github.csaf.validation
+package io.github.csaf.validation
 
 /**
  * Represents a requirement that the CSAF standard defines in
