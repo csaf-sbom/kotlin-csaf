@@ -16,13 +16,16 @@
  */
 package io.github.csaf.sbom
 
+import io.github.csaf.sbom.generated.Aggregator
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 
 class CsafLoaderTest {
     private val mockEngine = MockEngine { request ->
@@ -43,11 +46,18 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
+
+        var lister = result.getOrNull()
+        assertNotNull(lister)
         assertEquals(
             "Example CSAF Lister",
-            result.getOrThrow().aggregator.name,
+            lister.aggregator.name,
             "The name field of the loaded aggregator does not contain the expected value."
         )
+
+        val json = Json.encodeToString(Aggregator.serializer(), lister)
+        assertTrue(json.isNotEmpty())
+
         val failedResult = loader.fetchAggregator("https://dummy/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
