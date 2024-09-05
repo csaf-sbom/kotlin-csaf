@@ -48,7 +48,7 @@ class CsafLoaderTest {
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
 
-        var lister = result.getOrNull()
+        val lister = result.getOrNull()
         assertNotNull(lister)
         assertEquals(
             "Example CSAF Lister",
