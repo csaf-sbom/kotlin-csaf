@@ -14,16 +14,6 @@
  * limitations under the License.
  *
  */
-import io.github.csaf.sbom.mockEngine
-import io.github.csaf.sbom.retrieveProviderFromDomain
-import kotlin.test.Test
-import kotlinx.coroutines.runBlocking
+package io.github.csaf.validation
 
-class RetrievalTest {
-    @Test
-    fun testRetrieveProviderFromDomain() {
-        runBlocking() {
-            var list = retrieveProviderFromDomain("example.com", engine = mockEngine)
-        }
-    }
-}
+class ValidationException : Exception() {}

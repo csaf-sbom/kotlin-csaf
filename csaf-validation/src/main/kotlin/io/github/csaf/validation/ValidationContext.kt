@@ -16,15 +16,9 @@
  */
 package io.github.csaf.validation
 
-import io.github.csaf.sbom.generated.Aggregator
-import io.github.csaf.sbom.generated.Csaf.Document
-import io.github.csaf.sbom.generated.Provider
+interface Validatable<T> {
+    val json: T
+}
 
 /** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-class ValidationContext {
-    // TODO: add members to be accessed by the requirements
-    // TODO: this is probably not the final context, we probably want to have sub-contexts
-    var aggregator: Aggregator? = null
-    var provider: Provider? = null
-    var document: Document? = null
-}
+class ValidationContext<T>(val something: Validatable<T>) {}

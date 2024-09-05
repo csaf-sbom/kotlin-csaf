@@ -14,22 +14,17 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.validation
+import io.github.csaf.sbom.mockEngine
+import io.github.csaf.sbom.retrieval.RetrievedProvider
+import kotlin.test.Test
+import kotlinx.coroutines.runBlocking
 
-/**
- * Represents a CSAF profile according to
- * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles.
- */
-interface Role {
+class RetrievalTest {
+    @Test
+    fun testRetrievedProviderFrom() {
+        runBlocking() {
+            val result = RetrievedProvider.from("example.com", engine = mockEngine)
 
-    /**
-     * The list of requirements, that this role needs to fulfill according to the standard. This can
-     * either be a single [Requirement] or a combination thereof using the operators [allOf].
-     * [oneOf], [or].
-     */
-    val requirements: Requirement
-
-    fun check(ctx: ValidationContext<*>): ValidationResult {
-        return requirements.check(ctx)
+        }
     }
 }

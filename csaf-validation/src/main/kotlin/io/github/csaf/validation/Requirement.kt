@@ -23,7 +23,7 @@ package io.github.csaf.validation
  * combine requirements, such as [oneOf], [allOf] or [or].
  */
 interface Requirement {
-    fun check(ctx: ValidationContext): ValidationResult
+    fun check(ctx: ValidationContext<*>): ValidationResult
 }
 
 /**
@@ -38,7 +38,7 @@ fun allOf(vararg requirements: Requirement): Requirement {
 }
 
 internal class AllOf(var list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
+    override fun check(ctx: ValidationContext<*>): ValidationResult {
         var result: ValidationResult = ValidationSuccessful
         for (requirement in list) {
             var tmpResult = requirement.check(ctx)
@@ -65,7 +65,7 @@ fun oneOf(vararg requirements: Requirement): Requirement {
 }
 
 internal class OneOf(var list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
+    override fun check(ctx: ValidationContext<*>): ValidationResult {
         return if (list.map { it.check(ctx) }.any { it is ValidationSuccessful }) {
             ValidationSuccessful
         } else {
@@ -88,7 +88,7 @@ infix fun Requirement.or(other: Requirement): Requirement {
 }
 
 internal class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
+    override fun check(ctx: ValidationContext<*>): ValidationResult {
         var lhsResult = lhs.check(ctx)
         var rhsResult = rhs.check(ctx)
         return when {
@@ -123,7 +123,7 @@ operator fun Requirement.plus(other: Requirement): Requirement {
 }
 
 internal class And(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
+    override fun check(ctx: ValidationContext<*>): ValidationResult {
         var lhsResult = lhs.check(ctx)
         var rhsResult = rhs.check(ctx)
         return when {
