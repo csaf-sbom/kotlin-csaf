@@ -16,6 +16,9 @@
  */
 package io.github.csaf.sbom
 
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.reflect.KProperty1
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -25,35 +28,36 @@ typealias TestPair<R> = Pair<KProperty1<*, R>, R>
 
 object PojoTestHelper {
 
-    fun testAllNew(builder: (TestValueSourceNew) -> Unit) {
+    fun <T> testAllNew(builder: (TestValueSourceNew) -> T): T {
         val validValues = mutableListOf<Pair<String, *>>()
         val invalidValues = mutableListOf<Pair<String, *>>()
-        assertNotNull(
-            builder(
-                object : TestValueSourceNew {
-                    override fun <T> invoke(
-                        defaultValue: T,
-                        nullable: Boolean,
-                        validList: List<T>?,
-                        invalidList: List<T>?
-                    ): T {
-                        Thread.currentThread().stackTrace[3].toString().let { i ->
-                            validList?.forEach { validValues += i to it }
-                            invalidList?.forEach { invalidValues += i to it }
-                            when (defaultValue!!::class) {
-                                String::class -> invalidValues += i to ""
-                                Set::class -> invalidValues += i to emptySet<Any>()
-                                List::class -> invalidValues += i to emptyList<Any>()
+        val example =
+            assertNotNull(
+                builder(
+                    object : TestValueSourceNew {
+                        override fun <T> invoke(
+                            defaultValue: T,
+                            nullable: Boolean,
+                            validList: List<T>?,
+                            invalidList: List<T>?
+                        ): T {
+                            Thread.currentThread().stackTrace[3].toString().let { i ->
+                                validList?.forEach { validValues += i to it }
+                                invalidList?.forEach { invalidValues += i to it }
+                                when (defaultValue!!::class) {
+                                    String::class -> invalidValues += i to ""
+                                    Set::class -> invalidValues += i to emptySet<Any>()
+                                    List::class -> invalidValues += i to emptyList<Any>()
+                                }
+                                if (nullable) {
+                                    validValues += i to null
+                                }
                             }
-                            if (nullable) {
-                                validValues += i to null
-                            }
+                            return defaultValue
                         }
-                        return defaultValue
                     }
-                }
+                )
             )
-        )
         validValues.forEach { (vi, value) ->
             assertNotNull(
                 builder(
@@ -97,34 +101,36 @@ object PojoTestHelper {
                 throw afe
             }
         }
+        return example
     }
 
-    fun testAll(builder: (TestValueSource) -> Unit) {
+    fun <T> testAll(builder: (TestValueSource) -> T): T {
         val validValues = mutableListOf<TestPair<*>>()
         val invalidValues = mutableListOf<TestPair<*>>()
-        assertNotNull(
-            builder(
-                object : TestValueSource {
-                    override fun <T> invoke(
-                        property: KProperty1<*, T>,
-                        defaultValue: T,
-                        validList: List<T>?,
-                        invalidList: List<T>?
-                    ): T {
-                        validList?.forEach { validValues += property to it }
-                        invalidList?.forEach { invalidValues += property to it }
-                        when (property.returnType.classifier) {
-                            String::class -> invalidValues += property to ""
-                            Set::class -> invalidValues += property to emptySet<T>()
+        val example =
+            assertNotNull(
+                builder(
+                    object : TestValueSource {
+                        override fun <T> invoke(
+                            property: KProperty1<*, T>,
+                            defaultValue: T,
+                            validList: List<T>?,
+                            invalidList: List<T>?
+                        ): T {
+                            validList?.forEach { validValues += property to it }
+                            invalidList?.forEach { invalidValues += property to it }
+                            when (property.returnType.classifier) {
+                                String::class -> invalidValues += property to ""
+                                Set::class -> invalidValues += property to emptySet<T>()
+                            }
+                            if (property.returnType.isMarkedNullable) {
+                                validValues += property to null
+                            }
+                            return defaultValue
                         }
-                        if (property.returnType.isMarkedNullable) {
-                            validValues += property to null
-                        }
-                        return defaultValue
                     }
-                }
+                )
             )
-        )
         validValues.forEach { (validProperty, value) ->
             assertNotNull(
                 builder(
@@ -158,6 +164,18 @@ object PojoTestHelper {
                     }
                 )
             }
+        }
+        return example
+    }
+
+    fun readFileFromResources(filename: String): String {
+        val classLoader = javaClass.classLoader
+        val resourcePath = classLoader.getResource(filename)?.toURI()
+        if (resourcePath != null) {
+            val path = Paths.get(resourcePath)
+            return Files.readString(path)
+        } else {
+            throw IOException("Datei \"$filename\"nicht gefunden!")
         }
     }
 }

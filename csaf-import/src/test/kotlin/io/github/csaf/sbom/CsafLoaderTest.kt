@@ -18,15 +18,11 @@ package io.github.csaf.sbom
 
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 
 class CsafLoaderTest {
     private val mockEngine = MockEngine { request ->
-        println(request.url.fullPath)
         respond(
             content =
                 javaClass.classLoader.getResource(request.url.fullPath.substring(1))!!.readText(),
@@ -43,11 +39,15 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
+
+        val lister = result.getOrNull()
+        assertNotNull(lister)
         assertEquals(
             "Example CSAF Lister",
-            result.getOrThrow().aggregator.name,
+            lister.aggregator.name,
             "The name field of the loaded aggregator does not contain the expected value."
         )
+
         val failedResult = loader.fetchAggregator("https://dummy/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
@@ -62,11 +62,15 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
+
+        val provider = result.getOrNull()
+        assertNotNull(provider)
         assertEquals(
             "Example Company ProductCERT",
-            result.getOrThrow().publisher.name,
+            provider.publisher.name,
             "The publisher name field of the loaded provider does not contain the expected value."
         )
+
         val failedResult = loader.fetchProvider("https://dummy/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
