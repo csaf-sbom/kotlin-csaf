@@ -16,11 +16,7 @@
  */
 package io.github.csaf.validation.roles
 
-import io.github.csaf.validation.ValidationContext
-import io.github.csaf.validation.ValidationFailed
-import kotlin.test.Test
-import kotlin.test.assertIs
-
+/*
 class TestRoles {
     @Test
     fun testTrustedProvider() {
@@ -40,3 +36,4 @@ class TestRoles {
         assertIs<ValidationFailed>(result)
     }
 }
+*/

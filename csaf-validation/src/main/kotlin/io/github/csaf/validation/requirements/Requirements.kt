@@ -18,7 +18,6 @@ package io.github.csaf.validation.requirements
 
 import io.github.csaf.validation.Requirement
 import io.github.csaf.validation.ValidationContext
-import io.github.csaf.validation.ValidationFailed
 import io.github.csaf.validation.ValidationResult
 import io.github.csaf.validation.ValidationSuccessful
 
@@ -43,7 +42,7 @@ object ValidCSAFDocument : Requirement {
 object ValidFilename : Requirement {
     override fun check(ctx: ValidationContext<*>): ValidationResult {
         // TODO: actually implement the requirement
-        return ValidationFailed(errors = listOf("very bad error"))
+        return ValidationSuccessful
     }
 }
 

@@ -27,7 +27,6 @@ import io.github.csaf.validation.ValidationFailed
 import io.github.csaf.validation.roles.CSAFProviderRole
 import io.github.csaf.validation.roles.CSAFPublisherRole
 import io.github.csaf.validation.roles.CSAFTrustedProviderRole
-import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.java.Java
 import io.ktor.client.request.*
@@ -44,14 +43,21 @@ fun checkForTls(response: HttpResponse): Boolean {
 class RetrievedAggregator(override val json: Aggregator) : Validatable<Aggregator>
 
 /**
- * This class represents a "retrieved" provider, including its metadata (in the form of [Provider])
- * as well as functionality to retrieve its documents.
+ * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
+ * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
+ * to retrieve its documents.
  */
-class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
+class RetrievedProvider(override val json: Provider, var lastRetrieved: Date? = null) :
+    Validatable<Provider> {
 
-    var lastRetrieved: Date? = null
-
-    var documents: List<RetrievedDocument> = mutableListOf()
+    /**
+     * This function fetches all CSAF documents that are listed by this provider. Optionally, this
+     * can be filtered.
+     */
+    fun fetchDocuments(from: Date? = null): List<Result<RetrievedDocument>> {
+        // TODO: actually return documents
+        return listOf()
+    }
 
     companion object {
         /**
@@ -64,7 +70,6 @@ class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
             engine: HttpClientEngine = Java.create()
         ): Result<RetrievedProvider> {
             val loader = CsafLoader(engine)
-            val client = HttpClient(engine)
 
             // First, we need to check, if a well-known URL exists
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
@@ -74,10 +79,10 @@ class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
             }
 
             // TODO: fetch from security.txt
+            // TODO: fetch from DNS path if 1 or 2 not works
+            // TODO: choose one of the provider metadata
 
-            val provider = RetrievedProvider(result.getOrThrow())
-
-            // TODO: We want to prefer the well-known
+            val provider = RetrievedProvider(result.getOrThrow(), Date())
 
             // We need to validate the provider according to its "role" (publisher, provider,
             // trusted provider)

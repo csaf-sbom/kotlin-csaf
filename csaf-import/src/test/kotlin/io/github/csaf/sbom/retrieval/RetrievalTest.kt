@@ -17,14 +17,18 @@
 import io.github.csaf.sbom.mockEngine
 import io.github.csaf.sbom.retrieval.RetrievedProvider
 import kotlin.test.Test
-import kotlinx.coroutines.runBlocking
+import kotlin.test.assertNotNull
+import kotlinx.coroutines.test.runTest
 
 class RetrievalTest {
     @Test
     fun testRetrievedProviderFrom() {
-        runBlocking() {
+        runTest {
             val result = RetrievedProvider.from("example.com", engine = mockEngine)
+            val provider = result.getOrNull()
+            assertNotNull(provider)
 
+            val allDocuments = provider.fetchDocuments()
         }
     }
 }
