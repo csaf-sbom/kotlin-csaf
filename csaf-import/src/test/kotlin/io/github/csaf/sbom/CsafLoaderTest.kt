@@ -17,6 +17,7 @@
 package io.github.csaf.sbom
 
 import io.github.csaf.sbom.generated.Aggregator
+import io.github.csaf.sbom.generated.Provider
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import kotlin.test.Test
@@ -72,11 +73,18 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
+
+        val provider = result.getOrNull()
+        assertNotNull(provider)
         assertEquals(
             "Example Company ProductCERT",
-            result.getOrThrow().publisher.name,
+            provider.publisher.name,
             "The publisher name field of the loaded provider does not contain the expected value."
         )
+
+        val json = Json.encodeToString(Provider.serializer(), provider)
+        assertTrue(json.isNotEmpty())
+
         val failedResult = loader.fetchProvider("https://dummy/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
