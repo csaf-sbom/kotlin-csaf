@@ -2,7 +2,7 @@
 codegen = "0.108.2"
 ktor = "2.3.12"
 kotlin = "2.0.20"
-kotlinx-coroutines = "1.8.1"
+kotlinx-coroutines = "1.9.0"
 kotlinx-json = "1.7.2"
 kover = "0.8.3"
 mockito-kotlin = "5.4.0"
