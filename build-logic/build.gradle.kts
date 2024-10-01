@@ -17,4 +17,5 @@ dependencies {
     implementation(libs.spotless.gradle)
     implementation(libs.kover.gradle)
     implementation(libs.kotlin.json.codegen)
+    implementation(libs.kotlin.jvm.blocking.bridge.gradle)
 }

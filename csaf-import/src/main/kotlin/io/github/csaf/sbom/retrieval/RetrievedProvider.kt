@@ -17,6 +17,7 @@
 package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.CsafLoader
+import io.github.csaf.sbom.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.generated.Provider
 import io.github.csaf.sbom.mapAsync
 import io.github.csaf.validation.Validatable
@@ -27,10 +28,7 @@ import io.github.csaf.validation.roles.CSAFProviderRole
 import io.github.csaf.validation.roles.CSAFPublisherRole
 import io.github.csaf.validation.roles.CSAFTrustedProviderRole
 import io.ktor.client.statement.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.future.future
+import me.him188.kotlin.jvm.blocking.bridge.JvmBlockingBridge
 
 /**
  * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
@@ -40,6 +38,7 @@ import kotlinx.coroutines.future.future
 class RetrievedProvider(override val json: Provider) : Validatable {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
+    @JvmBlockingBridge
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
         return json.distributions
             ?.mapNotNull { it.directory_url?.toString()?.trimEnd('/') }
@@ -77,26 +76,13 @@ class RetrievedProvider(override val json: Provider) : Validatable {
             ?.flatten() ?: emptyList()
     }
 
-    @Suppress("unused")
-    @JvmOverloads
-    fun fetchDocumentsAsync(loader: CsafLoader = lazyLoader) =
-        ioScope.future { fetchDocuments(loader) }
-
     companion object {
-        private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-        private val lazyLoader: CsafLoader by lazy { CsafLoader() }
-
-        @Suppress("unused")
-        @JvmStatic
-        @JvmOverloads
-        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader) =
-            ioScope.future { from(domain, loader).getOrThrow() }
-
         /**
          * Retrieves one or more provider-metadata.json documents (represented by the [Provider]
          * data class) from a domain according to the
          * [retrieval rules](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#731-finding-provider-metadatajson).
          */
+        @JvmBlockingBridge
         suspend fun from(
             domain: String,
             loader: CsafLoader = lazyLoader

@@ -1,5 +1,6 @@
 plugins {
     id("buildlogic.kotlin-library-conventions")
+    id("me.him188.kotlin-jvm-blocking-bridge")
 }
 
 publishing {
@@ -21,6 +22,7 @@ dependencies {
     implementation(libs.kotlinx.json)
     implementation(libs.bundles.ktor.client)
     implementation(libs.ktor.kotlinx.json)
+    implementation(libs.kotlin.jvm.blocking.bridge)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
 }
