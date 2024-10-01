@@ -29,7 +29,7 @@ interface Role {
      */
     val requirements: Requirement
 
-    fun check(ctx: ValidationContext): ValidationResult {
+    fun check(ctx: ValidationContext<*, *>): ValidationResult {
         return requirements.check(ctx)
     }
 }

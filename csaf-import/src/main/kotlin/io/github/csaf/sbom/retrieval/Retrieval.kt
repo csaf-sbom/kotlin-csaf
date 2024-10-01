@@ -16,8 +16,28 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.generated.Csaf
+import io.github.csaf.sbom.generated.Provider
+import io.github.csaf.validation.ValidationContext
 import io.ktor.client.statement.*
 import io.ktor.http.*
 
 // TODO(oxisto): This needs to be moved to our requirements/validation API
 fun checkForTls(response: HttpResponse) = response.request.url.protocol == URLProtocol.HTTPS
+
+/**
+ * This [ValidationContext] holds all the necessary information that is needed to validate a
+ * provider. According to the requirements in the specification we probably need access to the
+ * following information:
+ * - The (parsed) JSON containing the provider metadata
+ * - The filename of the JSON
+ * - The URL where it was downloaded (both to check whether a TLP:WHITE is accessible and/or a
+ *   TLP:RED is not accessible and whether TLS is used)
+ * - The HTTP headers used in the HTTP communication to check for redirects; or the complete HTTP
+ *   request
+ */
+class ProviderValidationContext(validatable: RetrievedProvider? = null) :
+    ValidationContext<Provider, RetrievedProvider>(validatable) {}
+
+class DocumentValidationContext(validatable: RetrievedDocument? = null) :
+    ValidationContext<Csaf, RetrievedDocument>(validatable)

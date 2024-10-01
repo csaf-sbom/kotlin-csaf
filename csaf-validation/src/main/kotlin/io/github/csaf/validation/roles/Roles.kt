@@ -40,6 +40,7 @@ import io.github.csaf.validation.requirements.Requirement3
 import io.github.csaf.validation.requirements.Requirement4
 import io.github.csaf.validation.requirements.Requirement5
 import io.github.csaf.validation.requirements.Requirement6
+import io.github.csaf.validation.requirements.Requirement7
 import io.github.csaf.validation.requirements.Requirement8
 import io.github.csaf.validation.requirements.Requirement9
 import io.github.csaf.validation.requirements.ValidCSAFDocument
@@ -51,7 +52,7 @@ import io.github.csaf.validation.requirements.ValidFilename
  */
 open class CSAFPublisherRole : Role {
 
-    override val requirements = allOf(ValidCSAFDocument, ValidFilename)
+    override val requirements = allOf(ValidCSAFDocument, ValidFilename, Requirement3, Requirement4)
 }
 
 /**
@@ -62,6 +63,7 @@ open class CSAFProviderRole : CSAFPublisherRole() {
     override val requirements: Requirement
         get() =
             super.requirements +
+                allOf(Requirement5, Requirement6, Requirement7) +
                 oneOf(Requirement8, Requirement9, Requirement10) +
                 (allOf(Requirement11, Requirement12, Requirement13, Requirement14) or
                     allOf(Requirement15, Requirement16, Requirement17))

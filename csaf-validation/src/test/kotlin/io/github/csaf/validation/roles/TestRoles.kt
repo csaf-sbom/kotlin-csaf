@@ -17,6 +17,7 @@
 package io.github.csaf.validation.roles
 
 import io.github.csaf.validation.TestValidationContext
+import io.github.csaf.validation.ValidationFailed
 import io.github.csaf.validation.ValidationSuccessful
 import kotlin.test.Test
 import kotlin.test.assertIs
@@ -26,9 +27,9 @@ class TestRoles {
     fun testTrustedProvider() {
         var role = CSAFTrustedProviderRole()
         // TODO: adjust this, once we actually check something in the requirements
-        //  for now all will succeed
+        //  for now this will fail
         var result = role.requirements.check(TestValidationContext())
-        assertIs<ValidationSuccessful>(result)
+        assertIs<ValidationFailed>(result)
     }
 
     @Test

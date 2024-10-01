@@ -23,19 +23,19 @@ class TestDocument : Validatable<Any> {
     override val json = Any()
 }
 
-class TestValidationContext(override val something: TestDocument = TestDocument()) :
-    ValidationContext<TestDocument> {}
+class TestValidationContext(validatable: TestDocument = TestDocument()) :
+    ValidationContext<Any, TestDocument>(validatable) {}
 
 val alwaysFail =
     object : Requirement {
-        override fun check(ctx: ValidationContext<*>): ValidationResult {
+        override fun check(ctx: ValidationContext<*, *>): ValidationResult {
             return ValidationFailed()
         }
     }
 
 val alwaysGood =
     object : Requirement {
-        override fun check(ctx: ValidationContext<*>): ValidationResult {
+        override fun check(ctx: ValidationContext<*, *>): ValidationResult {
             return ValidationSuccessful
         }
     }

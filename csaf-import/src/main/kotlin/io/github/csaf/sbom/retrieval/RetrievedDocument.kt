@@ -20,7 +20,7 @@ import io.github.csaf.sbom.generated.Csaf
 import io.github.csaf.validation.Validatable
 
 /** This class represents a "retrieved" CSAF document. */
-class RetrievedDocument(val json: Csaf, val sourceUrl: String) : Validatable {
+class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Validatable<Csaf> {
 
     // TODO: other stuff, like import time, ASC, signatures, etc.
 

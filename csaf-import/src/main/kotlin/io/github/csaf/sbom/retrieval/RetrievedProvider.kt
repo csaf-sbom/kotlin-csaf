@@ -36,7 +36,7 @@ import kotlinx.coroutines.future.future
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
-class RetrievedProvider(val json: Provider) : Validatable {
+class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
@@ -100,7 +100,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
             domain: String,
             loader: CsafLoader = lazyLoader
         ): Result<RetrievedProvider> {
-            val ctx = ValidationContext()
+            val ctx = ProviderValidationContext()
             // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
