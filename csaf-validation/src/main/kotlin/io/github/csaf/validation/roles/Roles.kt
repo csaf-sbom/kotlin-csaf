@@ -24,7 +24,6 @@ import io.github.csaf.validation.oneOf
 import io.github.csaf.validation.or
 import io.github.csaf.validation.plus
 import io.github.csaf.validation.requirements.Requirement10
-import io.github.csaf.validation.requirements.YearInFolder
 import io.github.csaf.validation.requirements.Requirement12
 import io.github.csaf.validation.requirements.Requirement13
 import io.github.csaf.validation.requirements.Requirement14
@@ -46,6 +45,7 @@ import io.github.csaf.validation.requirements.TlpWhiteAccessible
 import io.github.csaf.validation.requirements.UsageOfTls
 import io.github.csaf.validation.requirements.ValidCSAFDocument
 import io.github.csaf.validation.requirements.ValidFilename
+import io.github.csaf.validation.requirements.YearInFolder
 
 /**
  * The "CSAF publisher" role. See
