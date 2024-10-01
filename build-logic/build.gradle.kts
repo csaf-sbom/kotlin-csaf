@@ -11,6 +11,8 @@ repositories {
 
 dependencies {
     implementation(libs.kotlin.gradle)
+    implementation(libs.dokka.gradle)
+    implementation(libs.nexus.publish.gradle)
     implementation(libs.kotlin.serialization)
     implementation(libs.spotless.gradle)
     implementation(libs.kover.gradle)
