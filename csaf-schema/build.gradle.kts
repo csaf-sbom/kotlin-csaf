@@ -12,8 +12,8 @@ publishing {
         named<MavenPublication>("csaf-schema") {
             pom {
                 artifactId = "csaf-schema"
-                name.set("Kotlin CSAF - Validation Module")
-                description.set("Validation support for Kotlin CSAF")
+                name.set("Kotlin CSAF - Schema Module")
+                description.set("CSAF Schema definitions for Kotlin")
             }
         }
     }

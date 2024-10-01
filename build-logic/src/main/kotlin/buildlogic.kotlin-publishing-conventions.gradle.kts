@@ -8,6 +8,7 @@ plugins {
 
 // Javadoc is mandatory on maven central
 val dokkaHtml by tasks.getting(DokkaTask::class)
+dokkaHtml.dependsOn(":csaf-schema:generate")
 val javadocJar by tasks.registering(Jar::class) {
     dependsOn(dokkaHtml)
     archiveClassifier.set("javadoc")
