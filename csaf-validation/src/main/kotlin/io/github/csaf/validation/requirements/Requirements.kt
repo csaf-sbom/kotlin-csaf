@@ -157,7 +157,8 @@ object Requirement10 : Requirement {
         }
 }
 
-object Requirement11 : Requirement {
+// TODO(oxisto): This is actually a document requirement, but it is part of an OR clause in the role requirement :(
+object YearInFolder : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful

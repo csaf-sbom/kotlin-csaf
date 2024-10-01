@@ -24,7 +24,7 @@ import io.github.csaf.validation.oneOf
 import io.github.csaf.validation.or
 import io.github.csaf.validation.plus
 import io.github.csaf.validation.requirements.Requirement10
-import io.github.csaf.validation.requirements.Requirement11
+import io.github.csaf.validation.requirements.YearInFolder
 import io.github.csaf.validation.requirements.Requirement12
 import io.github.csaf.validation.requirements.Requirement13
 import io.github.csaf.validation.requirements.Requirement14
@@ -69,7 +69,7 @@ open class CSAFProviderRole : CSAFPublisherRole() {
             super.roleRequirements +
                 allOf(Requirement6, Requirement7) +
                 oneOf(Requirement8, Requirement9, Requirement10) +
-                (allOf(Requirement11, Requirement12, Requirement13, Requirement14) or
+                (allOf(YearInFolder, Requirement12, Requirement13, Requirement14) or
                     allOf(Requirement15, Requirement16, Requirement17))
 
     override val documentRequirements = super.documentRequirements + Requirement5
