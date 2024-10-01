@@ -19,4 +19,4 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.generated.Aggregator
 import io.github.csaf.validation.Validatable
 
-class RetrievedAggregator(override val json: Aggregator) : Validatable<Aggregator>
+class RetrievedAggregator(override val json: Aggregator) : Validatable

@@ -37,7 +37,7 @@ import kotlinx.coroutines.future.future
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
-class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
+class RetrievedProvider(override val json: Provider) : Validatable {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
@@ -101,7 +101,7 @@ class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
             domain: String,
             loader: CsafLoader = lazyLoader
         ): Result<RetrievedProvider> {
-            val ctx = ProviderValidationContext()
+            val ctx = ValidationContext()
             // Closure for providing HttpResponse to ValidationContext.
             val ctxEnrichment = { response: HttpResponse -> ctx.httpResponse = response }
             // TODO: Only the last error will be available in result. We should do some logging.

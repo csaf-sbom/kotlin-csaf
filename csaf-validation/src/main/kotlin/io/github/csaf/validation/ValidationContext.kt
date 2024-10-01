@@ -18,10 +18,18 @@ package io.github.csaf.validation
 
 import io.ktor.client.statement.HttpResponse
 
-/** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-abstract class ValidationContext<JsonDocumentType, ValidatableType : Validatable<JsonDocumentType>>(
-    var validatable: ValidatableType? = null
-) {
+/**
+ * This [ValidationContext] holds all the necessary information that is needed to validate a
+ * validatable object. According to the requirements in the specification we probably need access to
+ * the following information:
+ * - The (parsed) JSON containing the provider metadata; see [ValidationContext.validatable]
+ * - The filename of the JSON
+ * - The URL where it was downloaded (both to check whether a TLP:WHITE is accessible and/or a
+ *   TLP:RED is not accessible and whether TLS is used); see [ValidationContext.httpResponse]
+ * - The HTTP headers used in the HTTP communication to check for redirects; or the complete HTTP
+ *   request; see [ValidationContext.httpResponse])
+ */
+open class ValidationContext(var validatable: Validatable? = null) {
 
     // TODO(oxisto): This should be moved to the provider validation context
     enum class DataSource {

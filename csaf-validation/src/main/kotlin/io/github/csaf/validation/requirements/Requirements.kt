@@ -22,19 +22,16 @@ import io.github.csaf.validation.*
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
-import io.ktor.http.URLProtocol
+import io.ktor.http.*
 
 /**
  * Represents
  * [Requirement 1: Valid CSAF document](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document).
  */
 object ValidCSAFDocument : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
-        var json = ctx.validatable?.json
-        if (json == null) {
-            // TODO(oxisto): We need to get the errors from the CSAF schema somehow :(
-            return ValidationFailed(listOf("We do not have a valid JSON"))
-        }
+    override fun check(ctx: ValidationContext): ValidationResult {
+        // TODO(oxisto): We need to get the errors from the CSAF schema somehow :(
+        ctx.validatable?.json ?: return ValidationFailed(listOf("We do not have a valid JSON"))
 
         // TODO(oxisto): Check for further conformance that are not checked by CSAF schema
         return ValidationSuccessful
@@ -46,12 +43,9 @@ object ValidCSAFDocument : Requirement {
  * [Requirement 2: Filename](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename).
  */
 object ValidFilename : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable for CSAF documents
-        var json = ctx.validatable?.json as? Csaf
-        if (json == null) {
-            return ValidationNotApplicable
-        }
+        val json = ctx.validatable?.json as? Csaf ?: return ValidationNotApplicable
 
         // Try to build the filename and then compare it
         val should = json.document.tracking.id.lowercase().replace("[^+\\-a-z0-9]+", "_") + ".json"
@@ -73,7 +67,7 @@ object ValidFilename : Requirement {
  * We make use of the [HttpResponse] / [HttpRequest] to check the [URLProtocol] for HTTPS.
  */
 object UsageOfTls : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO(oxisto): This will also fail if the httpResponse is empty, which is BAD
         return if (ctx.httpResponse?.call?.request?.url?.protocol == URLProtocol.HTTPS) {
             ValidationSuccessful
@@ -91,18 +85,12 @@ object UsageOfTls : Requirement {
  * the (non)-existence of authorization headers in the request.
  */
 object TlpWhiteAccessible : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // If we do not have a response, we can assume that its not accessible and we fail
-        var response = ctx.httpResponse
-        if (response == null) {
-            return ValidationFailed(listOf("Response is null"))
-        }
+        val response = ctx.httpResponse ?: return ValidationFailed(listOf("Response is null"))
 
         // Only applicable to Csaf document, because all the others do not have a TLP
-        var json = ctx.validatable?.json as? Csaf
-        if (json == null) {
-            return ValidationNotApplicable
-        }
+        val json = ctx.validatable?.json as? Csaf ?: return ValidationNotApplicable
 
         // Only for TLP:WHITE
         if (json.document.distribution?.tlp?.label != Label.WHITE) {
@@ -110,11 +98,9 @@ object TlpWhiteAccessible : Requirement {
         }
 
         // We assume that it is freely accessible, if
-        // - We actually got a "ok" error code
+        // - We actually got an "OK-ish" error code
         // - We did not send any authorization headers in the request
-        if (
-            response.status.value in 200..299 && !response.request.headers.contains("Authorization")
-        ) {
+        if (response.status.isSuccess() && !response.request.headers.contains("Authorization")) {
             return ValidationSuccessful
         }
 
@@ -124,28 +110,28 @@ object TlpWhiteAccessible : Requirement {
 }
 
 object Requirement5 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement6 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement7 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement8 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>) =
+    override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.SECURITY_TXT) {
             ValidationSuccessful
         } else {
@@ -154,7 +140,7 @@ object Requirement8 : Requirement {
 }
 
 object Requirement9 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>) =
+    override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.WELL_KNOWN) {
             ValidationSuccessful
         } else {
@@ -163,7 +149,7 @@ object Requirement9 : Requirement {
 }
 
 object Requirement10 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>) =
+    override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.DNS) {
             ValidationSuccessful
         } else {
@@ -172,91 +158,91 @@ object Requirement10 : Requirement {
 }
 
 object Requirement11 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement12 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement13 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement14 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement15 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement16 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement17 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement18 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement19 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement20 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement21 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement22 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
 }
 
 object Requirement23 : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }

@@ -16,6 +16,6 @@
  */
 package io.github.csaf.validation
 
-interface Validatable<JsonDocumentType> {
-    val json: JsonDocumentType
+interface Validatable {
+    val json: Any
 }

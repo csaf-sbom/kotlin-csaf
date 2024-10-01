@@ -19,12 +19,12 @@ package io.github.csaf.validation
 import kotlin.test.Test
 import kotlin.test.assertIs
 
-class TestDocument : Validatable<Any> {
+class TestDocument : Validatable {
     override val json = Any()
 }
 
 class TestValidationContext(validatable: TestDocument = TestDocument()) :
-    ValidationContext<Any, TestDocument>(validatable) {
+    ValidationContext(validatable) {
     init {
         dataSource = DataSource.WELL_KNOWN
     }
@@ -32,14 +32,14 @@ class TestValidationContext(validatable: TestDocument = TestDocument()) :
 
 val alwaysFail =
     object : Requirement {
-        override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+        override fun check(ctx: ValidationContext): ValidationResult {
             return ValidationFailed()
         }
     }
 
 val alwaysGood =
     object : Requirement {
-        override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+        override fun check(ctx: ValidationContext): ValidationResult {
             return ValidationSuccessful
         }
     }

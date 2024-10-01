@@ -23,7 +23,7 @@ package io.github.csaf.validation
  * combine requirements, such as [oneOf], [allOf] or [or].
  */
 interface Requirement {
-    fun check(ctx: ValidationContext<*, *>): ValidationResult
+    fun check(ctx: ValidationContext): ValidationResult
 }
 
 /**
@@ -38,7 +38,7 @@ fun allOf(vararg requirements: Requirement): Requirement {
 }
 
 internal class AllOf(private val list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         val results = list.map { it.check(ctx) }
         return if (results.any { it is ValidationFailed }) {
             ValidationFailed(
@@ -69,12 +69,12 @@ fun oneOf(vararg requirements: Requirement): Requirement {
 }
 
 internal class OneOf(private val list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         val results = list.map { it.check(ctx) }
-        return if (results.any { it is ValidationSuccessful }) {
-            ValidationSuccessful
+        return if (results.all { it is ValidationFailed }) {
+            ValidationFailed(results.flatMap { (it as ValidationFailed).errors })
         } else {
-            ValidationFailed(results)
+            ValidationSuccessful
         }
     }
 }
@@ -92,7 +92,7 @@ infix fun Requirement.or(other: Requirement): Requirement {
 }
 
 internal class Or(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         val lhsResult = lhs.check(ctx)
         val rhsResult = rhs.check(ctx)
         when {
@@ -127,7 +127,7 @@ operator fun Requirement.plus(other: Requirement): Requirement {
 }
 
 internal class And(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext<*, *>): ValidationResult {
+    override fun check(ctx: ValidationContext): ValidationResult {
         val lhsResult = lhs.check(ctx)
         val rhsResult = rhs.check(ctx)
         when {

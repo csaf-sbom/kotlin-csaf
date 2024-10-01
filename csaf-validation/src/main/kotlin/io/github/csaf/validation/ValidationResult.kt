@@ -31,5 +31,5 @@ var ValidationNotApplicable = ValidationSuccessful
  */
 data class ValidationFailed(
     /** Any errors encountered during the validation. */
-    val errors: List<Any> = emptyList()
+    val errors: List<String> = emptyList()
 ) : ValidationResult
