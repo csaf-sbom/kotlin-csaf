@@ -23,6 +23,7 @@ import io.github.csaf.validation.Validatable
 import io.github.csaf.validation.ValidationContext
 import io.github.csaf.validation.ValidationException
 import io.github.csaf.validation.ValidationFailed
+import io.ktor.client.statement.HttpResponse
 
 /** This class represents a "retrieved" CSAF document. */
 class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Validatable {
@@ -35,10 +36,11 @@ class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Valida
             loader: CsafLoader = lazyLoader,
             provider: RetrievedProvider
         ): Result<RetrievedDocument> {
+            val ctx = ValidationContext()
+            val ctxEnrichment = { response: HttpResponse -> ctx.httpResponse = response }
             return loader
-                .fetchDocument(documentUrl)
+                .fetchDocument(documentUrl, ctxEnrichment)
                 .mapCatching {
-                    val ctx = ValidationContext()
                     val doc = RetrievedDocument(it, documentUrl)
                     ctx.validatable = doc
 
