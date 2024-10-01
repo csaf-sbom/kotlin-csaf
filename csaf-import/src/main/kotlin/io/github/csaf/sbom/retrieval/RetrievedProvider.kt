@@ -127,19 +127,20 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                     // provider, trusted provider).
                     val role =
                         when (providerMeta.role) {
-                            Provider.Role.csaf_publisher -> CSAFPublisherRole()
-                            Provider.Role.csaf_provider -> CSAFProviderRole()
-                            Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole()
+                            Provider.Role.csaf_publisher -> CSAFPublisherRole
+                            Provider.Role.csaf_provider -> CSAFProviderRole
+                            Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole
                         }
-                    val provider =
-                        RetrievedProvider(providerMeta, role = role).also { ctx.validatable = it }
 
-                    val validationResult = role.checkRole(ctx)
-                    if (validationResult is ValidationFailed) {
-                        throw ValidationException(validationResult)
+                    RetrievedProvider(providerMeta, role = role).also {
+                        ctx.validatable = it
+
+                        role.checkRole(ctx).let { vr ->
+                            if (vr is ValidationFailed) {
+                                throw ValidationException(vr)
+                            }
+                        }
                     }
-
-                    provider
                 }
         }
     }

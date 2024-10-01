@@ -51,7 +51,7 @@ import io.github.csaf.validation.requirements.YearInFolder
  * The "CSAF publisher" role. See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#721-role-csaf-publisher.
  */
-open class CSAFPublisherRole : Role {
+object CSAFPublisherRole : Role {
 
     override val roleRequirements = none()
 
@@ -63,36 +63,34 @@ open class CSAFPublisherRole : Role {
  * The "CSAF provider" role. See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#722-role-csaf-provider.
  */
-open class CSAFProviderRole : CSAFPublisherRole() {
-    override val roleRequirements: Requirement
-        get() =
-            super.roleRequirements +
-                allOf(Requirement6, Requirement7) +
-                oneOf(Requirement8, Requirement9, Requirement10) +
-                (allOf(YearInFolder, Requirement12, Requirement13, Requirement14) or
-                    allOf(Requirement15, Requirement16, Requirement17))
+object CSAFProviderRole : Role {
+    override val roleRequirements =
+        CSAFPublisherRole.roleRequirements +
+            allOf(Requirement6, Requirement7) +
+            oneOf(Requirement8, Requirement9, Requirement10) +
+            (allOf(YearInFolder, Requirement12, Requirement13, Requirement14) or
+                allOf(Requirement15, Requirement16, Requirement17))
 
-    override val documentRequirements = super.documentRequirements + Requirement5
+    override val documentRequirements = CSAFPublisherRole.documentRequirements + Requirement5
 }
 
 /**
  * The "CSAF trusted provider role".
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#723-role-csaf-trusted-provider.
  */
-class CSAFTrustedProviderRole : CSAFProviderRole() {
-    override val roleRequirements: Requirement
-        get() = super.roleRequirements + Requirement20
+object CSAFTrustedProviderRole : Role {
+    override val roleRequirements = CSAFProviderRole.roleRequirements + Requirement20
 
     override val documentRequirements =
-        super.documentRequirements + allOf(Requirement18, Requirement19)
+        CSAFProviderRole.documentRequirements + allOf(Requirement18, Requirement19)
 }
 
 /**
  * The "CSAF lister role". See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#724-role-csaf-lister.
  */
-open class CSAFListerRole : Role {
-    override var roleRequirements: Requirement = allOf(Requirement6, Requirement21, Requirement22)
+object CSAFListerRole : Role {
+    override val roleRequirements: Requirement = allOf(Requirement6, Requirement21, Requirement22)
 
     override val documentRequirements = none()
 }
@@ -101,8 +99,8 @@ open class CSAFListerRole : Role {
  * The "CSAF aggregator role". See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#725-role-csaf-aggregator.
  */
-class CSAFAggregatorRole : CSAFListerRole() {
-    override var roleRequirements: Requirement = super.roleRequirements + Requirement23
+object CSAFAggregatorRole : Role {
+    override val roleRequirements: Requirement = CSAFListerRole.roleRequirements + Requirement23
 
     override val documentRequirements =
         allOf(

@@ -41,14 +41,15 @@ class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Valida
             return loader
                 .fetchDocument(documentUrl, ctxEnrichment)
                 .mapCatching {
-                    val doc = RetrievedDocument(it, documentUrl)
-                    ctx.validatable = doc
+                    RetrievedDocument(it, documentUrl).also { doc ->
+                        ctx.validatable = doc
 
-                    val validationResult = provider.role.checkDocument(ctx)
-                    if (validationResult is ValidationFailed) {
-                        throw ValidationException(validationResult)
+                        provider.role.checkDocument(ctx).let { vr ->
+                            if (vr is ValidationFailed) {
+                                throw ValidationException(vr)
+                            }
+                        }
                     }
-                    doc
                 }
                 .recoverCatching { e ->
                     throw Exception("Failed to fetch CSAF document from $documentUrl", e)

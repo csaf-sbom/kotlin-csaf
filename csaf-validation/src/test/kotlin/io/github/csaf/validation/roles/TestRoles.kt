@@ -24,19 +24,17 @@ import kotlin.test.assertIs
 class TestRoles {
     @Test
     fun testTrustedProvider() {
-        val role = CSAFTrustedProviderRole()
         // TODO: adjust this, once we actually check something in the requirements
         //  for now this will fail
-        val result = role.documentRequirements.check(TestValidationContext())
+        val result = CSAFTrustedProviderRole.documentRequirements.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 
     @Test
     fun testAggregatorRole() {
-        val role = CSAFAggregatorRole()
         // TODO: adjust this, once we actually check something in the requirements
         //  for now this will fail
-        val result = role.documentRequirements.check(TestValidationContext())
+        val result = CSAFAggregatorRole.documentRequirements.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 }
