@@ -25,10 +25,8 @@ import io.ktor.client.statement.request
 import io.ktor.http.URLProtocol
 
 /**
- * Represents Requirement 1: Valid CSAF document.
- *
- * See
- * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document
+ * Represents
+ * [Requirement 1: Valid CSAF document](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document).
  */
 object ValidCSAFDocument : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
@@ -38,9 +36,8 @@ object ValidCSAFDocument : Requirement {
 }
 
 /**
- * Represents Requirement 2: Filename
- *
- * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename
+ * Represents
+ * [Requirement 2: Filename](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename).
  */
 object ValidFilename : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
@@ -50,9 +47,8 @@ object ValidFilename : Requirement {
 }
 
 /**
- * Represents Requirement 3: TLS
- *
- * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#713-requirement-3-tls
+ * Represents
+ * [Requirement 3: TLS](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#713-requirement-3-tls).
  *
  * We make use of the [HttpResponse] / [HttpRequest] to check the [URLProtocol] for HTTPS.
  */
@@ -68,9 +64,8 @@ object UsageOfTls : Requirement {
 }
 
 /**
- * Represents Requirement 4: TLP:WHITE
- *
- * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#714-requirement-4-tlpwhite
+ * Represents
+ * [Requirement 4: TLP:WHITE](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#714-requirement-4-tlpwhite).
  *
  * We make use of the [HttpResponse] / [HttpRequest] to check for a "good" status code and check for
  * the (non)-existence of authorization headers in the request.
