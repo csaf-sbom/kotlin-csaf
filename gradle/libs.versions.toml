@@ -3,7 +3,6 @@ codegen = "0.108.2"
 ktor = "2.3.12"
 kotlin = "2.0.20"
 dokka = "1.9.20"
-kotlin-jvm-blocking-bridge = "3.0.0-180.1"
 kotlinx-coroutines = "1.9.0"
 kotlinx-json = "1.7.3"
 kover = "0.8.3"
@@ -12,7 +11,6 @@ spotless = "6.25.0"
 nexus-publish = "2.0.0"
 
 [libraries]
-kotlin-jvm-blocking-bridge = { group = "me.him188", name = "kotlin-jvm-blocking-bridge-runtime", version.ref = "kotlin-jvm-blocking-bridge"}
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-json" }
@@ -25,7 +23,6 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 
 # plugins
 kotlin-json-codegen = { module = "com.github.csaf-sbom:json-kotlin-gradle", version.ref = "codegen" }
-kotlin-jvm-blocking-bridge-gradle = { module = "me.him188:kotlin-jvm-blocking-bridge-gradle", version.ref = "kotlin-jvm-blocking-bridge"}
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 nexus-publish-gradle = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "nexus-publish" }

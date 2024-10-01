@@ -16,19 +16,8 @@
  */
 package io.github.csaf.sbom
 
-import io.ktor.client.engine.mock.*
-import io.ktor.http.*
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
-
-val mockEngine = MockEngine { request ->
-    println(request.url.fullPath)
-    respond(
-        content = javaClass.classLoader.getResource(request.url.fullPath.substring(1))!!.readText(),
-        status = HttpStatusCode.OK,
-        headers = headersOf(HttpHeaders.ContentType, "application/json")
-    )
-}
 
 class CsafLoaderTest {
     private val loader = CsafLoader(mockEngine)

@@ -26,9 +26,7 @@ class RetrievedProviderTest {
     @Test
     fun testRetrievedProviderFrom() = runTest {
         val loader = CsafLoader(mockEngine)
-
         val provider = RetrievedProvider.from("example.com", loader).getOrThrow()
-
         val documentResults = provider.fetchDocuments(loader)
         assertEquals(
             3,
