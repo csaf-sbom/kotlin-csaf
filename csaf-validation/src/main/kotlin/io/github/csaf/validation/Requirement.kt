@@ -26,6 +26,16 @@ interface Requirement {
     fun check(ctx: ValidationContext): ValidationResult
 }
 
+internal class NoRequirement : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        return ValidationSuccessful
+    }
+}
+
+fun none(): Requirement {
+    return NoRequirement()
+}
+
 /**
  * Creates a new [Requirement] that specifies that all the requirements in [requirements] must be
  * fulfilled.

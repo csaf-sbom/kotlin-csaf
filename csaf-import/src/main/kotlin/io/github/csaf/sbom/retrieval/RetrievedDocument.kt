@@ -21,6 +21,8 @@ import io.github.csaf.sbom.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.generated.Csaf
 import io.github.csaf.validation.Validatable
 import io.github.csaf.validation.ValidationContext
+import io.github.csaf.validation.ValidationException
+import io.github.csaf.validation.ValidationFailed
 
 /** This class represents a "retrieved" CSAF document. */
 class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Validatable {
@@ -35,19 +37,15 @@ class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Valida
         ): Result<RetrievedDocument> {
             return loader
                 .fetchDocument(documentUrl)
-                .map {
-                    /*var ct x....
-                    ctx.validatable = doc
-                    RetrievedDocument(it, documentUrl)
-
-                    role.documentReqruiementsCheck()
-                    // TODO: Validate document
-                    ???????*/
+                .mapCatching {
                     val ctx = ValidationContext()
                     val doc = RetrievedDocument(it, documentUrl)
                     ctx.validatable = doc
 
-                    provider.role.checkDocument(ctx)
+                    val validationResult = provider.role.checkDocument(ctx)
+                    if (validationResult is ValidationFailed) {
+                        throw ValidationException(validationResult)
+                    }
                     doc
                 }
                 .recoverCatching { e ->

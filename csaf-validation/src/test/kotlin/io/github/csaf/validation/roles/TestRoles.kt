@@ -27,7 +27,7 @@ class TestRoles {
         val role = CSAFTrustedProviderRole()
         // TODO: adjust this, once we actually check something in the requirements
         //  for now this will fail
-        val result = role.requirements.check(TestValidationContext())
+        val result = role.documentRequirements.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 
@@ -36,7 +36,7 @@ class TestRoles {
         val role = CSAFAggregatorRole()
         // TODO: adjust this, once we actually check something in the requirements
         //  for now this will fail
-        val result = role.requirements.check(TestValidationContext())
+        val result = role.documentRequirements.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 }

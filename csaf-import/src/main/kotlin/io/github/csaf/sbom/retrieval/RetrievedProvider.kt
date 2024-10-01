@@ -119,7 +119,7 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                     val provider =
                         RetrievedProvider(providerMeta, role = role).also { ctx.validatable = it }
 
-                    val validationResult = role.checkProvider(ctx)
+                    val validationResult = role.checkRole(ctx)
                     if (validationResult is ValidationFailed) {
                         throw ValidationException(validationResult)
                     }

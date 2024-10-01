@@ -23,17 +23,24 @@ package io.github.csaf.validation
 interface Role {
 
     /**
-     * The list of requirements, that this role needs to fulfill according to the standard. This can
-     * either be a single [Requirement] or a combination thereof using the operators [allOf].
-     * [oneOf], [or].
+     * The list of requirements, that this role needs to fulfill on its own metadata according to
+     * the standard. This can either be a single [Requirement] or a combination thereof using the
+     * operators [allOf]. [oneOf], [or].
      */
-    val requirements: Requirement
+    val roleRequirements: Requirement
 
-    fun checkProvider(ctx: ValidationContext): ValidationResult {
-        return requirements.check(ctx)
+    /**
+     * The list of requirements, that this role needs to fulfill for each CSAF document according to
+     * the standard. This can either be a single [Requirement] or a combination thereof using the
+     * operators [allOf]. [oneOf], [or].
+     */
+    val documentRequirements: Requirement
+
+    fun checkRole(ctx: ValidationContext): ValidationResult {
+        return roleRequirements.check(ctx)
     }
 
     fun checkDocument(ctx: ValidationContext): ValidationResult {
-        return ValidationSuccessful
+        return documentRequirements.check(ctx)
     }
 }
