@@ -30,7 +30,13 @@ import io.ktor.http.URLProtocol
  */
 object ValidCSAFDocument : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
-        // TODO: actually implement the requirement
+        var json = ctx.validatable?.json
+        if (json == null) {
+            // TODO(oxisto): We need to get the errors from the CSAF schema somehow :(
+            return ValidationFailed(listOf("We do not have a valid JSON"))
+        }
+
+        // TODO(oxisto): Check for further conformance that are not checked by CSAF schema
         return ValidationSuccessful
     }
 }
@@ -41,8 +47,22 @@ object ValidCSAFDocument : Requirement {
  */
 object ValidFilename : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
-        // TODO: actually implement the requirement
-        return ValidationSuccessful
+        // Only applicable for CSAF documents
+        var json = ctx.validatable?.json as? Csaf
+        if (json == null) {
+            return ValidationNotApplicable
+        }
+
+        // Try to build the filename and then compare it
+        val should = json.document.tracking.id.lowercase().replace("[^+\\-a-z0-9]+", "_") + ".json"
+
+        // Extract filename out of response?
+        val filename = ctx.httpResponse?.request?.url?.pathSegments?.lastOrNull()
+        return if (filename == should) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Filename $filename does not match conformance"))
+        }
     }
 }
 
