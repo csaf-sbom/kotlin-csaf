@@ -16,17 +16,6 @@
  */
 package io.github.csaf.validation
 
-/** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-abstract class ValidationContext<JsonDocumentType, ValidatableType : Validatable<JsonDocumentType>>(
-    var validatable: ValidatableType? = null
-) {
-
-    // TODO(oxisto): This should be moved to the provider validation context
-    enum class DataSource {
-        WELL_KNOWN,
-        SECURITY_TXT,
-        DNS
-    }
-
-    var dataSource: DataSource? = null
+interface Validatable<JsonDocumentType> {
+    val json: JsonDocumentType
 }

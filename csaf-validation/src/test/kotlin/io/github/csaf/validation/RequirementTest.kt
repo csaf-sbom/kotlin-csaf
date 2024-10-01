@@ -24,7 +24,11 @@ class TestDocument : Validatable<Any> {
 }
 
 class TestValidationContext(validatable: TestDocument = TestDocument()) :
-    ValidationContext<Any, TestDocument>(validatable) {}
+    ValidationContext<Any, TestDocument>(validatable) {
+    init {
+        dataSource = DataSource.WELL_KNOWN
+    }
+}
 
 val alwaysFail =
     object : Requirement {
@@ -43,8 +47,8 @@ val alwaysGood =
 class RequirementTest {
     @Test
     fun testCheck() {
-        var requirement = alwaysGood
-        var result = requirement.check(TestValidationContext())
+        val requirement = alwaysGood
+        val result = requirement.check(TestValidationContext())
         assertIs<ValidationSuccessful>(result)
     }
 
