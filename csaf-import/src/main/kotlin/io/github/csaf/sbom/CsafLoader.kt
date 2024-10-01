@@ -38,14 +38,33 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     private val httpClient = HttpClient(engine) { install(ContentNegotiation) { json() } }
 
     /**
+     * Helper function for all other functions defined below. Performs a get request and returns the
+     * `HttpResponse`, invoking `responseCallback` if not null.
+     *
+     * @param url The URL to request data from.
+     * @param responseCallback An optional callback to further evaluate the `HttpResponse`.
+     * @return The resulting `HttpResponse`.
+     */
+    private suspend fun genericGet(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): HttpResponse {
+        val response = httpClient.get(url)
+        responseCallback?.invoke(response)
+        return response
+    }
+
+    /**
      * Fetch and parse an aggregator JSON document from a given URL.
      *
      * @param url The URL where the aggregator document is found.
      * @return An instance of `Aggregator`, wrapped in a `Result` monad, if successful. A failed
      *   `Result` wrapping the thrown `Throwable` in case of an error.
      */
-    suspend fun fetchAggregator(url: String): Result<Aggregator> =
-        Result.of { httpClient.get(url).body() }
+    suspend fun fetchAggregator(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): Result<Aggregator> = Result.of { genericGet(url, responseCallback).body() }
 
     /**
      * Fetch and parse a provider JSON document from a given URL.
@@ -54,8 +73,10 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * @return An instance of `Provider`, wrapped in a `Result` monad, if successful. A failed
      *   `Result` wrapping the thrown `Throwable` in case of an error.
      */
-    suspend fun fetchProvider(url: String): Result<Provider> =
-        Result.of { httpClient.get(url).body() }
+    suspend fun fetchProvider(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): Result<Provider> = Result.of { genericGet(url, responseCallback).body() }
 
     /**
      * Fetch and parse a CSAF JSON document from a given URL.
@@ -64,7 +85,10 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * @return An instance of `CSAF`, wrapped in a `Result` monad, if successful. A failed `Result`
      *   wrapping the thrown `Throwable` in case of an error.
      */
-    suspend fun fetchDocument(url: String): Result<Csaf> = Result.of { httpClient.get(url).body() }
+    suspend fun fetchDocument(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): Result<Csaf> = Result.of { genericGet(url, responseCallback).body() }
 
     /**
      * Fetch an arbitrary URL's content as plain text `String`, falling back to UTF-8 if no charset
@@ -74,8 +98,10 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * @return The resulting text, wrapped in a `Result` monad, if successful. A failed `Result`
      *   wrapping the thrown `Throwable` in case of an error.
      */
-    suspend fun fetchText(url: String): Result<String> =
-        Result.of { httpClient.get(url).bodyAsText() }
+    suspend fun fetchText(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): Result<String> = Result.of { genericGet(url, responseCallback).bodyAsText() }
 
     /**
      * Fetch the `CSAF` fields from a `security.txt` as specified in
@@ -86,9 +112,13 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      *   `security.txt`, wrapped in a `Result` monad, if successful. A failed `Result` wrapping the
      *   thrown `Throwable` in case of an error.
      */
-    suspend fun fetchSecurityTxtCsafUrls(domain: String) =
+    suspend fun fetchSecurityTxtCsafUrls(
+        domain: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ) =
         // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
-        fetchText("https://$domain/.well-known/security.txt").mapCatching { securityTxt ->
+        fetchText("https://$domain/.well-known/security.txt", responseCallback).mapCatching {
+            securityTxt ->
             securityTxt
                 .lineSequence()
                 .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
