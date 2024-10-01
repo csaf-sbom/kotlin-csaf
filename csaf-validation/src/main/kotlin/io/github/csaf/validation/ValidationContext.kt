@@ -21,4 +21,6 @@ interface Validatable<T> {
 }
 
 /** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-class ValidationContext<T>(val something: Validatable<T>) {}
+interface ValidationContext<T : Validatable<*>> {
+    val something: T
+}

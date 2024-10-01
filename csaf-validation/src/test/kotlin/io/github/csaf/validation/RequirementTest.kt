@@ -16,6 +16,16 @@
  */
 package io.github.csaf.validation
 
+import kotlin.test.Test
+import kotlin.test.assertIs
+
+class TestDocument : Validatable<Any> {
+    override val json = Any()
+}
+
+class TestValidationContext(override val something: TestDocument = TestDocument()) :
+    ValidationContext<TestDocument> {}
+
 val alwaysFail =
     object : Requirement {
         override fun check(ctx: ValidationContext<*>): ValidationResult {
@@ -30,41 +40,39 @@ val alwaysGood =
         }
     }
 
-/*
 class RequirementTest {
     @Test
     fun testCheck() {
         var requirement = alwaysGood
-        var result = requirement.check(ValidationContext<Any>())
+        var result = requirement.check(TestValidationContext())
         assertIs<ValidationSuccessful>(result)
     }
 
     @Test
     fun testAnd() {
         val requirement = alwaysFail + alwaysGood
-        val result = requirement.check(ValidationContext())
+        val result = requirement.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 
     @Test
     fun testOr() {
         val requirement = alwaysFail or alwaysGood
-        val result = requirement.check(ValidationContext())
+        val result = requirement.check(TestValidationContext())
         assertIs<ValidationSuccessful>(result)
     }
 
     @Test
     fun testAllOf() {
         val requirement = allOf(alwaysFail, alwaysGood, alwaysGood, alwaysFail)
-        val result = requirement.check(ValidationContext())
+        val result = requirement.check(TestValidationContext())
         assertIs<ValidationFailed>(result)
     }
 
     @Test
     fun testOneOf() {
         val requirement = oneOf(alwaysFail, alwaysGood, alwaysGood, alwaysFail)
-        val result = requirement.check(ValidationContext())
+        val result = requirement.check(TestValidationContext())
         assertIs<ValidationSuccessful>(result)
     }
 }
-*/

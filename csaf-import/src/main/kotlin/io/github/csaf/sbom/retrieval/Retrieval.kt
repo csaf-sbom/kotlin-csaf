@@ -93,7 +93,7 @@ class RetrievedProvider(override val json: Provider, var lastRetrieved: Date? = 
                     Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole()
                 }
 
-            val ctx = ValidationContext(provider)
+            val ctx = ProviderValidationContext(provider)
             val validationResult = role.check(ctx)
             if (validationResult is ValidationFailed) {
                 return Result.failure(ValidationException())
@@ -111,3 +111,9 @@ class RetrievedDocument(override val json: Csaf) : Validatable<Csaf> {
     // TODO: other stuff, like ASC, signatures, etc.
 
 }
+
+class ProviderValidationContext(override val something: RetrievedProvider) :
+    ValidationContext<RetrievedProvider>
+
+class DocumentValidationContext(override val something: RetrievedDocument) :
+    ValidationContext<RetrievedDocument>

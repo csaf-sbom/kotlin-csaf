@@ -16,24 +16,27 @@
  */
 package io.github.csaf.validation.roles
 
-/*
+import io.github.csaf.validation.TestValidationContext
+import io.github.csaf.validation.ValidationSuccessful
+import kotlin.test.Test
+import kotlin.test.assertIs
+
 class TestRoles {
     @Test
     fun testTrustedProvider() {
         var role = CSAFTrustedProviderRole()
         // TODO: adjust this, once we actually check something in the requirements
-        //  for now all will fail, since requirement1 statically fails
-        var result = role.requirements.check(ValidationContext())
-        assertIs<ValidationFailed>(result)
+        //  for now all will succeed
+        var result = role.requirements.check(TestValidationContext())
+        assertIs<ValidationSuccessful>(result)
     }
 
     @Test
     fun testAggregatorRole() {
         var role = CSAFAggregatorRole()
         // TODO: adjust this, once we actually check something in the requirements
-        //  for now all will fail, since requirement1 statically fails
-        var result = role.requirements.check(ValidationContext())
-        assertIs<ValidationFailed>(result)
+        //  for now all will succeed
+        var result = role.requirements.check(TestValidationContext())
+        assertIs<ValidationSuccessful>(result)
     }
 }
-*/
