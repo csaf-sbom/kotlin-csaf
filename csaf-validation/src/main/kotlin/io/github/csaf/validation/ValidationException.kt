@@ -16,4 +16,4 @@
  */
 package io.github.csaf.validation
 
-class ValidationException : Exception() {}
+class ValidationException : Exception()

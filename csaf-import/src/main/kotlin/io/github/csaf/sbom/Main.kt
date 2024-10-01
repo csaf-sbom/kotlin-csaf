@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,7 +24,7 @@ import kotlinx.serialization.json.Json
 fun main() {
     val json = Json { prettyPrint = true }
     val loader = CsafLoader()
-    runBlocking(Dispatchers.IO) {
+    runBlocking {
         val aggregator =
             loader.fetchAggregator(
                 "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
@@ -38,6 +37,7 @@ fun main() {
                         provider
                             .onSuccess { println(json.encodeToString(it)) }
                             .onFailure { it.printStackTrace() }
+                        println("\n##################################################\n")
                     }
             }
             .onFailure { it.printStackTrace() }

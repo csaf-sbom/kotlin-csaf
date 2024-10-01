@@ -2,6 +2,12 @@
   "canonical_url": "https://www.example.com/.well-known/csaf/provider-metadata.json",
   "distributions": [
     {
+      "directory_url": "https://www.example.com/directory"
+    },
+    {
+      "directory_url": "https://www.example.com/invalid-directory"
+    },
+    {
       "rolie":{
         "feeds": [
           {

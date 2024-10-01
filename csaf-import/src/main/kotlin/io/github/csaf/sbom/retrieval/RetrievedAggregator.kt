@@ -16,8 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.github.csaf.sbom.generated.Aggregator
+import io.github.csaf.validation.Validatable
 
-// TODO(oxisto): This needs to be moved to our requirements/validation API
-fun checkForTls(response: HttpResponse) = response.request.url.protocol == URLProtocol.HTTPS
+class RetrievedAggregator(val json: Aggregator) : Validatable

@@ -16,11 +16,17 @@
  */
 package io.github.csaf.validation
 
-interface Validatable<T> {
-    val json: T
-}
+interface Validatable
 
 /** This class holds all necessary information that are needed to be checked by a [Requirement]. */
-interface ValidationContext<T : Validatable<*>> {
-    val something: T
+class ValidationContext {
+    var validatable: Validatable? = null
+
+    enum class DataSource {
+        WELL_KNOWN,
+        SECURITY_TXT,
+        DNS
+    }
+
+    var dataSource: DataSource? = null
 }

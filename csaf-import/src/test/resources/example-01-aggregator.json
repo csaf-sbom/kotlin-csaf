@@ -19,17 +19,6 @@
         },
         "url": "https://www.example.com/.well-known/csaf/provider-metadata.json"
       }
-    },
-    {
-      "metadata": {
-        "last_updated": "2021-07-12T21:35:38.000Z",
-        "publisher": {
-          "category": "coordinator",
-          "name": "Example Coordinator CERT",
-          "namespace": "https://cert.example"
-        },
-        "url": "https://cert.example/advisories/csaf/provider-metadata.json"
-      }
     }
   ],
   "last_updated":"2021-07-12T22:35:38.978Z"

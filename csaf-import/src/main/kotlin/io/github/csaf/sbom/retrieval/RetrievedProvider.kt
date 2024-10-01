@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2024, The Authors. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package io.github.csaf.sbom.retrieval
+
+import io.github.csaf.sbom.CsafLoader
+import io.github.csaf.sbom.generated.Provider
+import io.github.csaf.sbom.mapAsync
+import io.github.csaf.validation.Validatable
+import io.github.csaf.validation.ValidationContext
+import io.github.csaf.validation.ValidationException
+import io.github.csaf.validation.ValidationFailed
+import io.github.csaf.validation.roles.CSAFProviderRole
+import io.github.csaf.validation.roles.CSAFPublisherRole
+import io.github.csaf.validation.roles.CSAFTrustedProviderRole
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.future.future
+
+/**
+ * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
+ * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
+ * to retrieve its documents.
+ */
+class RetrievedProvider(val json: Provider) : Validatable {
+
+    /** This function fetches all CSAF documents that are listed by this provider. */
+    suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
+        return json.distributions
+            ?.mapNotNull { it.directory_url?.toString()?.trimEnd('/') }
+            ?.mapAsync { directoryUrl ->
+                val indexUrl = "$directoryUrl/index.txt"
+                loader
+                    .fetchText(indexUrl)
+                    .fold(
+                        { index ->
+                            index.lines().mapAsync { line ->
+                                val csafUrl = "$directoryUrl/$line"
+                                loader
+                                    .fetchDocument(csafUrl)
+                                    .map { RetrievedDocument(it, csafUrl) }
+                                    .recoverCatching { e ->
+                                        throw Exception(
+                                            "Failed to fetch CSAF document from $csafUrl",
+                                            e
+                                        )
+                                    }
+                            }
+                        },
+                        { e ->
+                            listOf(
+                                Result.failure(
+                                    Exception(
+                                        "Failed to fetch index.txt from directory at $directoryUrl",
+                                        e
+                                    )
+                                )
+                            )
+                        }
+                    )
+            }
+            ?.flatten() ?: emptyList()
+    }
+
+    @Suppress("unused")
+    @JvmOverloads
+    fun fetchDocumentsAsync(loader: CsafLoader = lazyLoader) =
+        ioScope.future { fetchDocuments(loader) }
+
+    companion object {
+        private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        private val lazyLoader: CsafLoader by lazy { CsafLoader() }
+
+        @Suppress("unused")
+        @JvmStatic
+        @JvmOverloads
+        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader) =
+            ioScope.future { from(domain, loader).getOrThrow() }
+
+        /**
+         * Retrieves one or more provider-metadata.json documents (represented by the [Provider]
+         * data class) from a domain according to the
+         * [retrieval rules](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#731-finding-provider-metadatajson).
+         */
+        suspend fun from(
+            domain: String,
+            loader: CsafLoader = lazyLoader
+        ): Result<RetrievedProvider> {
+            val ctx = ValidationContext()
+            // TODO: Only the last error will be available in result. We should do some logging.
+            // First, we need to check if a .well-known URL exists.
+            val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
+            return loader
+                .fetchProvider(wellKnownPath)
+                .map { it.also { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN } }
+                .recoverCatching {
+                    // If failure, we fetch CSAF fields from security.txt and try observed URLs
+                    // one-by-one.
+                    loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf {
+                        loader.fetchProvider(it).getOrNull()?.also {
+                            ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
+                        }
+                    }
+                }
+                .recoverCatching {
+                    // If still failure, we try to fetch the provider directly via HTTPS request to
+                    // "csaf.data.security.domain.tld", see
+                    // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
+                    loader.fetchProvider("https://csaf.data.security.$domain").getOrThrow().also {
+                        ctx.dataSource = ValidationContext.DataSource.DNS
+                    }
+                }
+                .mapCatching { providerMeta ->
+                    val provider = RetrievedProvider(providerMeta).also { ctx.validatable = it }
+
+                    // We need to validate the provider according to its "role" (publisher,
+                    // provider, trusted provider).
+                    val role =
+                        when (provider.json.role) {
+                            Provider.Role.csaf_publisher -> CSAFPublisherRole()
+                            Provider.Role.csaf_provider -> CSAFProviderRole()
+                            Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole()
+                        }
+
+                    val validationResult = role.check(ctx)
+                    if (validationResult is ValidationFailed) {
+                        throw ValidationException()
+                    }
+
+                    provider
+                }
+        }
+    }
+}

@@ -35,7 +35,7 @@ class CsafLoaderTest {
 
     @Test
     fun testFetchAggregator() = runTest {
-        val result = loader.fetchAggregator("https://dummy/example-01-aggregator.json")
+        val result = loader.fetchAggregator("https://www.example.com/example-01-aggregator.json")
         assertTrue(
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
@@ -49,16 +49,17 @@ class CsafLoaderTest {
             "The name field of the loaded aggregator does not contain the expected value."
         )
 
-        val failedResult = loader.fetchAggregator("https://dummy/does-not-exist.json")
+        val failedResult = loader.fetchAggregator("https://www.example.com/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
-            "\"Download\" of https://dummy/does-not-exist.json should produce a failed Result."
+            "\"Download\" of https://www.example.com/does-not-exist.json should produce a failed Result."
         )
     }
 
     @Test
     fun testFetchProvider() = runTest {
-        val result = loader.fetchProvider("https://dummy/example-01-provider-metadata.json")
+        val result =
+            loader.fetchProvider("https://www.example.com/example-01-provider-metadata.json")
         assertTrue(
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
@@ -72,10 +73,10 @@ class CsafLoaderTest {
             "The publisher name field of the loaded provider does not contain the expected value."
         )
 
-        val failedResult = loader.fetchProvider("https://dummy/does-not-exist.json")
+        val failedResult = loader.fetchProvider("https://www.example.com/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
-            "\"Download\" of https://dummy/does-not-exist.json should produce a failed Result."
+            "\"Download\" of https://www.example.com/does-not-exist.json should produce a failed Result."
         )
     }
 }

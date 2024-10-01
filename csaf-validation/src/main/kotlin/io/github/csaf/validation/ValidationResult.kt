@@ -27,5 +27,5 @@ object ValidationSuccessful : ValidationResult
  */
 data class ValidationFailed(
     /** Any errors encountered during the validation. */
-    var errors: List<Any> = emptyList()
-) : ValidationResult {}
+    val errors: List<Any> = emptyList()
+) : ValidationResult

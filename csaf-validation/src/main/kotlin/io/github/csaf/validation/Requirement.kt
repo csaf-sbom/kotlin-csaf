@@ -23,7 +23,7 @@ package io.github.csaf.validation
  * combine requirements, such as [oneOf], [allOf] or [or].
  */
 interface Requirement {
-    fun check(ctx: ValidationContext<*>): ValidationResult
+    fun check(ctx: ValidationContext): ValidationResult
 }
 
 /**
@@ -37,18 +37,22 @@ fun allOf(vararg requirements: Requirement): Requirement {
     return AllOf(requirements.toList())
 }
 
-internal class AllOf(var list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext<*>): ValidationResult {
-        var result: ValidationResult = ValidationSuccessful
-        for (requirement in list) {
-            var tmpResult = requirement.check(ctx)
-            if (tmpResult is ValidationFailed) {
-                // TODO: accumulate errors instead of last one
-                result = ValidationFailed(tmpResult.errors)
-            }
+internal class AllOf(private val list: List<Requirement>) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        val results = list.map { it.check(ctx) }
+        return if (results.any { it is ValidationFailed }) {
+            ValidationFailed(
+                results.flatMap {
+                    if (it is ValidationFailed) {
+                        it.errors
+                    } else {
+                        emptyList()
+                    }
+                }
+            )
+        } else {
+            ValidationSuccessful
         }
-
-        return result
     }
 }
 
@@ -64,13 +68,13 @@ fun oneOf(vararg requirements: Requirement): Requirement {
     return OneOf(requirements.toList())
 }
 
-internal class OneOf(var list: List<Requirement>) : Requirement {
-    override fun check(ctx: ValidationContext<*>): ValidationResult {
-        return if (list.map { it.check(ctx) }.any { it is ValidationSuccessful }) {
+internal class OneOf(private val list: List<Requirement>) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        val results = list.map { it.check(ctx) }
+        return if (results.any { it is ValidationSuccessful }) {
             ValidationSuccessful
         } else {
-            // TODO: populate errors from list
-            ValidationFailed(emptyList())
+            ValidationFailed(results)
         }
     }
 }
@@ -87,11 +91,11 @@ infix fun Requirement.or(other: Requirement): Requirement {
     return Or(this, other)
 }
 
-internal class Or(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext<*>): ValidationResult {
-        var lhsResult = lhs.check(ctx)
-        var rhsResult = rhs.check(ctx)
-        return when {
+internal class Or(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        val lhsResult = lhs.check(ctx)
+        val rhsResult = rhs.check(ctx)
+        when {
             lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
                 return ValidationSuccessful
             }
@@ -122,11 +126,11 @@ operator fun Requirement.plus(other: Requirement): Requirement {
     return And(this, other)
 }
 
-internal class And(var lhs: Requirement, var rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext<*>): ValidationResult {
-        var lhsResult = lhs.check(ctx)
-        var rhsResult = rhs.check(ctx)
-        return when {
+internal class And(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        val lhsResult = lhs.check(ctx)
+        val rhsResult = rhs.check(ctx)
+        when {
             lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
                 return ValidationSuccessful
             }

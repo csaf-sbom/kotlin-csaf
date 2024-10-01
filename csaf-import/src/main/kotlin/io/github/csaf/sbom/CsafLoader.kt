@@ -17,6 +17,7 @@
 package io.github.csaf.sbom
 
 import io.github.csaf.sbom.generated.Aggregator
+import io.github.csaf.sbom.generated.Csaf
 import io.github.csaf.sbom.generated.Provider
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -24,6 +25,7 @@ import io.ktor.client.engine.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 
 /**
@@ -54,4 +56,46 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      */
     suspend fun fetchProvider(url: String): Result<Provider> =
         Result.of { httpClient.get(url).body() }
+
+    /**
+     * Fetch and parse a CSAF JSON document from a given URL.
+     *
+     * @param url The URL where the CSAF document is found.
+     * @return An instance of `CSAF`, wrapped in a `Result` monad, if successful. A failed `Result`
+     *   wrapping the thrown `Throwable` in case of an error.
+     */
+    suspend fun fetchDocument(url: String): Result<Csaf> = Result.of { httpClient.get(url).body() }
+
+    /**
+     * Fetch an arbitrary URL's content as plain text `String`, falling back to UTF-8 if no charset
+     * is provided.
+     *
+     * @param url The URL to fetch plaintext from.
+     * @return The resulting text, wrapped in a `Result` monad, if successful. A failed `Result`
+     *   wrapping the thrown `Throwable` in case of an error.
+     */
+    suspend fun fetchText(url: String): Result<String> =
+        Result.of { httpClient.get(url).bodyAsText() }
+
+    /**
+     * Fetch the `CSAF` fields from a `security.txt` as specified in
+     * [CSAF 7.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt).
+     *
+     * @param domain The domain from which to obtain the `security.txt`.
+     * @return A list of `https`-URL values (as `String`s) obtained from CSAF fields in
+     *   `security.txt`, wrapped in a `Result` monad, if successful. A failed `Result` wrapping the
+     *   thrown `Throwable` in case of an error.
+     */
+    suspend fun fetchSecurityTxtCsafUrls(domain: String) =
+        // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
+        fetchText("https://$domain/.well-known/security.txt").mapCatching { securityTxt ->
+            securityTxt
+                .lineSequence()
+                .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
+                .toList()
+        }
+
+    companion object {
+        val securityTxtCsaf = Regex("CSAF: (https://.*)")
+    }
 }

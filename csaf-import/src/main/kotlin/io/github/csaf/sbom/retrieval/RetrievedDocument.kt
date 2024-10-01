@@ -14,21 +14,14 @@
  * limitations under the License.
  *
  */
-import io.github.csaf.sbom.mockEngine
-import io.github.csaf.sbom.retrieval.RetrievedProvider
-import kotlin.test.Test
-import kotlin.test.assertNotNull
-import kotlinx.coroutines.test.runTest
+package io.github.csaf.sbom.retrieval
 
-class RetrievalTest {
-    @Test
-    fun testRetrievedProviderFrom() {
-        runTest {
-            val result = RetrievedProvider.from("example.com", engine = mockEngine)
-            val provider = result.getOrNull()
-            assertNotNull(provider)
+import io.github.csaf.sbom.generated.Csaf
+import io.github.csaf.validation.Validatable
 
-            val allDocuments = provider.fetchDocuments()
-        }
-    }
+/** This class represents a "retrieved" CSAF document. */
+class RetrievedDocument(val json: Csaf, val sourceUrl: String) : Validatable {
+
+    // TODO: other stuff, like import time, ASC, signatures, etc.
+
 }
