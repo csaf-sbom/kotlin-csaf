@@ -20,6 +20,7 @@ import io.github.csaf.sbom.CsafLoader
 import io.github.csaf.sbom.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.generated.Provider
 import io.github.csaf.sbom.mapAsync
+import io.github.csaf.validation.Role
 import io.github.csaf.validation.Validatable
 import io.github.csaf.validation.ValidationContext
 import io.github.csaf.validation.ValidationException
@@ -35,7 +36,7 @@ import me.him188.kotlin.jvm.blocking.bridge.JvmBlockingBridge
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
-class RetrievedProvider(override val json: Provider) : Validatable {
+class RetrievedProvider(override val json: Provider, val role: Role) : Validatable {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     @JvmBlockingBridge
@@ -50,15 +51,7 @@ class RetrievedProvider(override val json: Provider) : Validatable {
                         { index ->
                             index.lines().mapAsync { line ->
                                 val csafUrl = "$directoryUrl/$line"
-                                loader
-                                    .fetchDocument(csafUrl)
-                                    .map { RetrievedDocument(it, csafUrl) }
-                                    .recoverCatching { e ->
-                                        throw Exception(
-                                            "Failed to fetch CSAF document from $csafUrl",
-                                            e
-                                        )
-                                    }
+                                RetrievedDocument.from(csafUrl, loader, this)
                             }
                         },
                         { e ->
@@ -115,18 +108,18 @@ class RetrievedProvider(override val json: Provider) : Validatable {
                         .also { ctx.dataSource = ValidationContext.DataSource.DNS }
                 }
                 .mapCatching { providerMeta ->
-                    val provider = RetrievedProvider(providerMeta).also { ctx.validatable = it }
-
                     // We need to validate the provider according to its "role" (publisher,
                     // provider, trusted provider).
                     val role =
-                        when (provider.json.role) {
+                        when (providerMeta.role) {
                             Provider.Role.csaf_publisher -> CSAFPublisherRole()
                             Provider.Role.csaf_provider -> CSAFProviderRole()
                             Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole()
                         }
+                    val provider =
+                        RetrievedProvider(providerMeta, role = role).also { ctx.validatable = it }
 
-                    val validationResult = role.check(ctx)
+                    val validationResult = role.checkProvider(ctx)
                     if (validationResult is ValidationFailed) {
                         throw ValidationException(validationResult)
                     }

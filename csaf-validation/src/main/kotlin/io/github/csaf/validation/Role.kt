@@ -18,7 +18,7 @@ package io.github.csaf.validation
 
 /**
  * Represents a CSAF profile according to
- * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles.
+ * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#72-roles.
  */
 interface Role {
 
@@ -29,7 +29,11 @@ interface Role {
      */
     val requirements: Requirement
 
-    fun check(ctx: ValidationContext): ValidationResult {
+    fun checkProvider(ctx: ValidationContext): ValidationResult {
         return requirements.check(ctx)
+    }
+
+    fun checkDocument(ctx: ValidationContext): ValidationResult {
+        return ValidationSuccessful
     }
 }
