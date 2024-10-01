@@ -36,13 +36,13 @@ import io.github.csaf.validation.requirements.Requirement20
 import io.github.csaf.validation.requirements.Requirement21
 import io.github.csaf.validation.requirements.Requirement22
 import io.github.csaf.validation.requirements.Requirement23
-import io.github.csaf.validation.requirements.Requirement3
-import io.github.csaf.validation.requirements.Requirement4
 import io.github.csaf.validation.requirements.Requirement5
 import io.github.csaf.validation.requirements.Requirement6
 import io.github.csaf.validation.requirements.Requirement7
 import io.github.csaf.validation.requirements.Requirement8
 import io.github.csaf.validation.requirements.Requirement9
+import io.github.csaf.validation.requirements.TlpWhiteAccessible
+import io.github.csaf.validation.requirements.UsageOfTls
 import io.github.csaf.validation.requirements.ValidCSAFDocument
 import io.github.csaf.validation.requirements.ValidFilename
 
@@ -52,7 +52,8 @@ import io.github.csaf.validation.requirements.ValidFilename
  */
 open class CSAFPublisherRole : Role {
 
-    override val requirements = allOf(ValidCSAFDocument, ValidFilename, Requirement3, Requirement4)
+    override val requirements =
+        allOf(ValidCSAFDocument, ValidFilename, UsageOfTls, TlpWhiteAccessible)
 }
 
 /**
@@ -95,8 +96,8 @@ class CSAFAggregatorRole : CSAFListerRole() {
         allOf(
             ValidCSAFDocument,
             ValidFilename,
-            Requirement3,
-            Requirement4,
+            UsageOfTls,
+            TlpWhiteAccessible,
             Requirement5,
             Requirement6
         ) + allOf(Requirement21, Requirement22, Requirement23)

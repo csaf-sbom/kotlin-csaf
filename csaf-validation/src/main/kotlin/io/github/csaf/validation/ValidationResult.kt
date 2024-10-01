@@ -22,6 +22,10 @@ sealed interface ValidationResult
 /** A successful validation. */
 object ValidationSuccessful : ValidationResult
 
+// TODO(oxisto): Does it make sense to have something like NotApplicable? Currently, this does not
+// propagate
+var ValidationNotApplicable = ValidationSuccessful
+
 /**
  * A [ValidationResult] that represents a failed validation, with extra information why it failed.
  */

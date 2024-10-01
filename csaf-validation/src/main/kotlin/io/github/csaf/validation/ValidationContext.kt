@@ -16,6 +16,8 @@
  */
 package io.github.csaf.validation
 
+import io.ktor.client.statement.HttpResponse
+
 /** This class holds all necessary information that are needed to be checked by a [Requirement]. */
 abstract class ValidationContext<JsonDocumentType, ValidatableType : Validatable<JsonDocumentType>>(
     var validatable: ValidatableType? = null
@@ -29,4 +31,7 @@ abstract class ValidationContext<JsonDocumentType, ValidatableType : Validatable
     }
 
     var dataSource: DataSource? = null
+
+    /** The HTTP response used to retrieve the [validatable]. */
+    var httpResponse: HttpResponse? = null
 }

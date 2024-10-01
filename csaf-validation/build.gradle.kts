@@ -16,4 +16,5 @@ publishing {
 
 dependencies {
     implementation(project(":csaf-schema"))
+    implementation(libs.bundles.ktor.client)
 }

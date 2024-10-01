@@ -17,7 +17,7 @@
 package io.github.csaf.validation.roles
 
 import io.github.csaf.validation.TestValidationContext
-import io.github.csaf.validation.ValidationSuccessful
+import io.github.csaf.validation.ValidationFailed
 import kotlin.test.Test
 import kotlin.test.assertIs
 
@@ -28,15 +28,15 @@ class TestRoles {
         // TODO: adjust this, once we actually check something in the requirements
         //  for now this will fail
         val result = role.requirements.check(TestValidationContext())
-        assertIs<ValidationSuccessful>(result)
+        assertIs<ValidationFailed>(result)
     }
 
     @Test
     fun testAggregatorRole() {
         val role = CSAFAggregatorRole()
         // TODO: adjust this, once we actually check something in the requirements
-        //  for now all will succeed
-        val result = role.requirements.check(TestValidationContext())
-        assertIs<ValidationSuccessful>(result)
+        //  for now this will fail
+        var result = role.requirements.check(TestValidationContext())
+        assertIs<ValidationFailed>(result)
     }
 }

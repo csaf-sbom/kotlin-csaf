@@ -138,7 +138,7 @@ class RetrievedProvider(override val json: Provider) : Validatable<Provider> {
 
                     val validationResult = role.check(ctx)
                     if (validationResult is ValidationFailed) {
-                        throw ValidationException()
+                        throw ValidationException(validationResult)
                     }
 
                     provider

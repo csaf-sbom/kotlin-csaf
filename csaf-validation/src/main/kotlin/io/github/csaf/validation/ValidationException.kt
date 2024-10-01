@@ -16,4 +16,4 @@
  */
 package io.github.csaf.validation
 
-class ValidationException : Exception()
+data class ValidationException(var validationResult: ValidationFailed) : Exception()

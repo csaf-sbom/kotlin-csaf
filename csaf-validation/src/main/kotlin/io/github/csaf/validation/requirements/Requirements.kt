@@ -16,7 +16,13 @@
  */
 package io.github.csaf.validation.requirements
 
+import io.github.csaf.sbom.generated.Csaf
+import io.github.csaf.sbom.generated.Csaf.Label
 import io.github.csaf.validation.*
+import io.ktor.client.request.HttpRequest
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.request
+import io.ktor.http.URLProtocol
 
 /**
  * Represents Requirement 1: Valid CSAF document.
@@ -43,17 +49,62 @@ object ValidFilename : Requirement {
     }
 }
 
-object Requirement3 : Requirement {
+/**
+ * Represents Requirement 3: TLS
+ *
+ * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#713-requirement-3-tls
+ *
+ * We make use of the [HttpResponse] / [HttpRequest] to check the [URLProtocol] for HTTPS.
+ */
+object UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
-        // TODO: actually implement the requirement
-        return ValidationSuccessful
+        // TODO(oxisto): This will also fail if the httpResponse is empty, which is BAD
+        return if (ctx.httpResponse?.call?.request?.url?.protocol == URLProtocol.HTTPS) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("JSON was not retrieved via HTTPS"))
+        }
     }
 }
 
-object Requirement4 : Requirement {
+/**
+ * Represents Requirement 4: TLP:WHITE
+ *
+ * See https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#714-requirement-4-tlpwhite
+ *
+ * We make use of the [HttpResponse] / [HttpRequest] to check for a "good" status code and check for
+ * the (non)-existence of authorization headers in the request.
+ */
+object TlpWhiteAccessible : Requirement {
     override fun check(ctx: ValidationContext<*, *>): ValidationResult {
-        // TODO: actually implement the requirement
-        return ValidationSuccessful
+        // If we do not have a response, we can assume that its not accessible and we fail
+        var response = ctx.httpResponse
+        if (response == null) {
+            return ValidationFailed(listOf("Response is null"))
+        }
+
+        // Only applicable to Csaf document, because all the others do not have a TLP
+        var json = ctx.validatable?.json as? Csaf
+        if (json == null) {
+            return ValidationNotApplicable
+        }
+
+        // Only for TLP:WHITE
+        if (json.document.distribution?.tlp?.label != Label.WHITE) {
+            return ValidationNotApplicable
+        }
+
+        // We assume that it is freely accessible, if
+        // - We actually got a "ok" error code
+        // - We did not send any authorization headers in the request
+        if (
+            response.status.value in 200..299 && !response.request.headers.contains("Authorization")
+        ) {
+            return ValidationSuccessful
+        }
+
+        // Otherwise, we fail
+        return ValidationFailed(listOf("TLP:WHITE document is not freely accessible"))
     }
 }
 
