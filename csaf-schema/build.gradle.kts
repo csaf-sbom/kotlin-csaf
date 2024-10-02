@@ -7,6 +7,18 @@ plugins {
     kotlin("plugin.serialization")
 }
 
+publishing {
+    publications {
+        named<MavenPublication>("csaf-schema") {
+            pom {
+                artifactId = "csaf-schema"
+                name.set("Kotlin CSAF - Schema Module")
+                description.set("CSAF Schema definitions for Kotlin")
+            }
+        }
+    }
+}
+
 dependencies {
     api(libs.kotlinx.json)
     testImplementation(libs.mockito.kotlin)

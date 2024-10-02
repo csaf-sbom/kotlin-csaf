@@ -5,6 +5,9 @@ plugins {
     // Apply formatting conventions
     id("buildlogic.kotlin-formatting-conventions")
 
+    // Apply publishing conventions
+    id("buildlogic.kotlin-publishing-conventions")
+
     // Apply code coverage plugin
     id("org.jetbrains.kotlinx.kover")
 }
