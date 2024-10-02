@@ -23,14 +23,30 @@ import io.github.csaf.validation.ValidationContext
 import io.github.csaf.validation.ValidationFailed
 import io.github.csaf.validation.ValidationNotApplicable
 import io.github.csaf.validation.ValidationSuccessful
+import io.ktor.client.HttpClient
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.HttpResponseData
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.utils.EmptyContent
+import io.ktor.http.Headers
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpProtocolVersion
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import io.ktor.util.Attributes
+import io.ktor.util.InternalAPI
+import io.ktor.util.date.GMTDate
 import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlinx.coroutines.Job
 
 var GoodCsaf =
     Csaf(
@@ -341,26 +357,22 @@ var GoodCsaf =
             )
     )
 
+var GoodDocument =
+    object : Validatable {
+        override val json: Any
+            get() = GoodCsaf
+    }
+
 class RequirementsTest {
     @Test
     fun testValidCSAFDocument() {
         val (rule, ctx) = testRule(ValidCSAFDocument)
 
-        // Empty validatable/json -> fail
+        // Empty validatable -> fail
         assertIs<ValidationFailed>(rule.check(ctx.also { it.validatable = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(
-            rule.check(
-                ctx.also {
-                    it.validatable =
-                        object : Validatable {
-                            override val json: Any
-                                get() = GoodCsaf
-                        }
-                }
-            )
-        )
+        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.validatable = GoodDocument }))
     }
 
     @Test
@@ -370,9 +382,59 @@ class RequirementsTest {
         // JSON not a CSAF -> not applicable
         ctx.validatable = null
         assertEquals(ValidationNotApplicable, (rule.check(ctx)))
+
+        // Invalid filename
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.validatable = GoodDocument
+                    it.httpResponse = mockResponse(mockRequest(Url("/test")), 200, "OK")
+                }
+            )
+        )
+
+        // Valid filename
+        assertIs<ValidationSuccessful>(
+            rule.check(
+                ctx.also {
+                    it.validatable = GoodDocument
+                    it.httpResponse = mockResponse(mockRequest(Url("/test-title.json")), 200, "OK")
+                }
+            )
+        )
     }
 }
 
 fun <T> testRule(rule: T): Pair<T, ValidationContext> {
     return Pair(rule, ValidationContext())
+}
+
+@OptIn(InternalAPI::class)
+fun mockResponse(
+    requestData: HttpRequestData,
+    statusCode: Int,
+    description: String,
+    header: Headers = Headers.Empty,
+): HttpResponse {
+    var responseData =
+        HttpResponseData(
+            HttpStatusCode(statusCode, description),
+            GMTDate(),
+            header,
+            HttpProtocolVersion(name = "HTTP", major = 2, minor = 0),
+            "",
+            EmptyCoroutineContext
+        )
+
+    var call = HttpClientCall(HttpClient(), requestData, responseData)
+    return call.response
+}
+
+@OptIn(InternalAPI::class)
+fun mockRequest(
+    url: Url,
+    method: HttpMethod = HttpMethod.Get,
+    headers: Headers = Headers.Empty
+): HttpRequestData {
+    return HttpRequestData(url, method, headers, EmptyContent, Job(), Attributes())
 }
