@@ -34,6 +34,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpProtocolVersion
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
+import io.ktor.http.headers
 import io.ktor.util.Attributes
 import io.ktor.util.InternalAPI
 import io.ktor.util.date.GMTDate
@@ -366,41 +367,113 @@ var GoodDocument =
 class RequirementsTest {
     @Test
     fun testValidCSAFDocument() {
-        val (_, ctx) = testRule(ValidCSAFDocument)
+        val (rule, ctx) = testRule(ValidCSAFDocument)
 
         // Empty validatable -> fail
-        assertIs<ValidationFailed>(ValidCSAFDocument.check(ctx.also { it.validatable = null }))
+        assertIs<ValidationFailed>(rule.check(ctx.also { it.validatable = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(
-            ValidCSAFDocument.check(ctx.also { it.validatable = GoodDocument })
-        )
+        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.validatable = GoodDocument }))
     }
 
     @Test
     fun testValidFilename() {
-        val (_, ctx) = testRule(ValidFilename)
+        val (rule, ctx) = testRule(ValidFilename)
 
         // JSON not a CSAF -> not applicable
         ctx.validatable = null
-        assertEquals(ValidationNotApplicable, (ValidFilename.check(ctx)))
+        assertEquals(ValidationNotApplicable, (rule.check(ctx)))
 
         // Invalid filename
         assertIs<ValidationFailed>(
-            ValidFilename.check(
+            rule.check(
                 ctx.also {
                     it.validatable = GoodDocument
-                    it.httpResponse = mockResponse(mockRequest(Url("/test")), 200, "OK")
+                    it.httpResponse = mockResponse(mockRequest(Url("/test")), HttpStatusCode.OK)
                 }
             )
         )
 
         // Valid filename
         assertIs<ValidationSuccessful>(
-            ValidFilename.check(
+            rule.check(
                 ctx.also {
                     it.validatable = GoodDocument
-                    it.httpResponse = mockResponse(mockRequest(Url("/test-title.json")), 200, "OK")
+                    it.httpResponse =
+                        mockResponse(mockRequest(Url("/test-title.json")), HttpStatusCode.OK)
+                }
+            )
+        )
+    }
+
+    @Test
+    fun testUsageOfTls() {
+        val (rule, ctx) = testRule(UsageOfTls)
+
+        // No TLS -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.httpResponse =
+                        mockResponse(mockRequest(Url("http://example.com")), HttpStatusCode.OK)
+                }
+            )
+        )
+
+        // TLS -> success
+        assertIs<ValidationSuccessful>(
+            rule.check(
+                ctx.also {
+                    it.httpResponse =
+                        mockResponse(mockRequest(Url("https://example.com")), HttpStatusCode.OK)
+                }
+            )
+        )
+    }
+
+    @Test
+    fun testTlpWhiteAccessible() {
+        val (rule, ctx) = testRule(TlpWhiteAccessible)
+
+        // URL was retrieved with authorization headers -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.validatable = GoodDocument
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(
+                                Url("http://example.com"),
+                                headers = headers { set("Authorization", "Bearer: 1234") }
+                            ),
+                            HttpStatusCode.OK
+                        )
+                }
+            )
+        )
+
+        // URL was not retrieved because of unauthorized -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(Url("http://example.com")),
+                            HttpStatusCode.Unauthorized,
+                        )
+                }
+            )
+        )
+
+        // URL was successfully retrieved without any authorization headers -> success
+        assertIs<ValidationSuccessful>(
+            rule.check(
+                ctx.also {
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(Url("http://example.com")),
+                            HttpStatusCode.OK,
+                        )
                 }
             )
         )
@@ -414,13 +487,12 @@ fun <T> testRule(rule: T): Pair<T, ValidationContext> {
 @OptIn(InternalAPI::class)
 fun mockResponse(
     requestData: HttpRequestData,
-    statusCode: Int,
-    description: String,
+    statusCode: HttpStatusCode,
     header: Headers = Headers.Empty,
 ): HttpResponse {
     val responseData =
         HttpResponseData(
-            HttpStatusCode(statusCode, description),
+            statusCode,
             GMTDate(),
             header,
             HttpProtocolVersion(name = "HTTP", major = 2, minor = 0),
