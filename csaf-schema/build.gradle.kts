@@ -1,5 +1,6 @@
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
@@ -7,15 +8,10 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-publishing {
-    publications {
-        named<MavenPublication>("csaf-schema") {
-            pom {
-                artifactId = "csaf-schema"
-                name.set("Kotlin CSAF - Schema Module")
-                description.set("CSAF Schema definitions for Kotlin")
-            }
-        }
+mavenPublishing {
+    pom {
+        name.set("Kotlin CSAF - Schema Module")
+        description.set("CSAF Schema definitions for Kotlin")
     }
 }
 
@@ -33,12 +29,20 @@ configure<JSONSchemaCodegen> {
 }
 
 // Configure gradle caching manually for json-kotlin-gradle, as the plugin seems to lack support for it.
-tasks.withType(JSONSchemaCodegenTask::class) {
+var generateTasks = tasks.withType(JSONSchemaCodegenTask::class) {
     inputs.file("src/main/resources/codegen-config.json").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("src/main/resources/schema").withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir("build/generated-sources/kotlin")
 }
 
+var jarTasks = tasks.withType<Jar>()
+jarTasks.forEach {
+    it.dependsOn(generateTasks)
+}
+val dokkaHtml by tasks.getting(DokkaTask::class)
+dokkaHtml.dependsOn(generateTasks)
+
 sourceSets.main {
     kotlin.srcDirs("build/generated-sources/kotlin")
 }
+
