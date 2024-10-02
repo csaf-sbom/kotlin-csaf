@@ -2,15 +2,10 @@ plugins {
     id("buildlogic.kotlin-library-conventions")
 }
 
-publishing {
-    publications {
-        named<MavenPublication>("csaf-import") {
-            pom {
-                artifactId = "csaf-import"
-                name.set("Kotlin CSAF - Import Module")
-                description.set("Import functionality for CSAF in Kotlin")
-            }
-        }
+mavenPublishing {
+    pom {
+        name.set("Kotlin CSAF - Import Module")
+        description.set("Import functionality for CSAF in Kotlin")
     }
 }
 

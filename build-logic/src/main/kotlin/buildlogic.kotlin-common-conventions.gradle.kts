@@ -5,15 +5,11 @@ plugins {
     // Apply formatting conventions
     id("buildlogic.kotlin-formatting-conventions")
 
-    // Apply publishing conventions
-    id("buildlogic.kotlin-publishing-conventions")
-
     // Apply code coverage plugin
     id("org.jetbrains.kotlinx.kover")
 }
 
 group = "io.github.csaf-sbom"
-version = "1.0-SNAPSHOT"
 
 repositories {
     // Use Maven Central for resolving dependencies.
