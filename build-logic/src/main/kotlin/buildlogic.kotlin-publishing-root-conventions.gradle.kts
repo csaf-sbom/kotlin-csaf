@@ -6,11 +6,8 @@ plugins {
 nexusPublishing {
     repositories {
         sonatype() {
-            val mavenCentralUsername: String? by project
-            val mavenCentralPassword: String? by project
-
-            username.set(mavenCentralUsername)
-            password.set(mavenCentralPassword)
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
 }
