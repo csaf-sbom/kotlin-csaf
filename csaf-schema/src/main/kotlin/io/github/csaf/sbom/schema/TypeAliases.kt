@@ -14,9 +14,15 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.schema
 
-import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
+import java.math.BigDecimal
+import java.net.URI
+import java.time.OffsetDateTime
+import kotlinx.serialization.Serializable
 
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+typealias JsonUri = @Serializable(UriSerializer::class) URI
+
+typealias JsonOffsetDateTime = @Serializable(OffsetDateTimeSerializer::class) OffsetDateTime
+
+typealias JsonBigDecimal = @Serializable(BigDecimalSerializer::class) BigDecimal

@@ -14,9 +14,15 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.schema
 
-import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
+import kotlin.reflect.KProperty1
 
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+interface TestValueSource {
+    operator fun <T> invoke(
+        property: KProperty1<*, T>,
+        defaultValue: T,
+        validList: List<T>? = null,
+        invalidList: List<T>? = null
+    ): T
+}

@@ -16,14 +16,11 @@
  */
 package io.github.csaf.sbom.retrieval;
 
-import io.github.csaf.sbom.CsafLoader;
-import io.github.csaf.sbom.TestUtilsKt;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests the functionality of <code>RetrievedProvider</code> in Java.

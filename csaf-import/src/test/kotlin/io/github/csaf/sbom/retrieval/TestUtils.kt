@@ -16,7 +16,14 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
+import io.ktor.client.engine.mock.*
+import io.ktor.http.*
 
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+val mockEngine = MockEngine { request ->
+    println(request.url.fullPath)
+    respond(
+        content = javaClass.classLoader.getResource(request.url.fullPath.substring(1))!!.readText(),
+        status = HttpStatusCode.OK,
+        headers = headersOf(HttpHeaders.ContentType, "application/json")
+    )
+}

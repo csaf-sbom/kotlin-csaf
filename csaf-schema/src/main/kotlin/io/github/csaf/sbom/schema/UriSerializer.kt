@@ -14,9 +14,19 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.schema
 
-import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
+import java.net.URI
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+object UriSerializer : KSerializer<URI> {
+    override val descriptor = PrimitiveSerialDescriptor("URI", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): URI = URI.create(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: URI) = encoder.encodeString(value.toString())
+}

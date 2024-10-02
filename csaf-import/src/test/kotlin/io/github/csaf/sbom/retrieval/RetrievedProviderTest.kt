@@ -16,8 +16,6 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.CsafLoader
-import io.github.csaf.sbom.mockEngine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest

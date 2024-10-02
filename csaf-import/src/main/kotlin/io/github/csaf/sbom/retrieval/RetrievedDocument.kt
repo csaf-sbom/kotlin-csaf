@@ -16,13 +16,12 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.CsafLoader
-import io.github.csaf.sbom.CsafLoader.Companion.lazyLoader
-import io.github.csaf.sbom.generated.Csaf
-import io.github.csaf.validation.Validatable
-import io.github.csaf.validation.ValidationContext
-import io.github.csaf.validation.ValidationException
-import io.github.csaf.validation.ValidationFailed
+import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
+import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.Validatable
+import io.github.csaf.sbom.validation.ValidationContext
+import io.github.csaf.sbom.validation.ValidationException
+import io.github.csaf.sbom.validation.ValidationFailed
 import io.ktor.client.statement.HttpResponse
 
 /** This class represents a "retrieved" CSAF document. */

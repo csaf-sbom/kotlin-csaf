@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.validation
 
-import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
-
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+interface Validatable {
+    val json: Any
+}

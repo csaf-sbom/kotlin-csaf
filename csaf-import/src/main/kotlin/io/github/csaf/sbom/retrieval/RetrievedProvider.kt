@@ -16,19 +16,16 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.CsafLoader
-import io.github.csaf.sbom.CsafLoader.Companion.lazyLoader
-import io.github.csaf.sbom.ResultCompat
-import io.github.csaf.sbom.generated.Provider
-import io.github.csaf.sbom.mapAsync
-import io.github.csaf.validation.Role
-import io.github.csaf.validation.Validatable
-import io.github.csaf.validation.ValidationContext
-import io.github.csaf.validation.ValidationException
-import io.github.csaf.validation.ValidationFailed
-import io.github.csaf.validation.roles.CSAFProviderRole
-import io.github.csaf.validation.roles.CSAFPublisherRole
-import io.github.csaf.validation.roles.CSAFTrustedProviderRole
+import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
+import io.github.csaf.sbom.schema.generated.Provider
+import io.github.csaf.sbom.validation.Role
+import io.github.csaf.sbom.validation.Validatable
+import io.github.csaf.sbom.validation.ValidationContext
+import io.github.csaf.sbom.validation.ValidationException
+import io.github.csaf.sbom.validation.ValidationFailed
+import io.github.csaf.sbom.validation.roles.CSAFProviderRole
+import io.github.csaf.sbom.validation.roles.CSAFPublisherRole
+import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
 import io.ktor.client.statement.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
