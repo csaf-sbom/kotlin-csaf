@@ -86,9 +86,6 @@ object UsageOfTls : Requirement {
  */
 object TlpWhiteAccessible : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        // If we do not have a response, we can assume that its not accessible and we fail
-        val response = ctx.httpResponse ?: return ValidationFailed(listOf("Response is null"))
-
         // Only applicable to Csaf document, because all the others do not have a TLP
         val json = ctx.validatable?.json as? Csaf ?: return ValidationNotApplicable
 
@@ -96,6 +93,9 @@ object TlpWhiteAccessible : Requirement {
         if (json.document.distribution?.tlp?.label != Label.WHITE) {
             return ValidationNotApplicable
         }
+
+        // If we do not have a response, we can assume that it's not accessible and we fail
+        val response = ctx.httpResponse ?: return ValidationFailed(listOf("Response is null"))
 
         // We assume that it is freely accessible, if
         // - We actually got an "OK-ish" error code

@@ -49,7 +49,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.Job
 
-var GoodCsaf =
+fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
     Csaf(
         document =
             Csaf.Document(
@@ -101,7 +101,7 @@ var GoodCsaf =
                     ),
                 distribution =
                     Csaf.Distribution(
-                        tlp = Csaf.Tlp(label = Csaf.Label.WHITE),
+                        tlp = Csaf.Tlp(label = label),
                         text = "can be distributed freely",
                     ),
                 notes =
@@ -358,10 +358,16 @@ var GoodCsaf =
             )
     )
 
-var GoodDocument =
+var GoodTlpWhiteDocument =
     object : Validatable {
         override val json: Any
-            get() = GoodCsaf
+            get() = goodCsaf()
+    }
+
+var GoodTlpRedDocument =
+    object : Validatable {
+        override val json: Any
+            get() = goodCsaf(Csaf.Label.RED)
     }
 
 class RequirementsTest {
@@ -373,7 +379,9 @@ class RequirementsTest {
         assertIs<ValidationFailed>(rule.check(ctx.also { it.validatable = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.validatable = GoodDocument }))
+        assertIs<ValidationSuccessful>(
+            rule.check(ctx.also { it.validatable = GoodTlpWhiteDocument })
+        )
     }
 
     @Test
@@ -388,7 +396,7 @@ class RequirementsTest {
         assertIs<ValidationFailed>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodDocument
+                    it.validatable = GoodTlpWhiteDocument
                     it.httpResponse = mockResponse(mockRequest(Url("/test")), HttpStatusCode.OK)
                 }
             )
@@ -398,7 +406,7 @@ class RequirementsTest {
         assertIs<ValidationSuccessful>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodDocument
+                    it.validatable = GoodTlpWhiteDocument
                     it.httpResponse =
                         mockResponse(mockRequest(Url("/test-title.json")), HttpStatusCode.OK)
                 }
@@ -435,11 +443,20 @@ class RequirementsTest {
     fun testTlpWhiteAccessible() {
         val (rule, ctx) = testRule(TlpWhiteAccessible)
 
+        // Validatable is something else -> not applicable
+        assertEquals(ValidationNotApplicable, rule.check(ctx.also { it.validatable = null }))
+
+        // Document is not TlpWhite -> not applicable
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { it.validatable = GoodTlpRedDocument })
+        )
+
         // URL was retrieved with authorization headers -> fail
         assertIs<ValidationFailed>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodDocument
+                    it.validatable = GoodTlpWhiteDocument
                     it.httpResponse =
                         mockResponse(
                             mockRequest(
@@ -476,6 +493,36 @@ class RequirementsTest {
                         )
                 }
             )
+        )
+    }
+
+    @Test
+    fun testRequirement8() {
+        val (rule, ctx) = testRule(Requirement8)
+
+        // Data source is not security.txt -> fail
+        assertIs<ValidationFailed>(
+            rule.check(ctx.also { it.dataSource = ValidationContext.DataSource.WELL_KNOWN })
+        )
+    }
+
+    @Test
+    fun testRequirement9() {
+        val (rule, ctx) = testRule(Requirement9)
+
+        // Data source is not well_known -> fail
+        assertIs<ValidationFailed>(
+            rule.check(ctx.also { it.dataSource = ValidationContext.DataSource.DNS })
+        )
+    }
+
+    @Test
+    fun testRequirement10() {
+        val (rule, ctx) = testRule(Requirement10)
+
+        // Data source is not DNS -> fail
+        assertIs<ValidationFailed>(
+            rule.check(ctx.also { it.dataSource = ValidationContext.DataSource.SECURITY_TXT })
         )
     }
 }
