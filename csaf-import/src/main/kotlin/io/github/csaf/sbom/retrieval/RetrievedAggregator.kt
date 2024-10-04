@@ -17,7 +17,6 @@
 package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.schema.generated.Aggregator
-import io.github.csaf.sbom.validation.Validatable
 
 /**
  * This class represents a wrapper around a [Aggregator] document, that provides functionality for
@@ -26,4 +25,4 @@ import io.github.csaf.sbom.validation.Validatable
  *
  * This class is not yet implemented.
  */
-class RetrievedAggregator(override val json: Aggregator) : Validatable
+class RetrievedAggregator(val json: Aggregator)

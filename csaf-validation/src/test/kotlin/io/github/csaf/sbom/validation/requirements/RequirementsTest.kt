@@ -18,7 +18,6 @@ package io.github.csaf.sbom.validation.requirements
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
-import io.github.csaf.sbom.validation.Validatable
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationNotApplicable
@@ -358,45 +357,31 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
             )
     )
 
-var GoodTlpWhiteDocument =
-    object : Validatable {
-        override val json: Any
-            get() = goodCsaf()
-    }
-
-var GoodTlpRedDocument =
-    object : Validatable {
-        override val json: Any
-            get() = goodCsaf(Csaf.Label.RED)
-    }
-
 class RequirementsTest {
     @Test
     fun testValidCSAFDocument() {
-        val (rule, ctx) = testRule(ValidCSAFDocument)
+        val (rule, ctx) = testRule(Requirement1ValidCSAFDocument)
 
         // Empty validatable -> fail
-        assertIs<ValidationFailed>(rule.check(ctx.also { it.validatable = null }))
+        assertIs<ValidationFailed>(rule.check(ctx.also { it.json = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(
-            rule.check(ctx.also { it.validatable = GoodTlpWhiteDocument })
-        )
+        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.json = goodCsaf() }))
     }
 
     @Test
     fun testValidFilename() {
-        val (rule, ctx) = testRule(ValidFilename)
+        val (rule, ctx) = testRule(Requirement2ValidFilename)
 
         // JSON not a CSAF -> not applicable
-        ctx.validatable = null
+        ctx.json = null
         assertEquals(ValidationNotApplicable, (rule.check(ctx)))
 
         // Invalid filename
         assertIs<ValidationFailed>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodTlpWhiteDocument
+                    it.json = goodCsaf()
                     it.httpResponse = mockResponse(mockRequest(Url("/test")), HttpStatusCode.OK)
                 }
             )
@@ -406,7 +391,7 @@ class RequirementsTest {
         assertIs<ValidationSuccessful>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodTlpWhiteDocument
+                    it.json = goodCsaf()
                     it.httpResponse =
                         mockResponse(mockRequest(Url("/test-title.json")), HttpStatusCode.OK)
                 }
@@ -416,7 +401,7 @@ class RequirementsTest {
 
     @Test
     fun testUsageOfTls() {
-        val (rule, ctx) = testRule(UsageOfTls)
+        val (rule, ctx) = testRule(Requirement3UsageOfTls)
 
         // No TLS -> fail
         assertIs<ValidationFailed>(
@@ -441,22 +426,22 @@ class RequirementsTest {
 
     @Test
     fun testTlpWhiteAccessible() {
-        val (rule, ctx) = testRule(TlpWhiteAccessible)
+        val (rule, ctx) = testRule(Requirement4TlpWhiteAccessible)
 
         // Validatable is something else -> not applicable
-        assertEquals(ValidationNotApplicable, rule.check(ctx.also { it.validatable = null }))
+        assertEquals(ValidationNotApplicable, rule.check(ctx.also { it.json = null }))
 
         // Document is not TlpWhite -> not applicable
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { it.validatable = GoodTlpRedDocument })
+            rule.check(ctx.also { it.json = goodCsaf(Csaf.Label.RED) })
         )
 
         // URL was retrieved with authorization headers -> fail
         assertIs<ValidationFailed>(
             rule.check(
                 ctx.also {
-                    it.validatable = GoodTlpWhiteDocument
+                    it.json = goodCsaf()
                     it.httpResponse =
                         mockResponse(
                             mockRequest(

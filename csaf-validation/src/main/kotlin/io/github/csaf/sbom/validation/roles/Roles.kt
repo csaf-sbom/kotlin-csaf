@@ -24,6 +24,7 @@ import io.github.csaf.sbom.validation.oneOf
 import io.github.csaf.sbom.validation.or
 import io.github.csaf.sbom.validation.plus
 import io.github.csaf.sbom.validation.requirements.Requirement10
+import io.github.csaf.sbom.validation.requirements.Requirement11YearInFolder
 import io.github.csaf.sbom.validation.requirements.Requirement12
 import io.github.csaf.sbom.validation.requirements.Requirement13
 import io.github.csaf.sbom.validation.requirements.Requirement14
@@ -32,20 +33,19 @@ import io.github.csaf.sbom.validation.requirements.Requirement16
 import io.github.csaf.sbom.validation.requirements.Requirement17
 import io.github.csaf.sbom.validation.requirements.Requirement18
 import io.github.csaf.sbom.validation.requirements.Requirement19
+import io.github.csaf.sbom.validation.requirements.Requirement1ValidCSAFDocument
 import io.github.csaf.sbom.validation.requirements.Requirement20
 import io.github.csaf.sbom.validation.requirements.Requirement21
 import io.github.csaf.sbom.validation.requirements.Requirement22
 import io.github.csaf.sbom.validation.requirements.Requirement23
+import io.github.csaf.sbom.validation.requirements.Requirement2ValidFilename
+import io.github.csaf.sbom.validation.requirements.Requirement3UsageOfTls
+import io.github.csaf.sbom.validation.requirements.Requirement4TlpWhiteAccessible
 import io.github.csaf.sbom.validation.requirements.Requirement5
 import io.github.csaf.sbom.validation.requirements.Requirement6
 import io.github.csaf.sbom.validation.requirements.Requirement7
 import io.github.csaf.sbom.validation.requirements.Requirement8
 import io.github.csaf.sbom.validation.requirements.Requirement9
-import io.github.csaf.sbom.validation.requirements.TlpWhiteAccessible
-import io.github.csaf.sbom.validation.requirements.UsageOfTls
-import io.github.csaf.sbom.validation.requirements.ValidCSAFDocument
-import io.github.csaf.sbom.validation.requirements.ValidFilename
-import io.github.csaf.sbom.validation.requirements.YearInFolder
 
 /**
  * The "CSAF publisher" role. See
@@ -56,7 +56,12 @@ object CSAFPublisherRole : Role {
     override val roleRequirements = none()
 
     override val documentRequirements =
-        allOf(ValidCSAFDocument, ValidFilename, UsageOfTls, TlpWhiteAccessible)
+        allOf(
+            Requirement1ValidCSAFDocument,
+            Requirement2ValidFilename,
+            Requirement3UsageOfTls,
+            Requirement4TlpWhiteAccessible
+        )
 }
 
 /**
@@ -68,7 +73,7 @@ object CSAFProviderRole : Role {
         CSAFPublisherRole.roleRequirements +
             allOf(Requirement6, Requirement7) +
             oneOf(Requirement8, Requirement9, Requirement10) +
-            (allOf(YearInFolder, Requirement12, Requirement13, Requirement14) or
+            (allOf(Requirement11YearInFolder, Requirement12, Requirement13, Requirement14) or
                 allOf(Requirement15, Requirement16, Requirement17))
 
     override val documentRequirements = CSAFPublisherRole.documentRequirements + Requirement5
@@ -104,10 +109,10 @@ object CSAFAggregatorRole : Role {
 
     override val documentRequirements =
         allOf(
-            ValidCSAFDocument,
-            ValidFilename,
-            UsageOfTls,
-            TlpWhiteAccessible,
+            Requirement1ValidCSAFDocument,
+            Requirement2ValidFilename,
+            Requirement3UsageOfTls,
+            Requirement4TlpWhiteAccessible,
             Requirement5,
         )
 }

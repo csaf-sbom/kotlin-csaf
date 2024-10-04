@@ -19,14 +19,10 @@ package io.github.csaf.sbom.validation
 import kotlin.test.Test
 import kotlin.test.assertIs
 
-class TestDocument : Validatable {
-    override val json = Any()
-}
-
-class TestValidationContext(validatable: TestDocument = TestDocument()) :
-    ValidationContext(validatable) {
+class TestValidationContext() : ValidationContext() {
     init {
         dataSource = DataSource.WELL_KNOWN
+        json = Any()
     }
 }
 

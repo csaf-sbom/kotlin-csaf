@@ -19,14 +19,12 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.validation.Role
-import io.github.csaf.sbom.validation.Validatable
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFProviderRole
 import io.github.csaf.sbom.validation.roles.CSAFPublisherRole
 import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
-import io.ktor.client.statement.*
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +36,7 @@ import kotlinx.coroutines.future.future
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
-class RetrievedProvider(override val json: Provider, val role: Role) : Validatable {
+class RetrievedProvider(val json: Provider, val role: Role) {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
@@ -106,14 +104,13 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return loader
-                .useValidationContext(ctx)
-                .fetchProvider(wellKnownPath)
+                .fetchProvider(wellKnownPath, ctx)
                 .map { it.also { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN } }
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf {
-                        loader.fetchProvider(it).getOrNull()?.also {
+                        loader.fetchProvider(it, ctx).getOrNull()?.also {
                             ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
                         }
                     }
@@ -122,9 +119,10 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
-                    loader.fetchProvider("https://csaf.data.security.$domain").getOrThrow().also {
-                        ctx.dataSource = ValidationContext.DataSource.DNS
-                    }
+                    loader
+                        .fetchProvider("https://csaf.data.security.$domain", ctx)
+                        .getOrThrow()
+                        .also { ctx.dataSource = ValidationContext.DataSource.DNS }
                 }
                 .mapCatching { providerMeta ->
                     // We need to validate the provider according to its "role" (publisher,
@@ -137,8 +135,6 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                         }
 
                     RetrievedProvider(providerMeta, role = role).also {
-                        ctx.validatable = it
-
                         role.checkRole(ctx).let { vr ->
                             if (vr is ValidationFailed) {
                                 throw ValidationException(vr)

@@ -28,10 +28,10 @@ import io.ktor.http.*
  * Represents
  * [Requirement 1: Valid CSAF document](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document).
  */
-object ValidCSAFDocument : Requirement {
+object Requirement1ValidCSAFDocument : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO(oxisto): We need to get the errors from the CSAF schema somehow :(
-        ctx.validatable?.json ?: return ValidationFailed(listOf("We do not have a valid JSON"))
+        ctx.json ?: return ValidationFailed(listOf("We do not have a valid JSON"))
 
         // TODO(oxisto): Check for further conformance that are not checked by CSAF schema
         return ValidationSuccessful
@@ -42,10 +42,10 @@ object ValidCSAFDocument : Requirement {
  * Represents
  * [Requirement 2: Filename](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename).
  */
-object ValidFilename : Requirement {
+object Requirement2ValidFilename : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable for CSAF documents
-        val json = ctx.validatable?.json as? Csaf ?: return ValidationNotApplicable
+        val json = ctx.json as? Csaf ?: return ValidationNotApplicable
 
         // Try to build the filename and then compare it
         val should = json.document.tracking.id.lowercase().replace("[^+\\-a-z0-9]+", "_") + ".json"
@@ -66,7 +66,7 @@ object ValidFilename : Requirement {
  *
  * We make use of the [HttpResponse] / [HttpRequest] to check the [URLProtocol] for HTTPS.
  */
-object UsageOfTls : Requirement {
+object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO(oxisto): This will also fail if the httpResponse is empty, which is BAD
         return if (ctx.httpResponse?.call?.request?.url?.protocol == URLProtocol.HTTPS) {
@@ -84,10 +84,10 @@ object UsageOfTls : Requirement {
  * We make use of the [HttpResponse] / [HttpRequest] to check for a "good" status code and check for
  * the (non)-existence of authorization headers in the request.
  */
-object TlpWhiteAccessible : Requirement {
+object Requirement4TlpWhiteAccessible : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable to Csaf document, because all the others do not have a TLP
-        val json = ctx.validatable?.json as? Csaf ?: return ValidationNotApplicable
+        val json = ctx.json as? Csaf ?: return ValidationNotApplicable
 
         // Only for TLP:WHITE
         if (json.document.distribution?.tlp?.label != Label.WHITE) {
@@ -159,7 +159,7 @@ object Requirement10 : Requirement {
 
 // TODO(oxisto): This is actually a document requirement, but it is part of an OR clause in the role
 // requirement :(
-object YearInFolder : Requirement {
+object Requirement11YearInFolder : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
         return ValidationSuccessful
