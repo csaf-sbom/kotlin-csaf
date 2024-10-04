@@ -23,7 +23,7 @@ import io.github.csaf.sbom.validation.none
 import io.github.csaf.sbom.validation.oneOf
 import io.github.csaf.sbom.validation.or
 import io.github.csaf.sbom.validation.plus
-import io.github.csaf.sbom.validation.requirements.Requirement10
+import io.github.csaf.sbom.validation.requirements.Requirement10DNSPath
 import io.github.csaf.sbom.validation.requirements.Requirement11YearInFolder
 import io.github.csaf.sbom.validation.requirements.Requirement12
 import io.github.csaf.sbom.validation.requirements.Requirement13
@@ -44,8 +44,8 @@ import io.github.csaf.sbom.validation.requirements.Requirement4TlpWhiteAccessibl
 import io.github.csaf.sbom.validation.requirements.Requirement5
 import io.github.csaf.sbom.validation.requirements.Requirement6
 import io.github.csaf.sbom.validation.requirements.Requirement7
-import io.github.csaf.sbom.validation.requirements.Requirement8
-import io.github.csaf.sbom.validation.requirements.Requirement9
+import io.github.csaf.sbom.validation.requirements.Requirement8SecurityTxt
+import io.github.csaf.sbom.validation.requirements.Requirement9WellKnownURL
 
 /**
  * The "CSAF publisher" role. See
@@ -72,7 +72,7 @@ object CSAFProviderRole : Role {
     override val roleRequirements =
         CSAFPublisherRole.roleRequirements +
             allOf(Requirement6, Requirement7) +
-            oneOf(Requirement8, Requirement9, Requirement10) +
+            oneOf(Requirement8SecurityTxt, Requirement9WellKnownURL, Requirement10DNSPath) +
             (allOf(Requirement11YearInFolder, Requirement12, Requirement13, Requirement14) or
                 allOf(Requirement15, Requirement16, Requirement17))
 

@@ -483,7 +483,7 @@ class RequirementsTest {
 
     @Test
     fun testRequirement8() {
-        val (rule, ctx) = testRule(Requirement8)
+        val (rule, ctx) = testRule(Requirement8SecurityTxt)
 
         // Data source is not security.txt -> fail
         assertIs<ValidationFailed>(
@@ -493,7 +493,7 @@ class RequirementsTest {
 
     @Test
     fun testRequirement9() {
-        val (rule, ctx) = testRule(Requirement9)
+        val (rule, ctx) = testRule(Requirement9WellKnownURL)
 
         // Data source is not well_known -> fail
         assertIs<ValidationFailed>(
@@ -503,7 +503,7 @@ class RequirementsTest {
 
     @Test
     fun testRequirement10() {
-        val (rule, ctx) = testRule(Requirement10)
+        val (rule, ctx) = testRule(Requirement10DNSPath)
 
         // Data source is not DNS -> fail
         assertIs<ValidationFailed>(

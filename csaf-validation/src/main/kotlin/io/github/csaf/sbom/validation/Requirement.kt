@@ -26,12 +26,13 @@ interface Requirement {
     fun check(ctx: ValidationContext): ValidationResult
 }
 
-internal class NoRequirement : Requirement {
+private class NoRequirement : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         return ValidationSuccessful
     }
 }
 
+/** Creates a new [Requirement] that specifies that no requirements need to be fulfilled. */
 fun none(): Requirement {
     return NoRequirement()
 }
@@ -47,7 +48,7 @@ fun allOf(vararg requirements: Requirement): Requirement {
     return AllOf(requirements.toList())
 }
 
-internal class AllOf(private val list: List<Requirement>) : Requirement {
+private class AllOf(private val list: List<Requirement>) : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         val results = list.map { it.check(ctx) }
         return if (results.any { it is ValidationFailed }) {
@@ -78,7 +79,7 @@ fun oneOf(vararg requirements: Requirement): Requirement {
     return OneOf(requirements.toList())
 }
 
-internal class OneOf(private val list: List<Requirement>) : Requirement {
+private class OneOf(private val list: List<Requirement>) : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         val results = list.map { it.check(ctx) }
         return if (results.all { it is ValidationFailed }) {
@@ -98,31 +99,7 @@ internal class OneOf(private val list: List<Requirement>) : Requirement {
  *   fulfilled.
  */
 infix fun Requirement.or(other: Requirement): Requirement {
-    return Or(this, other)
-}
-
-internal class Or(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
-        val lhsResult = lhs.check(ctx)
-        val rhsResult = rhs.check(ctx)
-        when {
-            lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
-                return ValidationSuccessful
-            }
-            lhsResult is ValidationFailed && rhsResult is ValidationFailed -> {
-                return ValidationFailed(lhsResult.errors + rhsResult.errors)
-            }
-            lhsResult is ValidationFailed && rhsResult is ValidationSuccessful -> {
-                return ValidationSuccessful
-            }
-            lhsResult is ValidationSuccessful && rhsResult is ValidationFailed -> {
-                return ValidationSuccessful
-            }
-            else -> {
-                throw RuntimeException("unreachable state reached")
-            }
-        }
-    }
+    return OneOf(listOf(this, other))
 }
 
 /**
@@ -133,29 +110,5 @@ internal class Or(private val lhs: Requirement, private val rhs: Requirement) : 
  * @return a combined [Requirement] that is fulfilled if this and the [other] is fulfilled.
  */
 operator fun Requirement.plus(other: Requirement): Requirement {
-    return And(this, other)
-}
-
-internal class And(private val lhs: Requirement, private val rhs: Requirement) : Requirement {
-    override fun check(ctx: ValidationContext): ValidationResult {
-        val lhsResult = lhs.check(ctx)
-        val rhsResult = rhs.check(ctx)
-        when {
-            lhsResult is ValidationSuccessful && rhsResult is ValidationSuccessful -> {
-                return ValidationSuccessful
-            }
-            lhsResult is ValidationFailed && rhsResult is ValidationFailed -> {
-                return ValidationFailed(lhsResult.errors + rhsResult.errors)
-            }
-            lhsResult is ValidationFailed && rhsResult is ValidationSuccessful -> {
-                return lhsResult
-            }
-            lhsResult is ValidationSuccessful && rhsResult is ValidationFailed -> {
-                return rhsResult
-            }
-            else -> {
-                throw RuntimeException("unreachable state reached")
-            }
-        }
-    }
+    return AllOf(listOf(this, other))
 }

@@ -130,7 +130,14 @@ object Requirement7 : Requirement {
     }
 }
 
-object Requirement8 : Requirement {
+/**
+ * Represents
+ * [Requirement 8: security.txt](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt).
+ *
+ * The check itself is already performed in the retrieval API, we can just check for the existence
+ * of the data source here.
+ */
+object Requirement8SecurityTxt : Requirement {
     override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.SECURITY_TXT) {
             ValidationSuccessful
@@ -139,7 +146,14 @@ object Requirement8 : Requirement {
         }
 }
 
-object Requirement9 : Requirement {
+/**
+ * Represents
+ * [Requirement 9: Well-known URL](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#719-requirement-9-well-known-url-for-provider-metadatajson).
+ *
+ * The check itself is already performed in the retrieval API, we can just check for the existence
+ * of the data source here.
+ */
+object Requirement9WellKnownURL : Requirement {
     override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.WELL_KNOWN) {
             ValidationSuccessful
@@ -148,7 +162,14 @@ object Requirement9 : Requirement {
         }
 }
 
-object Requirement10 : Requirement {
+/**
+ * Represents
+ * [Requirement 10: DNS path](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path).
+ *
+ * The check itself is already performed in the retrieval API, we can just check for the existence
+ * of the data source here.
+ */
+object Requirement10DNSPath : Requirement {
     override fun check(ctx: ValidationContext) =
         if (ctx.dataSource == ValidationContext.DataSource.DNS) {
             ValidationSuccessful
@@ -158,7 +179,7 @@ object Requirement10 : Requirement {
 }
 
 // TODO(oxisto): This is actually a document requirement, but it is part of an OR clause in the role
-// requirement :(
+//  requirement :(
 object Requirement11YearInFolder : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO: actually implement the requirement
