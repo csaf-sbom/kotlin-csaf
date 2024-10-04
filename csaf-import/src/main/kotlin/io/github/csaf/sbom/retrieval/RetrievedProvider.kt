@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.future.future
+import java.util.concurrent.CompletableFuture
 
 /**
  * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
@@ -71,8 +72,9 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
 
     @Suppress("unused")
     @JvmOverloads
-    fun fetchDocumentsAsync(loader: CsafLoader = lazyLoader) =
-        ioScope.future { fetchDocuments(loader).map { ResultCompat(it) } }
+    fun fetchDocumentsAsync(loader: CsafLoader = lazyLoader): CompletableFuture<List<ResultCompat<RetrievedDocument>>> {
+        return ioScope.future { fetchDocuments(loader).map { ResultCompat(it) } }
+    }
 
     companion object {
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -80,8 +82,9 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
         @Suppress("unused")
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader) =
-            ioScope.future { from(domain, loader).getOrThrow() }
+        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader): CompletableFuture<RetrievedProvider> {
+            return ioScope.future { from(domain, loader).getOrThrow() }
+        }
 
         /**
          * Retrieves one or more provider-metadata.json documents (represented by the [Provider]
