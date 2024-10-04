@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the functionality of <code>RetrievedProvider</code> in Java.
  */
 public class RetrievedProviderJavaTest {
-    private static final CsafLoader loader = new CsafLoader(TestUtilsKt.getMockEngine());
+    private static final CsafLoader loader = new CsafLoader(TestUtilsKt.mockEngine());
 
     @Test
     public void test() throws InterruptedException, ExecutionException {
@@ -49,14 +49,14 @@ public class RetrievedProviderJavaTest {
         final var documentError = documentResults.get(1).exceptionOrNull();
         assertNotNull(documentError);
         assertEquals(
-                "Failed to fetch CSAF document from https://www.example.com/directory/2024/does-not-exist.json",
+                "Failed to fetch CSAF document from https://example.com/directory/2024/does-not-exist.json",
                 documentError.getMessage()
         );
         // Check index error
         final var indexError = documentResults.get(2).exceptionOrNull();
         assertNotNull(indexError);
         assertEquals(
-                "Failed to fetch index.txt from directory at https://www.example.com/invalid-directory",
+                "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
                 indexError.getMessage()
         );
     }

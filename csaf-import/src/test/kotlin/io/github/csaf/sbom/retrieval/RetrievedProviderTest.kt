@@ -23,8 +23,25 @@ import kotlinx.coroutines.test.runTest
 class RetrievedProviderTest {
     @Test
     fun testRetrievedProviderFrom() = runTest {
-        val loader = CsafLoader(mockEngine)
-        val provider = RetrievedProvider.from("example.com", loader).getOrThrow()
+        var url = "example.com"
+        providerTest(url)
+    }
+
+    @Test
+    fun testRetrievedProviderFromSecurityTxt() = runTest {
+        var url = "provider-with-securitytxt.com"
+        providerTest(url)
+    }
+
+    @Test
+    fun testRetrievedProviderFromDNSPath() = runTest {
+        var url = "publisher-with-dns.com"
+        providerTest(url)
+    }
+
+    suspend fun providerTest(url: String) {
+        val loader = CsafLoader(mockEngine())
+        val provider = RetrievedProvider.from(url, loader).getOrThrow()
         val documentResults = provider.fetchDocuments(loader)
         assertEquals(
             3,
@@ -38,12 +55,12 @@ class RetrievedProviderTest {
         )
         // Check document error
         assertEquals(
-            "Failed to fetch CSAF document from https://www.example.com/directory/2024/does-not-exist.json",
+            "Failed to fetch CSAF document from https://$url/directory/2024/does-not-exist.json",
             documentResults[1].exceptionOrNull()?.message
         )
         // Check index error
         assertEquals(
-            "Failed to fetch index.txt from directory at https://www.example.com/invalid-directory",
+            "Failed to fetch index.txt from directory at https://$url/invalid-directory",
             documentResults[2].exceptionOrNull()?.message
         )
     }

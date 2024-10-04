@@ -1,19 +1,13 @@
 {
-  "canonical_url": "https://www.example.com/.well-known/csaf/provider-metadata.json",
+  "canonical_url": "https://example.com/.well-known/csaf/provider-metadata.json",
   "distributions": [
-    {
-      "directory_url": "https://www.example.com/directory"
-    },
-    {
-      "directory_url": "https://www.example.com/invalid-directory"
-    },
     {
       "rolie":{
         "feeds": [
           {
             "summary":"All TLP:WHITE advisories of Example Company.",
             "tlp_label": "WHITE",
-            "url": "https://www.example.com/.well-known/csaf/feed-tlp-white.json"
+            "url": "https://example.com/.well-known/csaf/feed-tlp-white.json"
           }
         ]
       }

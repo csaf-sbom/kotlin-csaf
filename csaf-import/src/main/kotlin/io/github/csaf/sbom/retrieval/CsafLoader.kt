@@ -29,6 +29,7 @@ import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.*
 
 /**
@@ -54,6 +55,11 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     ): T {
         val response = httpClient.get(url)
         responseCallback?.invoke(response)
+
+        if (!response.status.isSuccess()) {
+            throw Exception("Could not retrieve $url: ${response.status.description}")
+        }
+
         return response.body()
     }
 

@@ -17,7 +17,7 @@
           "name": "Example Company ProductCERT",
           "namespace": "https://psirt.example.com"
         },
-        "url": "https://www.example.com/.well-known/csaf/provider-metadata.json"
+        "url": "https://example.com/.well-known/csaf/provider-metadata.json"
       }
     }
   ],

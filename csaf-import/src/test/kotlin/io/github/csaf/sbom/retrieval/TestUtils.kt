@@ -19,11 +19,23 @@ package io.github.csaf.sbom.retrieval
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 
-val mockEngine = MockEngine { request ->
-    println(request.url.fullPath)
-    respond(
-        content = javaClass.classLoader.getResource(request.url.fullPath.substring(1))!!.readText(),
-        status = HttpStatusCode.OK,
-        headers = headersOf(HttpHeaders.ContentType, "application/json")
-    )
+fun mockEngine() = MockEngine { request ->
+    var host = request.url.host
+    var file = request.url.fullPath.trimStart('/')
+    // A little trick to serve the metadata JSON on the DNS path
+    if (file == "") {
+        file = "index.json"
+    }
+    var resourcePath = ("$host/$file").trimStart('/')
+    var response = javaClass.classLoader.getResource(resourcePath)
+
+    if (response == null) {
+        respond(content = "Not Found", status = HttpStatusCode.NotFound)
+    } else {
+        respond(
+            content = response.readText(),
+            status = HttpStatusCode.OK,
+            headers = headersOf(HttpHeaders.ContentType, "application/json")
+        )
+    }
 }
