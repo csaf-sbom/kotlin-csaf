@@ -27,11 +27,11 @@ import io.github.csaf.sbom.validation.roles.CSAFProviderRole
 import io.github.csaf.sbom.validation.roles.CSAFPublisherRole
 import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
 import io.ktor.client.statement.*
+import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.future.future
-import java.util.concurrent.CompletableFuture
 
 /**
  * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
@@ -52,7 +52,7 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                         { index ->
                             index.lines().mapAsync { line ->
                                 val csafUrl = "$directoryUrl/$line"
-                                RetrievedDocument.from(csafUrl, loader, this)
+                                RetrievedDocument.from(csafUrl, loader, this.role)
                             }
                         },
                         { e ->
@@ -72,7 +72,9 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
 
     @Suppress("unused")
     @JvmOverloads
-    fun fetchDocumentsAsync(loader: CsafLoader = lazyLoader): CompletableFuture<List<ResultCompat<RetrievedDocument>>> {
+    fun fetchDocumentsAsync(
+        loader: CsafLoader = lazyLoader
+    ): CompletableFuture<List<ResultCompat<RetrievedDocument>>> {
         return ioScope.future { fetchDocuments(loader).map { ResultCompat(it) } }
     }
 
@@ -82,7 +84,10 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
         @Suppress("unused")
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader): CompletableFuture<RetrievedProvider> {
+        fun fromAsync(
+            domain: String,
+            loader: CsafLoader = lazyLoader
+        ): CompletableFuture<RetrievedProvider> {
             return ioScope.future { from(domain, loader).getOrThrow() }
         }
 

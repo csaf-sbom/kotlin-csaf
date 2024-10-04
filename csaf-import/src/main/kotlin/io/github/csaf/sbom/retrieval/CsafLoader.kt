@@ -39,11 +39,11 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
 
     /**
      * Helper function for all other functions defined below. Performs a get request and returns the
-     * `HttpResponse`, invoking `responseCallback` if not null.
+     * [HttpResponse], invoking [responseCallback] if not null.
      *
      * @param url The URL to request data from.
-     * @param responseCallback An optional callback to further evaluate the `HttpResponse`.
-     * @return The resulting `HttpResponse`.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return The resulting [HttpResponse].
      */
     private suspend fun genericGet(
         url: String,
@@ -58,8 +58,9 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse an aggregator JSON document from a given URL.
      *
      * @param url The URL where the aggregator document is found.
-     * @return An instance of `Aggregator`, wrapped in a `Result` monad, if successful. A failed
-     *   `Result` wrapping the thrown `Throwable` in case of an error.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return An instance of [Aggregator], wrapped in a [Result] monad, if successful. A failed
+     *   [Result] wrapping the thrown [Throwable] in case of an error.
      */
     suspend fun fetchAggregator(
         url: String,
@@ -70,8 +71,9 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse a provider JSON document from a given URL.
      *
      * @param url The URL where the provider document is found.
-     * @return An instance of `Provider`, wrapped in a `Result` monad, if successful. A failed
-     *   `Result` wrapping the thrown `Throwable` in case of an error.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return An instance of [Provider], wrapped in a [Result] monad, if successful. A failed
+     *   [Result] wrapping the thrown [Throwable] in case of an error.
      */
     suspend fun fetchProvider(
         url: String,
@@ -82,8 +84,9 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse a CSAF JSON document from a given URL.
      *
      * @param url The URL where the CSAF document is found.
-     * @return An instance of `CSAF`, wrapped in a `Result` monad, if successful. A failed `Result`
-     *   wrapping the thrown `Throwable` in case of an error.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return An instance of [Csaf], wrapped in a [Result] monad, if successful. A failed [Result]
+     *   wrapping the thrown [Throwable] in case of an error.
      */
     suspend fun fetchDocument(
         url: String,
@@ -91,12 +94,13 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     ): Result<Csaf> = Result.of { genericGet(url, responseCallback).body() }
 
     /**
-     * Fetch an arbitrary URL's content as plain text `String`, falling back to UTF-8 if no charset
+     * Fetch an arbitrary URL's content as plain text [String], falling back to UTF-8 if no charset
      * is provided.
      *
      * @param url The URL to fetch plaintext from.
-     * @return The resulting text, wrapped in a `Result` monad, if successful. A failed `Result`
-     *   wrapping the thrown `Throwable` in case of an error.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return The resulting text, wrapped in a [Result] monad, if successful. A failed [Result]
+     *   wrapping the thrown [hrowable] in case of an error.
      */
     suspend fun fetchText(
         url: String,
@@ -108,15 +112,19 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * [CSAF 7.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt).
      *
      * @param domain The domain from which to obtain the `security.txt`.
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
      * @return A list of `https`-URL values (as `String`s) obtained from CSAF fields in
-     *   `security.txt`, wrapped in a `Result` monad, if successful. A failed `Result` wrapping the
-     *   thrown `Throwable` in case of an error.
+     *   `security.txt`, wrapped in a [Result] monad, if successful. A failed [Result] wrapping the
+     *   thrown [Throwable] in case of an error.
      */
     suspend fun fetchSecurityTxtCsafUrls(
         domain: String,
         responseCallback: ((HttpResponse) -> Unit)? = null
     ) =
         // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
+        //  See https://github.com/csaf-sbom/kotlin-csaf/issues/43
+        // TODO: A security.txt can also be at a legacy location.
+        //  See https://github.com/csaf-sbom/kotlin-csaf/issues/44
         fetchText("https://$domain/.well-known/security.txt", responseCallback).mapCatching {
             securityTxt ->
             securityTxt

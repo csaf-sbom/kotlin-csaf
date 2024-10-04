@@ -18,22 +18,37 @@ package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.Role
 import io.github.csaf.sbom.validation.Validatable
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
+import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
 import io.ktor.client.statement.HttpResponse
 
-/** This class represents a "retrieved" CSAF document. */
+/**
+ * This class represents a wrapper around a [Csaf] document, that provides functionality for
+ * fetching a document from a location, including validation according to the specification.
+ */
 class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Validatable {
 
-    // TODO: other stuff, like import time, ASC, signatures, etc.
-
     companion object {
+        /**
+         * Retrieves a specific CSAF document from a [documentUrl]. The document will be validated
+         * according to [providerRole].
+         *
+         * @param documentUrl The URL where to retrieve the document from.
+         * @param loader An instance of [CsafLoader].
+         * @param providerRole An instance of a [Role]. This is needed in order to correctly
+         *   validate the document according to the role where it is hosted (e.g.,
+         *   [CSAFTrustedProviderRole]).
+         * @return An instance of [RetrievedDocument], wrapped in a [Result] monad, if successful. A
+         *   failed [Result] wrapping the thrown [Throwable] in case of an error.
+         */
         suspend fun from(
             documentUrl: String,
             loader: CsafLoader = lazyLoader,
-            provider: RetrievedProvider
+            providerRole: Role
         ): Result<RetrievedDocument> {
             val ctx = ValidationContext()
             val ctxEnrichment = { response: HttpResponse -> ctx.httpResponse = response }
@@ -43,7 +58,7 @@ class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Valida
                     RetrievedDocument(it, documentUrl).also { doc ->
                         ctx.validatable = doc
 
-                        provider.role.checkDocument(ctx).let { vr ->
+                        providerRole.checkDocument(ctx).let { vr ->
                             if (vr is ValidationFailed) {
                                 throw ValidationException(vr)
                             }
