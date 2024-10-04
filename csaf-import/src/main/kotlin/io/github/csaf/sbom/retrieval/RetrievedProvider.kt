@@ -102,18 +102,18 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
         ): Result<RetrievedProvider> {
             val ctx = ValidationContext()
             // Closure for providing HttpResponse to ValidationContext.
-            val ctxEnrichment = { response: HttpResponse -> ctx.httpResponse = response }
             // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return loader
-                .fetchProvider(wellKnownPath, ctxEnrichment)
+                .useValidationContext(ctx)
+                .fetchProvider(wellKnownPath)
                 .map { it.also { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN } }
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf {
-                        loader.fetchProvider(it, ctxEnrichment).getOrNull()?.also {
+                        loader.fetchProvider(it).getOrNull()?.also {
                             ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
                         }
                     }
@@ -122,10 +122,9 @@ class RetrievedProvider(override val json: Provider, val role: Role) : Validatab
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
-                    loader
-                        .fetchProvider("https://csaf.data.security.$domain", ctxEnrichment)
-                        .getOrThrow()
-                        .also { ctx.dataSource = ValidationContext.DataSource.DNS }
+                    loader.fetchProvider("https://csaf.data.security.$domain").getOrThrow().also {
+                        ctx.dataSource = ValidationContext.DataSource.DNS
+                    }
                 }
                 .mapCatching { providerMeta ->
                     // We need to validate the provider according to its "role" (publisher,

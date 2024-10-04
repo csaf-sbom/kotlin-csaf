@@ -24,7 +24,6 @@ import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
-import io.ktor.client.statement.HttpResponse
 
 /**
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
@@ -51,9 +50,9 @@ class RetrievedDocument(override val json: Csaf, val sourceUrl: String) : Valida
             providerRole: Role
         ): Result<RetrievedDocument> {
             val ctx = ValidationContext()
-            val ctxEnrichment = { response: HttpResponse -> ctx.httpResponse = response }
             return loader
-                .fetchDocument(documentUrl, ctxEnrichment)
+                .useValidationContext(ctx)
+                .fetchDocument(documentUrl)
                 .mapCatching {
                     RetrievedDocument(it, documentUrl).also { doc ->
                         ctx.validatable = doc

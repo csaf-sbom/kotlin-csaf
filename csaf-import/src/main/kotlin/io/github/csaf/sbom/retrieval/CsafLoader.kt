@@ -19,6 +19,7 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.schema.generated.Aggregator
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Provider
+import io.github.csaf.sbom.validation.ValidationContext
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -36,6 +37,21 @@ import io.ktor.serialization.kotlinx.json.*
  */
 class CsafLoader(engine: HttpClientEngine = Java.create()) {
     private val httpClient = HttpClient(engine) { install(ContentNegotiation) { json() } }
+
+    /**
+     * An optional validation context that is automatically filled with the HTTP response of the
+     * calls made in this loader. It can be set with [useValidationContext].
+     */
+    private var ctx: ValidationContext? = null
+
+    private var storeHttpResponseInContext =
+        fun(ctx: ValidationContext?) = { response: HttpResponse -> ctx?.httpResponse = response }
+
+    /** Configures [ctx] to be used as a validation context during fetching. */
+    fun useValidationContext(ctx: ValidationContext): CsafLoader {
+        this.ctx = ctx
+        return this
+    }
 
     /**
      * Helper function for all other functions defined below. Performs a get request and returns the
@@ -71,27 +87,21 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse a provider JSON document from a given URL.
      *
      * @param url The URL where the provider document is found.
-     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
      * @return An instance of [Provider], wrapped in a [Result] monad, if successful. A failed
      *   [Result] wrapping the thrown [Throwable] in case of an error.
      */
-    suspend fun fetchProvider(
-        url: String,
-        responseCallback: ((HttpResponse) -> Unit)? = null
-    ): Result<Provider> = Result.of { genericGet(url, responseCallback).body() }
+    suspend fun fetchProvider(url: String): Result<Provider> =
+        Result.of { genericGet(url, storeHttpResponseInContext(ctx)).body() }
 
     /**
      * Fetch and parse a CSAF JSON document from a given URL.
      *
      * @param url The URL where the CSAF document is found.
-     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
      * @return An instance of [Csaf], wrapped in a [Result] monad, if successful. A failed [Result]
      *   wrapping the thrown [Throwable] in case of an error.
      */
-    suspend fun fetchDocument(
-        url: String,
-        responseCallback: ((HttpResponse) -> Unit)? = null
-    ): Result<Csaf> = Result.of { genericGet(url, responseCallback).body() }
+    suspend fun fetchDocument(url: String): Result<Csaf> =
+        Result.of { genericGet(url, storeHttpResponseInContext(ctx)).body() }
 
     /**
      * Fetch an arbitrary URL's content as plain text [String], falling back to UTF-8 if no charset
