@@ -1,0 +1,1 @@
+CSAF: https://provider-with-securitytxt.com/directory/provider-metadata.json

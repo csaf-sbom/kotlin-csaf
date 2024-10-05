@@ -11,6 +11,7 @@ mavenPublishing {
 
 dependencies {
     api(project(":csaf-schema"))
+    implementation(project(":csaf-validation"))
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.json)
     implementation(libs.bundles.ktor.client)

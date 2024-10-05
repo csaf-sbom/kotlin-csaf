@@ -1,0 +1,32 @@
+{
+  "canonical_url": "https://provider-with-securitytxt.com/directory/provider-metadata.json",
+  "distributions": [
+    {
+      "directory_url": "https://provider-with-securitytxt.com/directory"
+    },
+    {
+      "directory_url": "https://provider-with-securitytxt.com/invalid-directory"
+    },
+    {
+      "rolie":{
+        "feeds": [
+          {
+            "summary":"All TLP:WHITE advisories of Example Company.",
+            "tlp_label": "WHITE",
+            "url": "https://provider-with-securitytxt.com/.well-known/csaf/feed-tlp-white.json"
+          }
+        ]
+      }
+    }
+  ],
+  "last_updated": "2021-07-12T20:20:56.169Z",
+  "list_on_CSAF_aggregators": true,
+  "metadata_version": "2.0",
+  "mirror_on_CSAF_aggregators": true,
+  "publisher": {
+    "category": "vendor",
+    "name": "Example Company ProductCERT",
+    "namespace":"https://psirt.provider-with-securitytxt.com"
+  },
+  "role": "csaf_provider"
+}
