@@ -36,22 +36,27 @@ The project itself is split into three modules, which can be (more or less) impo
 Once the dependency has been imported, one of the first things to try out would be to import/fetch CSAF documents from a provider using a domain. The following code snippet illustrates some key concepts:
 
 ```Kotlin
-// We make use of Kotlin coroutines, so one needs to wrap this in a blocking context, if
-// needed. Otherwise the calling function can also be made suspendable
 runBlocking {
-    // Create a new "RetrievedProvider" from a domain. This will automatically discover a 
+    // Create a new "RetrievedProvider" from a domain. This will automatically discover a
     // suitable provider-metadata.json
-    val provider = RetrievedProvider.from("example.com").getOrThrow()
+    val provider = RetrievedProvider.from(args[0]).getOrThrow()
 
-    // Retrieve all documents 
-    val documentResults = provider.fetchDocuments()
-    
-    // The resulting document is a "Csaf" type, which contains the representation defined
-    // in the JSON schema
-    val firstDoc = documentResults[0].getOrThrow()
+    print("Discovered provider-metadata.json @ ${provider.json.canonical_url}\n")
 
-    // Print some info
-    print(firstDoc.json.document.tracking.id)
+    // Retrieve all documents from all feeds. Note: we currently only support index.txt
+    async {
+        val documentResults = provider.fetchDocuments()
+        documentResults.forEach { it ->
+            it.onSuccess { doc ->
+                // The resulting document is a "Csaf" type, which contains the
+                // representation defined
+                // in the JSON schema
+                print("Fetched document with ID ${doc.json.document.tracking.id}\n")
+            }.onFailure { ex ->
+                print("Could not fetch document: ${ex.message}, ${ex.cause}\n")
+            }
+        }
+    }
 }
 ```
 
