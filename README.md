@@ -27,6 +27,7 @@ dependencies {
 ```
 
 The project itself is split into three modules, which can be (more or less) imported independently:
+
 * `csaf-import` contains the logic to retrieve CSAF documents from a provider
 * `csaf-schema` contains generated types to represent the CSAF schemas (document, provider, aggregator)
 * `csaf-validation` contains the logic needed to validate CSAF documents according to a role, e.g., trusted provider
