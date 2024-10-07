@@ -16,30 +16,32 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @KoverIgnore("Entry point for demo purposes only")
-fun main() {
-    val json = Json { prettyPrint = true }
-    val loader = CsafLoader()
+fun main(args: Array<String>) {
     runBlocking {
-        val aggregator =
-            loader.fetchAggregator(
-                "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
-            )
-        aggregator
-            .onSuccess { ag ->
-                ag.csaf_providers
-                    .mapAsync { loader.fetchProvider(it.metadata.url.toString()) }
-                    .forEach { provider ->
-                        provider
-                            .onSuccess { println(json.encodeToString(it)) }
-                            .onFailure { it.printStackTrace() }
-                        println("\n##################################################\n")
+        // Create a new "RetrievedProvider" from a domain. This will automatically discover a
+        // suitable provider-metadata.json
+        val provider = RetrievedProvider.from(args[0]).getOrThrow()
+
+        print("Discovered provider-metadata.json @ ${provider.json.canonical_url}\n")
+
+        // Retrieve all documents from all feeds. Note: we currently only support index.txt
+        async {
+            val documentResults = provider.fetchDocuments()
+            documentResults.forEach { it ->
+                it.onSuccess { doc ->
+                        // The resulting document is a "Csaf" type, which contains the
+                        // representation defined
+                        // in the JSON schema
+                        print("Fetched document with ID ${doc.json.document.tracking.id}\n")
+                    }
+                    .onFailure { ex ->
+                        print("Could not fetch document: ${ex.message}, ${ex.cause}\n")
                     }
             }
-            .onFailure { it.printStackTrace() }
+        }
     }
 }
