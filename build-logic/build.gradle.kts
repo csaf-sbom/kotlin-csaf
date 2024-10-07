@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(libs.kotlin.gradle)
     implementation(libs.dokka.gradle)
+    implementation(libs.fasterxml.woodstox)
     implementation(libs.publish.central)
     implementation(libs.kotlin.serialization)
     implementation(libs.spotless.gradle)
