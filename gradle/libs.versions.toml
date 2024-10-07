@@ -3,6 +3,8 @@ codegen = "0.108.2"
 ktor = "2.3.12"
 kotlin = "2.0.20"
 dokka = "1.9.20"
+# for dependency CVE fix
+woodstox = "6.7.0"
 kotlinx-coroutines = "1.9.0"
 kotlinx-json = "1.7.3"
 kover = "0.8.3"
@@ -25,6 +27,8 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 kotlin-json-codegen = { module = "com.github.csaf-sbom:json-kotlin-gradle", version.ref = "codegen" }
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+# dependency CVE fix
+fasterxml-woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version.ref = "woodstox" }
 publish-central = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
 kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 kover-gradle = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
