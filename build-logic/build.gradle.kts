@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(libs.kotlin.gradle)
     implementation(libs.dokka.gradle)
+    // We need to upgrade woodstox, which is part of dokka
     implementation(libs.fasterxml.woodstox)
     implementation(libs.publish.central)
     implementation(libs.kotlin.serialization)
