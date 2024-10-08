@@ -69,7 +69,7 @@ object Requirement2ValidFilename : Requirement {
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO(oxisto): This will also fail if the httpResponse is empty, which is BAD
-        return if (ctx.httpResponse?.call?.request?.url?.protocol == URLProtocol.HTTPS) {
+        return if (ctx.httpResponse?.request?.url?.protocol == URLProtocol.HTTPS) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("JSON was not retrieved via HTTPS"))

@@ -99,20 +99,45 @@ class RetrievedProvider(val json: Provider, val role: Role) {
             loader: CsafLoader = lazyLoader
         ): Result<RetrievedProvider> {
             val ctx = ValidationContext()
-            // Closure for providing HttpResponse to ValidationContext.
             // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
+
+            // Checks a [Provider] for validity and turns it into a [RetrievedProvider].
+            val verifyingMapping = { providerMeta: Provider ->
+                // We need to validate the provider according to its "role" (publisher,
+                // provider, trusted provider).
+                val role =
+                    when (providerMeta.role) {
+                        Provider.Role.csaf_publisher -> CSAFPublisherRole
+                        Provider.Role.csaf_provider -> CSAFProviderRole
+                        Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole
+                    }
+
+                RetrievedProvider(providerMeta, role).also {
+                    role.checkRole(ctx).let { vr ->
+                        if (vr is ValidationFailed) {
+                            throw ValidationException(vr)
+                        }
+                    }
+                }
+            }
+
             return loader
                 .fetchProvider(wellKnownPath, ctx)
-                .map { it.also { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN } }
+                .onSuccess { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN }
+                .mapCatching(verifyingMapping)
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf {
-                        loader.fetchProvider(it, ctx).getOrNull()?.also {
-                            ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
-                        }
+                        loader
+                            .fetchProvider(it, ctx)
+                            .onSuccess {
+                                ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
+                            }
+                            .mapCatching(verifyingMapping)
+                            .getOrNull()
                     }
                 }
                 .recoverCatching {
@@ -121,26 +146,9 @@ class RetrievedProvider(val json: Provider, val role: Role) {
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
                     loader
                         .fetchProvider("https://csaf.data.security.$domain", ctx)
+                        .onSuccess { ctx.dataSource = ValidationContext.DataSource.DNS }
+                        .mapCatching(verifyingMapping)
                         .getOrThrow()
-                        .also { ctx.dataSource = ValidationContext.DataSource.DNS }
-                }
-                .mapCatching { providerMeta ->
-                    // We need to validate the provider according to its "role" (publisher,
-                    // provider, trusted provider).
-                    val role =
-                        when (providerMeta.role) {
-                            Provider.Role.csaf_publisher -> CSAFPublisherRole
-                            Provider.Role.csaf_provider -> CSAFProviderRole
-                            Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole
-                        }
-
-                    RetrievedProvider(providerMeta, role = role).also {
-                        role.checkRole(ctx).let { vr ->
-                            if (vr is ValidationFailed) {
-                                throw ValidationException(vr)
-                            }
-                        }
-                    }
                 }
         }
     }

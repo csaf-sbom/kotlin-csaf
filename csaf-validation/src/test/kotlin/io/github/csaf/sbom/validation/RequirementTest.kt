@@ -19,7 +19,7 @@ package io.github.csaf.sbom.validation
 import kotlin.test.Test
 import kotlin.test.assertIs
 
-class TestValidationContext() : ValidationContext() {
+class TestValidationContext : ValidationContext() {
     init {
         dataSource = DataSource.WELL_KNOWN
         json = Any()

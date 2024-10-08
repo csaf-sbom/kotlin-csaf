@@ -21,25 +21,17 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 
 class RetrievedProviderTest {
-    @Test
-    fun testRetrievedProviderFrom() = runTest {
-        var url = "example.com"
-        providerTest(url)
-    }
+    @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
 
     @Test
     fun testRetrievedProviderFromSecurityTxt() = runTest {
-        var url = "provider-with-securitytxt.com"
-        providerTest(url)
+        providerTest("provider-with-securitytxt.com")
     }
 
     @Test
-    fun testRetrievedProviderFromDNSPath() = runTest {
-        var url = "publisher-with-dns.com"
-        providerTest(url)
-    }
+    fun testRetrievedProviderFromDNSPath() = runTest { providerTest("publisher-with-dns.com") }
 
-    suspend fun providerTest(url: String) {
+    private suspend fun providerTest(url: String) {
         val loader = CsafLoader(mockEngine())
         val provider = RetrievedProvider.from(url, loader).getOrThrow()
         val documentResults = provider.fetchDocuments(loader)

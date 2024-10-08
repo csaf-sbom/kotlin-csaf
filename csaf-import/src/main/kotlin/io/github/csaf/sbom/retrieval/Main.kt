@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
 @KoverIgnore("Entry point for demo purposes only")
@@ -24,24 +23,24 @@ fun main(args: Array<String>) {
     runBlocking {
         // Create a new "RetrievedProvider" from a domain. This will automatically discover a
         // suitable provider-metadata.json
-        val provider = RetrievedProvider.from(args[0]).getOrThrow()
-
-        print("Discovered provider-metadata.json @ ${provider.json.canonical_url}\n")
-
-        // Retrieve all documents from all feeds. Note: we currently only support index.txt
-        async {
-            val documentResults = provider.fetchDocuments()
-            documentResults.forEach { it ->
-                it.onSuccess { doc ->
+        RetrievedProvider.from(args[0])
+            .onSuccess { provider ->
+                println("Discovered provider-metadata.json @ ${provider.json.canonical_url}")
+                // Retrieve all documents from all feeds. Note: we currently only support index.txt
+                provider.fetchDocuments().forEach {
+                    it.onSuccess { doc ->
                         // The resulting document is a "Csaf" type, which contains the
-                        // representation defined
-                        // in the JSON schema
-                        print("Fetched document with ID ${doc.json.document.tracking.id}\n")
+                        // representation defined in the JSON schema
+                        println("Fetched document with ID ${doc.json.document.tracking.id}")
                     }
-                    .onFailure { ex ->
-                        print("Could not fetch document: ${ex.message}, ${ex.cause}\n")
+                    it.onFailure { ex ->
+                        println("Could not fetch document: ${ex.message}, ${ex.cause}")
                     }
+                }
             }
-        }
+            .onFailure {
+                println("Could not fetch provider meta from ${args[0]}")
+                it.printStackTrace()
+            }
     }
 }
