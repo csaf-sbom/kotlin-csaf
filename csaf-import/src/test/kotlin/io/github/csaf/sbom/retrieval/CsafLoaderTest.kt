@@ -16,8 +16,11 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.validation.ValidationContext
+import io.github.csaf.sbom.validation.ValidationException
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.assertThrows
 
 class CsafLoaderTest {
     private val loader = CsafLoader(mockEngine())
@@ -52,6 +55,10 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
+        // Fresh [ValidationContext] should always throw.
+        assertThrows<ValidationException> {
+            RetrievedProvider(result.getOrThrow()).validate(ValidationContext())
+        }
 
         val provider = result.getOrNull()
         assertNotNull(provider)
