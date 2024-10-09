@@ -122,19 +122,34 @@ class RetrievedProvider(val json: Provider) {
          * Retrieves one or more provider-metadata.json documents (represented by the [Provider]
          * data class) from a domain according to the
          * [retrieval rules](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#731-finding-provider-metadatajson).
+         *
+         * [CSAF standard section
+         * 7.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
+         * states that "It is possible to advertise more than one provider-metadata.json by adding
+         * multiple CSAF fields [...] However, **this SHOULD NOT be done and removed as soon as
+         * possible.**", plus "**If one of the URLs fulfills requirement 9, this MUST be used as the
+         * first CSAF entry in the security.txt.**"
+         *
+         * That means, if we do not return more than one valid Provider, then the first `CSAF` entry
+         * in `security.txt` is guaranteed to be identical to the `.well-known` URL, hence
+         * resolution of `security.txt` in that case is useless **unless** we want to change our API
+         * such that it may resolve multiple `Provider`s for an input domain.
          */
         suspend fun from(
             domain: String,
             loader: CsafLoader = lazyLoader
         ): Result<RetrievedProvider> {
             val ctx = ValidationContext()
+            val mapAndValidateProvider = { p: Provider ->
+                RetrievedProvider(p).also { it.validate(ctx) }
+            }
             // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return loader
                 .fetchProvider(wellKnownPath, ctx)
                 .onSuccess { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN }
-                .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
+                .mapCatching(mapAndValidateProvider)
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
@@ -144,7 +159,7 @@ class RetrievedProvider(val json: Provider) {
                             .onSuccess {
                                 ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
                             }
-                            .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
+                            .mapCatching(mapAndValidateProvider)
                             .getOrNull()
                     }
                 }
@@ -155,7 +170,7 @@ class RetrievedProvider(val json: Provider) {
                     loader
                         .fetchProvider("https://csaf.data.security.$domain", ctx)
                         .onSuccess { ctx.dataSource = ValidationContext.DataSource.DNS }
-                        .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
+                        .mapCatching(mapAndValidateProvider)
                         .getOrThrow()
                 }
         }
