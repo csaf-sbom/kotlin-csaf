@@ -18,6 +18,7 @@ package io.github.csaf.sbom.retrieval
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.assertThrows
 
@@ -43,6 +44,14 @@ class RetrievedProviderTest {
             "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
             exception.message
         )
+    }
+
+    @Test
+    fun testRetrievedProviderEmptyIndex() = runTest {
+        val loader = CsafLoader(mockEngine())
+        val provider = RetrievedProvider.from("no-distributions.com", loader).getOrThrow()
+        val documentResults = provider.fetchDocuments(loader)
+        assertSame(emptyList(), documentResults)
     }
 
     private suspend fun providerTest(url: String) {

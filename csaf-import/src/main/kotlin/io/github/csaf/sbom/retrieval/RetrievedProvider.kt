@@ -18,7 +18,6 @@ package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Provider
-import io.github.csaf.sbom.validation.Role
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
@@ -36,7 +35,32 @@ import kotlinx.coroutines.future.future
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
-class RetrievedProvider(val json: Provider, val role: Role) {
+class RetrievedProvider(val json: Provider) {
+
+    /**
+     * The role of this [RetrievedProvider] (publisher, provider, trusted provider), required for
+     * checking the validity of the provider itself and the documents downloaded by it.
+     */
+    private val role
+        get() =
+            when (json.role) {
+                Provider.Role.csaf_publisher -> CSAFPublisherRole
+                Provider.Role.csaf_provider -> CSAFProviderRole
+                Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole
+            }
+
+    /**
+     * Validates this [RetrievedProvider] according to the CSAF standard.
+     *
+     * @param validationContext The validation context used for validation.
+     */
+    fun validate(validationContext: ValidationContext) {
+        role.checkRole(validationContext).let { vr ->
+            if (vr is ValidationFailed) {
+                throw ValidationException(vr)
+            }
+        }
+    }
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
@@ -107,41 +131,20 @@ class RetrievedProvider(val json: Provider, val role: Role) {
             // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
-
-            // Checks a [Provider] for validity and turns it into a [RetrievedProvider].
-            val verifyingMapping = { providerMeta: Provider ->
-                // We need to validate the provider according to its "role" (publisher,
-                // provider, trusted provider).
-                val role =
-                    when (providerMeta.role) {
-                        Provider.Role.csaf_publisher -> CSAFPublisherRole
-                        Provider.Role.csaf_provider -> CSAFProviderRole
-                        Provider.Role.csaf_trusted_provider -> CSAFTrustedProviderRole
-                    }
-
-                RetrievedProvider(providerMeta, role).also {
-                    role.checkRole(ctx).let { vr ->
-                        if (vr is ValidationFailed) {
-                            throw ValidationException(vr)
-                        }
-                    }
-                }
-            }
-
             return loader
                 .fetchProvider(wellKnownPath, ctx)
                 .onSuccess { ctx.dataSource = ValidationContext.DataSource.WELL_KNOWN }
-                .mapCatching(verifyingMapping)
+                .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
-                    loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf {
+                    loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
                         loader
-                            .fetchProvider(it, ctx)
+                            .fetchProvider(entry, ctx)
                             .onSuccess {
                                 ctx.dataSource = ValidationContext.DataSource.SECURITY_TXT
                             }
-                            .mapCatching(verifyingMapping)
+                            .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
                             .getOrNull()
                     }
                 }
@@ -152,7 +155,7 @@ class RetrievedProvider(val json: Provider, val role: Role) {
                     loader
                         .fetchProvider("https://csaf.data.security.$domain", ctx)
                         .onSuccess { ctx.dataSource = ValidationContext.DataSource.DNS }
-                        .mapCatching(verifyingMapping)
+                        .mapCatching { p -> RetrievedProvider(p).also { it.validate(ctx) } }
                         .getOrThrow()
                 }
         }
