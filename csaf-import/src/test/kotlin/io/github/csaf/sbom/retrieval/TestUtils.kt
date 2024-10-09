@@ -20,14 +20,14 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 
 fun mockEngine() = MockEngine { request ->
-    var host = request.url.host
-    var file = request.url.fullPath.trimStart('/')
-    // A little trick to serve the metadata JSON on the DNS path
-    if (file == "") {
-        file = "index.json"
-    }
-    var resourcePath = ("$host/$file").trimStart('/')
-    var response = javaClass.classLoader.getResource(resourcePath)
+    val host = request.url.host
+    val file =
+        request.url.fullPath.trimStart('/').let {
+            // A little trick to serve the metadata JSON on the DNS path
+            if (it == "") "index.json" else it
+        }
+    val resourcePath = ("$host/$file").trimStart('/')
+    val response = javaClass.classLoader.getResource(resourcePath)
 
     if (response == null) {
         respond(content = "Not Found", status = HttpStatusCode.NotFound)

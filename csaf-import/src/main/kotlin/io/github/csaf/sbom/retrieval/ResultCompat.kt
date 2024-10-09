@@ -51,5 +51,5 @@ class ResultCompat<T>(private val result: Result<T>) {
 
     override fun toString(): String =
         if (isSuccess) "ResultCompat(value = ${getOrNull()})"
-        else "ResultCompat(error = ${exceptionOrNull()?.message})"
+        else "ResultCompat(error = ${exceptionOrNull().toString()})"
 }

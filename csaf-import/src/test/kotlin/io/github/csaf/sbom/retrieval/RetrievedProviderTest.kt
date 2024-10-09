@@ -18,28 +18,43 @@ package io.github.csaf.sbom.retrieval
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
-    @Test
-    fun testRetrievedProviderFrom() = runTest {
-        var url = "example.com"
-        providerTest(url)
-    }
+    @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
 
     @Test
     fun testRetrievedProviderFromSecurityTxt() = runTest {
-        var url = "provider-with-securitytxt.com"
-        providerTest(url)
+        providerTest("provider-with-securitytxt.com")
     }
 
     @Test
-    fun testRetrievedProviderFromDNSPath() = runTest {
-        var url = "publisher-with-dns.com"
-        providerTest(url)
+    fun testRetrievedProviderFromDNSPath() = runTest { providerTest("publisher-with-dns.com") }
+
+    @Test
+    fun testRetrievedProviderBrokenDomain() {
+        val loader = CsafLoader(mockEngine())
+        val exception =
+            assertThrows<Exception> {
+                runTest { RetrievedProvider.from("broken-domain.com", loader).getOrThrow() }
+            }
+        assertEquals(
+            "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
+            exception.message
+        )
     }
 
-    suspend fun providerTest(url: String) {
+    @Test
+    fun testRetrievedProviderEmptyIndex() = runTest {
+        val loader = CsafLoader(mockEngine())
+        val provider = RetrievedProvider.from("no-distributions.com", loader).getOrThrow()
+        val documentResults = provider.fetchDocuments(loader)
+        assertSame(emptyList(), documentResults)
+    }
+
+    private suspend fun providerTest(url: String) {
         val loader = CsafLoader(mockEngine())
         val provider = RetrievedProvider.from(url, loader).getOrThrow()
         val documentResults = provider.fetchDocuments(loader)

@@ -407,6 +407,7 @@ class RequirementsTest {
         assertIs<ValidationFailed>(
             rule.check(
                 ctx.also {
+                    @Suppress("HttpUrlsUsage")
                     it.httpResponse =
                         mockResponse(mockRequest(Url("http://example.com")), HttpStatusCode.OK)
                 }
@@ -445,7 +446,7 @@ class RequirementsTest {
                     it.httpResponse =
                         mockResponse(
                             mockRequest(
-                                Url("http://example.com"),
+                                Url("https://example.com"),
                                 headers = headers { set("Authorization", "Bearer: 1234") }
                             ),
                             HttpStatusCode.OK
@@ -460,7 +461,7 @@ class RequirementsTest {
                 ctx.also {
                     it.httpResponse =
                         mockResponse(
-                            mockRequest(Url("http://example.com")),
+                            mockRequest(Url("https://example.com")),
                             HttpStatusCode.Unauthorized,
                         )
                 }
@@ -473,7 +474,7 @@ class RequirementsTest {
                 ctx.also {
                     it.httpResponse =
                         mockResponse(
-                            mockRequest(Url("http://example.com")),
+                            mockRequest(Url("https://example.com")),
                             HttpStatusCode.OK,
                         )
                 }

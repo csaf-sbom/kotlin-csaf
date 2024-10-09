@@ -1,0 +1,1 @@
+CSAF: https://example.com/.well-known/csaf/provider-metadata.json

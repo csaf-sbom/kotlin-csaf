@@ -51,10 +51,10 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      */
     private suspend inline fun <reified T> get(
         url: String,
-        noinline responseCallback: ((HttpResponse) -> Unit)? = null
+        crossinline responseCallback: ((HttpResponse) -> Unit)
     ): T {
         val response = httpClient.get(url)
-        responseCallback?.invoke(response)
+        responseCallback.invoke(response)
 
         if (!response.status.isSuccess()) {
             throw Exception("Could not retrieve $url: ${response.status.description}")
@@ -91,12 +91,12 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse a CSAF JSON document from a given URL.
      *
      * @param url The URL where the CSAF document is found.
-     * @param ctx An optional [ValidationContext] that is automatically filled with the HTTP
-     *   response and body of the calls made in this function.
+     * @param ctx A [ValidationContext] that is automatically filled with the HTTP response and body
+     *   of the calls made in this function.
      * @return An instance of [Csaf], wrapped in a [Result] monad, if successful. A failed [Result]
      *   wrapping the thrown [Throwable] in case of an error.
      */
-    suspend fun fetchDocument(url: String, ctx: ValidationContext? = null): Result<Csaf> =
+    suspend fun fetchDocument(url: String, ctx: ValidationContext): Result<Csaf> =
         Result.of { get<Csaf>(url, ctx.responseCallback()).also(ctx.jsonCallback()) }
 
     /**
@@ -111,7 +111,7 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     suspend fun fetchText(
         url: String,
         responseCallback: ((HttpResponse) -> Unit)? = null
-    ): Result<String> = Result.of { get(url, responseCallback) }
+    ): Result<String> = Result.of { get(url, responseCallback ?: {}) }
 
     /**
      * Fetch the `CSAF` fields from a `security.txt` as specified in
@@ -129,15 +129,19 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     ) =
         // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
         //  See https://github.com/csaf-sbom/kotlin-csaf/issues/43
-        // TODO: A security.txt can also be at a legacy location.
-        //  See https://github.com/csaf-sbom/kotlin-csaf/issues/44
-        fetchText("https://$domain/.well-known/security.txt", responseCallback).mapCatching {
-            securityTxt ->
-            securityTxt
-                .lineSequence()
-                .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
-                .toList()
-        }
+        fetchText("https://$domain/.well-known/security.txt", responseCallback)
+            // Try fallback to legacy location.
+            .recoverCatching {
+                fetchText("https://$domain/security.txt", responseCallback).getOrThrow()
+            }
+            .mapCatching { securityTxt ->
+                securityTxt
+                    .lineSequence()
+                    .mapNotNull { line ->
+                        securityTxtCsaf.matchEntire(line)?.let { it.groupValues[1] }
+                    }
+                    .toList()
+            }
 
     companion object {
         val securityTxtCsaf = Regex("CSAF: (https://.*)")
