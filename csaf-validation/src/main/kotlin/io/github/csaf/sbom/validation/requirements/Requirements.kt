@@ -51,7 +51,8 @@ object Requirement2ValidFilename : Requirement {
         val should = json.document.tracking.id.lowercase().replace("[^+\\-a-z0-9]+", "_") + ".json"
 
         // Extract filename out of response?
-        val filename = ctx.httpResponse?.request?.url?.pathSegments?.lastOrNull()
+        @Suppress("SimpleRedundantLet")
+        val filename = ctx.httpResponse?.let { it.request.url.pathSegments.lastOrNull() }
         return if (filename == should) {
             ValidationSuccessful
         } else {
@@ -68,8 +69,9 @@ object Requirement2ValidFilename : Requirement {
  */
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        // TODO(oxisto): This will also fail if the httpResponse is empty, which is BAD
-        return if (ctx.httpResponse?.request?.url?.protocol == URLProtocol.HTTPS) {
+        return if (
+            ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } != false
+        ) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("JSON was not retrieved via HTTPS"))
