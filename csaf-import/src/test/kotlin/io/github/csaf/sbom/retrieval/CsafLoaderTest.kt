@@ -67,4 +67,21 @@ class CsafLoaderTest {
             "\"Download\" of https://example.com/does-not-exist.json should produce a failed Result."
         )
     }
+
+    @Test
+    fun testFetchSecurityTxtCsafUrls() = runTest {
+        // Test .well-known resolution (preferred).
+        val result = loader.fetchSecurityTxtCsafUrls("provider-with-securitytxt.com")
+        assertContentEquals(
+            listOf("https://provider-with-securitytxt.com/directory/provider-metadata.json"),
+            result.getOrThrow()
+        )
+
+        // Test fallback location.
+        val legacyResult = loader.fetchSecurityTxtCsafUrls("example.com")
+        assertContentEquals(
+            listOf("https://example.com/.well-known/csaf/provider-metadata.json"),
+            legacyResult.getOrThrow()
+        )
+    }
 }

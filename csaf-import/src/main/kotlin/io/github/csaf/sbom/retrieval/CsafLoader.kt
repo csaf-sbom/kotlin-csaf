@@ -129,15 +129,17 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     ) =
         // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
         //  See https://github.com/csaf-sbom/kotlin-csaf/issues/43
-        // TODO: A security.txt can also be at a legacy location.
-        //  See https://github.com/csaf-sbom/kotlin-csaf/issues/44
-        fetchText("https://$domain/.well-known/security.txt", responseCallback).mapCatching {
-            securityTxt ->
-            securityTxt
-                .lineSequence()
-                .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
-                .toList()
-        }
+        fetchText("https://$domain/.well-known/security.txt", responseCallback)
+            // Try fallback to legacy location.
+            .recoverCatching {
+                fetchText("https://$domain/security.txt", responseCallback).getOrThrow()
+            }
+            .mapCatching { securityTxt ->
+                securityTxt
+                    .lineSequence()
+                    .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
+                    .toList()
+            }
 
     companion object {
         val securityTxtCsaf = Regex("CSAF: (https://.*)")
