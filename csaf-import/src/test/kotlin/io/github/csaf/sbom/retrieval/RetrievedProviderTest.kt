@@ -19,6 +19,7 @@ package io.github.csaf.sbom.retrieval
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
     @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
@@ -30,6 +31,19 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderFromDNSPath() = runTest { providerTest("publisher-with-dns.com") }
+
+    @Test
+    fun testRetrievedProviderBrokenDomain() {
+        val loader = CsafLoader(mockEngine())
+        val exception =
+            assertThrows<Exception> {
+                runTest { RetrievedProvider.from("broken-domain.com", loader).getOrThrow() }
+            }
+        assertEquals(
+            "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
+            exception.message
+        )
+    }
 
     private suspend fun providerTest(url: String) {
         val loader = CsafLoader(mockEngine())

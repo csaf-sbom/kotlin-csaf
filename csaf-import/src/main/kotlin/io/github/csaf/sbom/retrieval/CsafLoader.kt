@@ -91,12 +91,12 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      * Fetch and parse a CSAF JSON document from a given URL.
      *
      * @param url The URL where the CSAF document is found.
-     * @param ctx An optional [ValidationContext] that is automatically filled with the HTTP
-     *   response and body of the calls made in this function.
+     * @param ctx A [ValidationContext] that is automatically filled with the HTTP response and body
+     *   of the calls made in this function.
      * @return An instance of [Csaf], wrapped in a [Result] monad, if successful. A failed [Result]
      *   wrapping the thrown [Throwable] in case of an error.
      */
-    suspend fun fetchDocument(url: String, ctx: ValidationContext? = null): Result<Csaf> =
+    suspend fun fetchDocument(url: String, ctx: ValidationContext): Result<Csaf> =
         Result.of { get<Csaf>(url, ctx.responseCallback()).also(ctx.jsonCallback()) }
 
     /**
@@ -137,7 +137,9 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
             .mapCatching { securityTxt ->
                 securityTxt
                     .lineSequence()
-                    .mapNotNull { securityTxtCsaf.matchEntire(it)?.groupValues?.get(1) }
+                    .mapNotNull { line ->
+                        securityTxtCsaf.matchEntire(line)?.let { it.groupValues[1] }
+                    }
                     .toList()
             }
 

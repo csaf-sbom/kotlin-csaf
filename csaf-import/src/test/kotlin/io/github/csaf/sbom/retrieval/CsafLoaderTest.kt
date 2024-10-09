@@ -73,7 +73,10 @@ class CsafLoaderTest {
         // Test .well-known resolution (preferred).
         val result = loader.fetchSecurityTxtCsafUrls("provider-with-securitytxt.com")
         assertContentEquals(
-            listOf("https://provider-with-securitytxt.com/directory/provider-metadata.json"),
+            listOf(
+                "https://provider-with-securitytxt.com/broken-url/provider-metadata.json",
+                "https://provider-with-securitytxt.com/directory/provider-metadata.json"
+            ),
             result.getOrThrow()
         )
 

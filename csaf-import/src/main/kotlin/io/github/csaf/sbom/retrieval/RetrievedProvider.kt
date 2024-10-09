@@ -40,32 +40,37 @@ class RetrievedProvider(val json: Provider, val role: Role) {
 
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
-        return json.distributions
-            ?.mapNotNull { it.directory_url?.toString()?.trimEnd('/') }
-            ?.mapAsync { directoryUrl ->
-                val indexUrl = "$directoryUrl/index.txt"
-                loader
-                    .fetchText(indexUrl)
-                    .fold(
-                        { index ->
-                            index.lines().mapAsync { line ->
-                                val csafUrl = "$directoryUrl/$line"
-                                RetrievedDocument.from(csafUrl, loader, this.role)
-                            }
-                        },
-                        { e ->
-                            listOf(
-                                Result.failure(
-                                    Exception(
-                                        "Failed to fetch index.txt from directory at $directoryUrl",
-                                        e
+        @Suppress("SimpleRedundantLet")
+        return json.distributions?.let { distributions ->
+            distributions
+                .mapNotNull { distribution ->
+                    distribution.directory_url?.let { it.toString().trimEnd('/') }
+                }
+                .mapAsync { directoryUrl ->
+                    val indexUrl = "$directoryUrl/index.txt"
+                    loader
+                        .fetchText(indexUrl)
+                        .fold(
+                            { index ->
+                                index.lines().mapAsync { line ->
+                                    val csafUrl = "$directoryUrl/$line"
+                                    RetrievedDocument.from(csafUrl, loader, this.role)
+                                }
+                            },
+                            { e ->
+                                listOf(
+                                    Result.failure(
+                                        Exception(
+                                            "Failed to fetch index.txt from directory at $directoryUrl",
+                                            e
+                                        )
                                     )
                                 )
-                            )
-                        }
-                    )
-            }
-            ?.flatten() ?: emptyList()
+                            }
+                        )
+                }
+                .flatten()
+        } ?: emptyList()
     }
 
     @Suppress("unused")
