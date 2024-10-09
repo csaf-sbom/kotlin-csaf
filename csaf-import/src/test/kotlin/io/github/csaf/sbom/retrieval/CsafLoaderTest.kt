@@ -18,6 +18,7 @@ package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
+import io.ktor.http.*
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.assertThrows
@@ -93,5 +94,14 @@ class CsafLoaderTest {
             listOf("https://example.com/.well-known/csaf/provider-metadata.json"),
             legacyResult.getOrThrow()
         )
+    }
+
+    @Test
+    fun testFetchInvalidUrl() = runTest {
+        val result =
+            loader.fetchText("does-not-exist.com/not-available.txt") {
+                assertSame(HttpStatusCode.NotFound, it.status)
+            }
+        assertFalse { result.isSuccess }
     }
 }

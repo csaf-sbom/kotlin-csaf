@@ -51,10 +51,10 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      */
     private suspend inline fun <reified T> get(
         url: String,
-        noinline responseCallback: ((HttpResponse) -> Unit)? = null
+        crossinline responseCallback: ((HttpResponse) -> Unit)
     ): T {
         val response = httpClient.get(url)
-        responseCallback?.invoke(response)
+        responseCallback.invoke(response)
 
         if (!response.status.isSuccess()) {
             throw Exception("Could not retrieve $url: ${response.status.description}")
@@ -111,7 +111,7 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
     suspend fun fetchText(
         url: String,
         responseCallback: ((HttpResponse) -> Unit)? = null
-    ): Result<String> = Result.of { get(url, responseCallback) }
+    ): Result<String> = Result.of { get(url, responseCallback ?: {}) }
 
     /**
      * Fetch the `CSAF` fields from a `security.txt` as specified in

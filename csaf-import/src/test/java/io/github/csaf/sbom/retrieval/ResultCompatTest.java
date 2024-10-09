@@ -42,7 +42,7 @@ public class ResultCompatTest {
     public void testFailureResult() {
         final var result = ResultCompat.failure(new Exception("Some error"));
 
-        assertEquals("ResultCompat(error = Some error)", result.toString());
+        assertEquals("ResultCompat(error = java.lang.Exception: Some error)", result.toString());
         assertFalse(result.isSuccess());
         assertTrue(result.isFailure());
         assertEquals("Some error", Objects.requireNonNull(result.exceptionOrNull()).getMessage());
