@@ -28,7 +28,7 @@ import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
  * fetching a document from a location, including validation according to the specification.
  */
-class RetrievedDocument(val json: Csaf, val sourceUrl: String) {
+class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: String) {
 
     companion object {
         /**
@@ -52,7 +52,7 @@ class RetrievedDocument(val json: Csaf, val sourceUrl: String) {
             return loader
                 .fetchDocument(documentUrl, ctx)
                 .mapCatching {
-                    RetrievedDocument(it, documentUrl).also { doc ->
+                    RetrievedDocument(it, documentUrl).also { _ ->
                         providerRole.checkDocument(ctx).let { vr ->
                             if (vr is ValidationFailed) {
                                 throw ValidationException(vr)

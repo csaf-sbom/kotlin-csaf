@@ -23,6 +23,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
+    init {
+        CsafLoader.defaultLoaderFactory = { CsafLoader(mockEngine()) }
+    }
+
     @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
 
     @Test
@@ -35,10 +39,9 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderBrokenDomain() {
-        val loader = CsafLoader(mockEngine())
         val exception =
             assertThrows<Exception> {
-                runTest { RetrievedProvider.from("broken-domain.com", loader).getOrThrow() }
+                runTest { RetrievedProvider.from("broken-domain.com").getOrThrow() }
             }
         assertEquals(
             "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
@@ -48,16 +51,14 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderEmptyIndex() = runTest {
-        val loader = CsafLoader(mockEngine())
-        val provider = RetrievedProvider.from("no-distributions.com", loader).getOrThrow()
-        val documentResults = provider.fetchDocuments(loader)
+        val provider = RetrievedProvider.from("no-distributions.com").getOrThrow()
+        val documentResults = provider.fetchDocuments()
         assertSame(emptyList(), documentResults)
     }
 
     private suspend fun providerTest(url: String) {
-        val loader = CsafLoader(mockEngine())
-        val provider = RetrievedProvider.from(url, loader).getOrThrow()
-        val documentResults = provider.fetchDocuments(loader)
+        val provider = RetrievedProvider.from(url).getOrThrow()
+        val documentResults = provider.fetchDocuments()
         assertEquals(
             3,
             documentResults.size,

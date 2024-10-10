@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.*;
@@ -26,12 +27,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the functionality of <code>RetrievedProvider</code> in Java.
  */
 public class RetrievedProviderJavaTest {
-    private static final CsafLoader loader = new CsafLoader(TestUtilsKt.mockEngine());
+    @BeforeAll
+    public static void setup() {
+        //noinspection KotlinInternalInJava
+        CsafLoader.Companion.setDefaultLoaderFactory$csaf_import(() -> new CsafLoader(TestUtilsKt.mockEngine()));
+    }
 
     @Test
     public void test() throws InterruptedException, ExecutionException {
-        final var provider = RetrievedProvider.fromAsync("example.com", loader).get();
-        final var documentResults = provider.fetchDocumentsAsync(loader).get();
+        final var provider = RetrievedProvider.fromAsync("example.com").get();
+        final var documentResults = provider.fetchDocumentsAsync().get();
 
         assertEquals(
                 3,
