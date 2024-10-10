@@ -16,13 +16,15 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertSame
+import io.github.csaf.sbom.validation.ValidationException
+import kotlin.test.*
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
+    init {
+        CsafLoader.defaultLoaderFactory = { CsafLoader(mockEngine()) }
+    }
+
     @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
 
     @Test
@@ -35,10 +37,9 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderBrokenDomain() {
-        val loader = CsafLoader(mockEngine())
         val exception =
-            assertThrows<Exception> {
-                runTest { RetrievedProvider.from("broken-domain.com", loader).getOrThrow() }
+            assertFailsWith<Exception> {
+                runTest { RetrievedProvider.from("broken-domain.com").getOrThrow() }
             }
         assertEquals(
             "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
@@ -48,35 +49,41 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderEmptyIndex() = runTest {
-        val loader = CsafLoader(mockEngine())
-        val provider = RetrievedProvider.from("no-distributions.com", loader).getOrThrow()
-        val documentResults = provider.fetchDocuments(loader)
-        assertSame(emptyList(), documentResults)
+        val provider = RetrievedProvider.from("no-distributions.com").getOrThrow()
+        val documentResults = provider.fetchDocuments()
+        assertEquals(0, documentResults.size)
     }
 
     private suspend fun providerTest(url: String) {
-        val loader = CsafLoader(mockEngine())
-        val provider = RetrievedProvider.from(url, loader).getOrThrow()
-        val documentResults = provider.fetchDocuments(loader)
+        val provider = RetrievedProvider.from(url).getOrThrow()
+        val documentResults = provider.fetchDocuments()
         assertEquals(
-            3,
+            4,
             documentResults.size,
-            "Expected exactly 3 results: One document, one document error, one index error"
+            "Expected exactly 4 results: One document, two document errors, one index error"
         )
         // Check some random property on successful document
         assertEquals(
             "Bundesamt für Sicherheit in der Informationstechnik",
             documentResults[0].getOrThrow().json.document.publisher.name
         )
-        // Check document error
+        // Check document validation error
+        val validationException =
+            assertIs<ValidationException>(documentResults[1].exceptionOrNull()?.cause)
+        assertContentEquals(
+            listOf("Filename bsi-2022_2-01.json does not match conformance"),
+            validationException.errors
+        )
+        // Check download error
+        val fetchException = assertIs<Exception>(documentResults[2].exceptionOrNull()?.cause)
         assertEquals(
-            "Failed to fetch CSAF document from https://$url/directory/2024/does-not-exist.json",
-            documentResults[1].exceptionOrNull()?.message
+            "Could not retrieve https://$url/directory/2024/does-not-exist.json: Not Found",
+            fetchException.message
         )
         // Check index error
         assertEquals(
             "Failed to fetch index.txt from directory at https://$url/invalid-directory",
-            documentResults[2].exceptionOrNull()?.message
+            documentResults[3].exceptionOrNull()?.message
         )
     }
 }

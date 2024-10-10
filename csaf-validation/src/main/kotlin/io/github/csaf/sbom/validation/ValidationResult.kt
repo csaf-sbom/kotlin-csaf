@@ -24,7 +24,7 @@ object ValidationSuccessful : ValidationResult
 
 // TODO(oxisto): Does it make sense to have something like NotApplicable? Currently, this does not
 // propagate
-var ValidationNotApplicable = ValidationSuccessful
+val ValidationNotApplicable = ValidationSuccessful
 
 /**
  * A [ValidationResult] that represents a failed validation, with extra information why it failed.
@@ -32,4 +32,6 @@ var ValidationNotApplicable = ValidationSuccessful
 data class ValidationFailed(
     /** Any errors encountered during the validation. */
     val errors: List<String> = emptyList()
-) : ValidationResult
+) : ValidationResult {
+    fun toException() = ValidationException(errors)
+}

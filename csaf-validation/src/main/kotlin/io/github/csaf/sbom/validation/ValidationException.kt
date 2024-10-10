@@ -20,4 +20,7 @@ package io.github.csaf.sbom.validation
  * This exception will be thrown, if the result of [Role.checkRole] or [Role.checkDocument] is
  * [ValidationFailed].
  */
-data class ValidationException(var validationResult: ValidationFailed) : Exception()
+data class ValidationException(val errors: List<String>) : Exception() {
+    override val message: String
+        get() = "Validation failed with this errors: $errors"
+}
