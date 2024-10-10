@@ -51,7 +51,7 @@ class RetrievedProviderTest {
     fun testRetrievedProviderEmptyIndex() = runTest {
         val provider = RetrievedProvider.from("no-distributions.com").getOrThrow()
         val documentResults = provider.fetchDocuments()
-        assertSame(emptyList(), documentResults)
+        assertEquals(0, documentResults.size)
     }
 
     private suspend fun providerTest(url: String) {
@@ -74,7 +74,6 @@ class RetrievedProviderTest {
             listOf("Filename bsi-2022_2-01.json does not match conformance"),
             validationException.errors
         )
-        validationException.printStackTrace()
         // Check download error
         val fetchException = assertIs<Exception>(documentResults[2].exceptionOrNull()?.cause)
         assertEquals(
