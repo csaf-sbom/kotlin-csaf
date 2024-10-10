@@ -16,11 +16,9 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.Role
 import io.github.csaf.sbom.validation.ValidationContext
-import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
 
@@ -45,7 +43,7 @@ class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: Strin
          */
         suspend fun from(
             documentUrl: String,
-            loader: CsafLoader = lazyLoader,
+            loader: CsafLoader,
             providerRole: Role
         ): Result<RetrievedDocument> {
             val ctx = ValidationContext()
@@ -55,13 +53,13 @@ class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: Strin
                     RetrievedDocument(it, documentUrl).also { _ ->
                         providerRole.checkDocument(ctx).let { vr ->
                             if (vr is ValidationFailed) {
-                                throw ValidationException(vr)
+                                throw vr.toException()
                             }
                         }
                     }
                 }
                 .recoverCatching { e ->
-                    throw Exception("Failed to fetch CSAF document from $documentUrl", e)
+                    throw Exception("Failed to load CSAF document from $documentUrl", e)
                 }
         }
     }

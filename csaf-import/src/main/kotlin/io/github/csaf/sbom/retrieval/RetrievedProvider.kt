@@ -19,7 +19,6 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.validation.ValidationContext
-import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFProviderRole
 import io.github.csaf.sbom.validation.roles.CSAFPublisherRole
@@ -57,7 +56,7 @@ class RetrievedProvider(val json: Provider) {
     fun validate(validationContext: ValidationContext) {
         role.checkRole(validationContext).let { vr ->
             if (vr is ValidationFailed) {
-                throw ValidationException(vr)
+                throw vr.toException()
             }
         }
     }
