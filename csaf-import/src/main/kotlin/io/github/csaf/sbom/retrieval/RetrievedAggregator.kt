@@ -24,7 +24,7 @@ import io.github.csaf.sbom.validation.ValidationContext
  * parsing the metadata about an aggregator from a location, including validation according to the
  * specification.
  *
- * This class is not yet implemented.
+ * This class is not yet complete.
  */
 class RetrievedAggregator(val json: Aggregator) {
 
