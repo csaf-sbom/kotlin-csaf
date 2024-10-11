@@ -19,7 +19,6 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.validation.ValidationContext
-import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFProviderRole
 import io.github.csaf.sbom.validation.roles.CSAFPublisherRole
@@ -57,7 +56,7 @@ class RetrievedProvider(val json: Provider) {
     fun validate(validationContext: ValidationContext) {
         role.checkRole(validationContext).let { vr ->
             if (vr is ValidationFailed) {
-                throw ValidationException(vr)
+                throw vr.toException()
             }
         }
     }
@@ -65,36 +64,34 @@ class RetrievedProvider(val json: Provider) {
     /** This function fetches all CSAF documents that are listed by this provider. */
     suspend fun fetchDocuments(loader: CsafLoader = lazyLoader): List<Result<RetrievedDocument>> {
         @Suppress("SimpleRedundantLet")
-        return json.distributions?.let { distributions ->
-            distributions
-                .mapNotNull { distribution ->
-                    distribution.directory_url?.let { it.toString().trimEnd('/') }
-                }
-                .mapAsync { directoryUrl ->
-                    val indexUrl = "$directoryUrl/index.txt"
-                    loader
-                        .fetchText(indexUrl)
-                        .fold(
-                            { index ->
-                                index.lines().mapAsync { line ->
-                                    val csafUrl = "$directoryUrl/$line"
-                                    RetrievedDocument.from(csafUrl, loader, this.role)
-                                }
-                            },
-                            { e ->
-                                listOf(
-                                    Result.failure(
-                                        Exception(
-                                            "Failed to fetch index.txt from directory at $directoryUrl",
-                                            e
-                                        )
+        return (json.distributions ?: emptySet())
+            .mapNotNull { distribution ->
+                distribution.directory_url?.let { it.toString().trimEnd('/') }
+            }
+            .mapAsync { directoryUrl ->
+                val indexUrl = "$directoryUrl/index.txt"
+                loader
+                    .fetchText(indexUrl)
+                    .fold(
+                        { index ->
+                            index.lines().mapAsync { line ->
+                                val csafUrl = "$directoryUrl/$line"
+                                RetrievedDocument.from(csafUrl, loader, this.role)
+                            }
+                        },
+                        { e ->
+                            listOf(
+                                Result.failure(
+                                    Exception(
+                                        "Failed to fetch index.txt from directory at $directoryUrl",
+                                        e
                                     )
                                 )
-                            }
-                        )
-                }
-                .flatten()
-        } ?: emptyList()
+                            )
+                        }
+                    )
+            }
+            .flatten()
     }
 
     @Suppress("unused")

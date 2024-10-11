@@ -145,6 +145,7 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
 
     companion object {
         val securityTxtCsaf = Regex("CSAF: (https://.*)")
-        val lazyLoader: CsafLoader by lazy { CsafLoader() }
+        val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
+        internal var defaultLoaderFactory: (() -> CsafLoader) = { CsafLoader() }
     }
 }

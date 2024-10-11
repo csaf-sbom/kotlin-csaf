@@ -16,11 +16,9 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.Role
 import io.github.csaf.sbom.validation.ValidationContext
-import io.github.csaf.sbom.validation.ValidationException
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
 
@@ -28,7 +26,7 @@ import io.github.csaf.sbom.validation.roles.CSAFTrustedProviderRole
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
  * fetching a document from a location, including validation according to the specification.
  */
-class RetrievedDocument(val json: Csaf, val sourceUrl: String) {
+class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: String) {
 
     companion object {
         /**
@@ -45,23 +43,23 @@ class RetrievedDocument(val json: Csaf, val sourceUrl: String) {
          */
         suspend fun from(
             documentUrl: String,
-            loader: CsafLoader = lazyLoader,
+            loader: CsafLoader,
             providerRole: Role
         ): Result<RetrievedDocument> {
             val ctx = ValidationContext()
             return loader
                 .fetchDocument(documentUrl, ctx)
                 .mapCatching {
-                    RetrievedDocument(it, documentUrl).also { doc ->
+                    RetrievedDocument(it, documentUrl).also { _ ->
                         providerRole.checkDocument(ctx).let { vr ->
                             if (vr is ValidationFailed) {
-                                throw ValidationException(vr)
+                                throw vr.toException()
                             }
                         }
                     }
                 }
                 .recoverCatching { e ->
-                    throw Exception("Failed to fetch CSAF document from $documentUrl", e)
+                    throw Exception("Failed to load CSAF document from $documentUrl", e)
                 }
         }
     }

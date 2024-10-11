@@ -16,6 +16,8 @@
  */
 package io.github.csaf.sbom.retrieval;
 
+import io.github.csaf.sbom.validation.ValidationException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.*;
@@ -26,17 +28,21 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the functionality of <code>RetrievedProvider</code> in Java.
  */
 public class RetrievedProviderJavaTest {
-    private static final CsafLoader loader = new CsafLoader(TestUtilsKt.mockEngine());
+    @BeforeAll
+    public static void setup() {
+        //noinspection KotlinInternalInJava
+        CsafLoader.Companion.setDefaultLoaderFactory$csaf_import(() -> new CsafLoader(TestUtilsKt.mockEngine()));
+    }
 
     @Test
-    public void test() throws InterruptedException, ExecutionException {
-        final var provider = RetrievedProvider.fromAsync("example.com", loader).get();
-        final var documentResults = provider.fetchDocumentsAsync(loader).get();
+    public void testRetrievedProviderJava() throws InterruptedException, ExecutionException {
+        final var provider = RetrievedProvider.fromAsync("example.com").get();
+        final var documentResults = provider.fetchDocumentsAsync().get();
 
         assertEquals(
-                3,
+                4,
                 documentResults.size(),
-                "Expected exactly 3 results: One document, one document error, one index error"
+                "Expected exactly 4 results: One document, two document errors, one index error"
         );
         // Check some random property on successful document
         final var document = documentResults.getFirst().getOrNull();
@@ -45,15 +51,26 @@ public class RetrievedProviderJavaTest {
                 "Bundesamt für Sicherheit in der Informationstechnik",
                 document.getJson().getDocument().getPublisher().getName()
         );
-        // Check document error
-        final var documentError = documentResults.get(1).exceptionOrNull();
-        assertNotNull(documentError);
+        // Check document validation error
+        final var documentError1 = documentResults.get(1).exceptionOrNull();
+        assertNotNull(documentError1);
+        final var validationException = (ValidationException) documentError1.getCause();
+        assertNotNull(validationException);
         assertEquals(
-                "Failed to fetch CSAF document from https://example.com/directory/2024/does-not-exist.json",
-                documentError.getMessage()
+                "Filename bsi-2022_2-01.json does not match conformance",
+                validationException.getErrors().getFirst()
+        );
+        // Check document error
+        final var documentError2 = documentResults.get(2).exceptionOrNull();
+        assertNotNull(documentError2);
+        final var documentFetchError = (Exception) documentError2.getCause();
+        assertNotNull(documentFetchError);
+        assertEquals(
+                "Could not retrieve https://example.com/directory/2024/does-not-exist.json: Not Found",
+                documentFetchError.getMessage()
         );
         // Check index error
-        final var indexError = documentResults.get(2).exceptionOrNull();
+        final var indexError = documentResults.get(3).exceptionOrNull();
         assertNotNull(indexError);
         assertEquals(
                 "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
