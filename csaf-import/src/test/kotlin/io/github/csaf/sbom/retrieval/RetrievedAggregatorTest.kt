@@ -26,15 +26,13 @@ class RetrievedAggregatorTest {
     }
 
     @Test
-    fun testRetrievedAggregatorSuccess() = runTest {
+    fun testRetrievedAggregator() = runTest {
+        val lister = RetrievedAggregator.from("https://example.com/example-01-lister.json")
+        assertTrue(lister.isSuccess)
         val aggregator = RetrievedAggregator.from("https://example.com/example-01-aggregator.json")
         assertTrue(aggregator.isSuccess)
-    }
-
-    @Test
-    fun testRetrievedAggregatorFailure() = runTest {
-        val aggregator =
-            RetrievedAggregator.from("https://does-not-exist.com/example-01-aggregator.json")
-        assertTrue(aggregator.isFailure)
+        val nonExistingLister =
+            RetrievedAggregator.from("https://does-not-exist.com/example-01-lister.json")
+        assertTrue(nonExistingLister.isFailure)
     }
 }

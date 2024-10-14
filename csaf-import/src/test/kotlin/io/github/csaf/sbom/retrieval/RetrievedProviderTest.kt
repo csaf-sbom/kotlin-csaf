@@ -57,8 +57,21 @@ class RetrievedProviderTest {
         assertTrue(documentResults.isEmpty())
     }
 
-    private suspend fun providerTest(url: String) {
-        val provider = RetrievedProvider.from(url).getOrThrow()
+    @Test
+    fun testFetchDocumentIndices() = runTest {
+        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val documentIndexResults = provider.fetchDocumentIndices().toList()
+        assertEquals(
+            2,
+            documentIndexResults.size,
+            "Expected exactly 2 results: One index.txt content and one fetch error"
+        )
+        assertTrue(documentIndexResults[0].second.isSuccess)
+        assertFalse(documentIndexResults[1].second.isSuccess)
+    }
+
+    private suspend fun providerTest(domain: String) {
+        val provider = RetrievedProvider.from(domain).getOrThrow()
         val expectedDocumentCount = provider.countExpectedDocuments()
         assertEquals(3, expectedDocumentCount, "Expected 3 documents")
         val documentResults = provider.fetchDocuments().toList()
@@ -82,12 +95,12 @@ class RetrievedProviderTest {
         // Check download error
         val fetchException = assertIs<Exception>(documentResults[2].exceptionOrNull()?.cause)
         assertEquals(
-            "Could not retrieve https://$url/directory/2024/does-not-exist.json: Not Found",
+            "Could not retrieve https://$domain/directory/2024/does-not-exist.json: Not Found",
             fetchException.message
         )
         // Check index error
         assertEquals(
-            "Failed to fetch index.txt from directory at https://$url/invalid-directory",
+            "Failed to fetch index.txt from directory at https://$domain/invalid-directory",
             documentResults[3].exceptionOrNull()?.message
         )
     }
