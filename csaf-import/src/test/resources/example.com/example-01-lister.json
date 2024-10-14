@@ -1,6 +1,6 @@
 {
   "aggregator": {
-    "category": "lister",
+    "category": "aggregator",
     "contact_details": "Example CSAF Lister can be reached at contact_us@lister.example, or via our website at https://lister.example/security/csaf/aggregator/contact.",
     "issuing_authority": "This service is provided as it is. It is free for everybody.",
     "name": "Example CSAF Lister",
