@@ -37,8 +37,13 @@ public class RetrievedProviderJavaTest {
     @Test
     public void testRetrievedProviderJava() throws InterruptedException, ExecutionException {
         final var provider = RetrievedProvider.fromAsync("example.com").get();
-        final var documentResults = provider.fetchDocumentsAsync().get();
-
+        final var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
+        assertEquals(
+                3,
+                expectedDocumentCount,
+                "Expected 3 documents"
+        );
+        final var documentResults = provider.streamDocuments().toList();
         assertEquals(
                 4,
                 documentResults.size(),

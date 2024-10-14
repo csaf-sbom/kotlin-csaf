@@ -27,13 +27,13 @@ fun main(args: Array<String>) {
             .onSuccess { provider ->
                 println("Discovered provider-metadata.json @ ${provider.json.canonical_url}")
                 // Retrieve all documents from all feeds. Note: we currently only support index.txt
-                provider.fetchDocuments().forEach {
-                    it.onSuccess { doc ->
+                for (result in provider.fetchDocuments()) {
+                    result.onSuccess { doc ->
                         // The resulting document is a "Csaf" type, which contains the
                         // representation defined in the JSON schema
                         println("Fetched document with ID ${doc.json.document.tracking.id}")
                     }
-                    it.onFailure { ex ->
+                    result.onFailure { ex ->
                         println("Could not fetch document: ${ex.message}, ${ex.cause}")
                     }
                 }
