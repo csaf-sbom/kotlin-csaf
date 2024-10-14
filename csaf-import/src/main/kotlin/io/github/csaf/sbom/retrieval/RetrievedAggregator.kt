@@ -18,6 +18,8 @@ package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.schema.generated.Aggregator
 import io.github.csaf.sbom.validation.ValidationContext
+import io.github.csaf.sbom.validation.roles.CSAFAggregatorRole
+import io.github.csaf.sbom.validation.roles.CSAFListerRole
 
 /**
  * This class represents a wrapper around a [Aggregator] document, that provides functionality for
@@ -26,7 +28,18 @@ import io.github.csaf.sbom.validation.ValidationContext
  *
  * This class is not yet complete.
  */
-class RetrievedAggregator(val json: Aggregator) {
+class RetrievedAggregator(val json: Aggregator) : Validatable {
+
+    /**
+     * The role of this [RetrievedAggregator] (lister, aggregator), required for checking the
+     * validity of the aggregator itself and the Provider instances downloaded by it.
+     */
+    override val role
+        get() =
+            when (json.aggregator.category) {
+                Aggregator.Category.lister -> CSAFListerRole
+                Aggregator.Category.aggregator -> CSAFAggregatorRole
+            }
 
     companion object {
         /**
@@ -42,11 +55,14 @@ class RetrievedAggregator(val json: Aggregator) {
             loader: CsafLoader = CsafLoader.lazyLoader
         ): Result<RetrievedAggregator> {
             val ctx = ValidationContext()
+            val mapAndValidateAggregator = { a: Aggregator ->
+                RetrievedAggregator(a).also { it.validate(ctx) }
+            }
             return loader
                 .fetchAggregator(url, ctx)
-                .mapCatching { RetrievedAggregator(it) }
+                .mapCatching(mapAndValidateAggregator)
                 .recoverCatching { e ->
-                    throw Exception("Failed to load CSAF document from $url", e)
+                    throw Exception("Failed to load CSAF Aggregator from $url", e)
                 }
         }
     }

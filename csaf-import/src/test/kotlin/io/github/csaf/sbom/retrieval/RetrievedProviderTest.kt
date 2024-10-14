@@ -18,6 +18,7 @@ package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.validation.ValidationException
 import kotlin.test.*
+import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.test.runTest
 
 class RetrievedProviderTest {
@@ -50,13 +51,17 @@ class RetrievedProviderTest {
     @Test
     fun testRetrievedProviderEmptyIndex() = runTest {
         val provider = RetrievedProvider.from("no-distributions.com").getOrThrow()
-        val documentResults = provider.fetchDocuments()
-        assertEquals(0, documentResults.size)
+        val expectedDocumentCount = provider.countExpectedDocuments()
+        assertEquals(0, expectedDocumentCount)
+        val documentResults = provider.fetchDocuments().toList()
+        assertTrue(documentResults.isEmpty())
     }
 
     private suspend fun providerTest(url: String) {
         val provider = RetrievedProvider.from(url).getOrThrow()
-        val documentResults = provider.fetchDocuments()
+        val expectedDocumentCount = provider.countExpectedDocuments()
+        assertEquals(3, expectedDocumentCount, "Expected 3 documents")
+        val documentResults = provider.fetchDocuments().toList()
         assertEquals(
             4,
             documentResults.size,
