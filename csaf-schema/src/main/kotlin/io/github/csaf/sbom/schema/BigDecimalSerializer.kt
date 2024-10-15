@@ -24,10 +24,10 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 object BigDecimalSerializer : KSerializer<BigDecimal> {
-    override val descriptor = PrimitiveSerialDescriptor("OffsetDateTime", PrimitiveKind.STRING)
+    override val descriptor = PrimitiveSerialDescriptor("BigDecimal", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): BigDecimal = BigDecimal(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): BigDecimal = BigDecimal(decoder.decodeDouble())
 
     override fun serialize(encoder: Encoder, value: BigDecimal) =
-        encoder.encodeString(value.toString())
+        encoder.encodeDouble(value.toDouble())
 }
