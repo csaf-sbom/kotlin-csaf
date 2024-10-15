@@ -1,0 +1,184 @@
+/*
+ * Copyright (c) 2024, The Authors. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package io.github.csaf.sbom.validation.tests
+
+import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.Test
+import io.github.csaf.sbom.validation.ValidationFailed
+import io.github.csaf.sbom.validation.ValidationResult
+import io.github.csaf.sbom.validation.ValidationSuccessful
+import io.github.csaf.sbom.validation.merge
+
+/**
+ * Mandatory tests as defined in
+ * [Section 6.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61-mandatory-tests).
+ */
+var mandatoryTests =
+    listOf(
+        Test611MissingDefinitionOfProductID,
+        Test612MultipleDefinitionOfProductID,
+        Test613CircularDefinitionOfProductID,
+        Test614MissingDefinitionOfProductGroupID,
+        Test615MultipleDefinitionOfProductGroupID,
+    )
+
+/**
+ * Optional tests as defined in
+ * [Section 6.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#62-optional-tests).
+ */
+var optionalTests =
+    listOf(
+        Test621UnusedDefinitionOfProductID,
+    )
+
+/**
+ * Informative tests as defined in
+ * [Section 6.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#63-informative-test).
+ */
+var informativeTests = listOf<Test>()
+
+/** Executes all tests in this list of [Test] objects. */
+fun List<Test>.test(doc: Csaf): ValidationResult {
+    return this.map { it.test(doc) }.merge()
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#611-missing-definition-of-product-id).
+ */
+object Test611MissingDefinitionOfProductID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val definitions = doc.gatherProducts().map { it.product_id }
+        val references = doc.gatherProductReferences()
+
+        val notDefined = references.subtract(definitions)
+
+        return if (notDefined.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs are not defined: ${notDefined.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612-multiple-definition-of-product-id).
+ */
+object Test612MultipleDefinitionOfProductID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val definitions = doc.gatherProducts().map { it.product_id }
+
+        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs are duplicate: ${duplicates.keys.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#613-circular-definition-of-product-id).
+ */
+object Test613CircularDefinitionOfProductID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val circles = mutableSetOf<String>()
+
+        for (relationship in doc.product_tree?.relationships ?: listOf()) {
+            var definedId = relationship.full_product_name.product_id
+            var notAllowed =
+                listOf(relationship.product_reference, relationship.relates_to_product_reference)
+            if (definedId in notAllowed) {
+                circles += definedId
+            }
+        }
+
+        return if (circles.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs are defined in circles: ${circles.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#614-missing-definition-of-product-group-id).
+ */
+object Test614MissingDefinitionOfProductGroupID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val definitions = doc.gatherProductGroups().map { it.group_id }
+        val references = doc.gatherProductGroupReferences()
+
+        val notDefined = references.subtract(definitions)
+
+        return if (notDefined.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs are not defined: ${notDefined.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.5](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#615-multiple-definition-of-product-group-id)
+ */
+object Test615MultipleDefinitionOfProductGroupID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val definitions = doc.gatherProductGroups().map { it.group_id }
+
+        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs are duplicate: ${duplicates.keys.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.2.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#621-unused-definition-of-product-id).
+ */
+object Test621UnusedDefinitionOfProductID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val definitions = doc.gatherProducts().map { it.product_id }
+        val references = doc.gatherProductReferences()
+
+        val notUsed = definitions.subtract(references)
+        return if (notUsed.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The following IDs are not used: ${notUsed.joinToString(",")}"))
+        }
+    }
+}

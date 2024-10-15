@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.schema.KoverIgnore
 import kotlinx.coroutines.runBlocking
 
 @KoverIgnore("Entry point for demo purposes only")

@@ -7,7 +7,6 @@ on:
     tags:
       - v*.**
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -49,7 +48,10 @@ jobs:
       run: ./gradlew spotlessCheck -x spotlessApply
 
     - name: Build ${{ env.version }}
-      run: ./gradlew build koverXmlReport
+      run: |
+        git submodule init
+        git submodule update --remote
+        ./gradlew build koverXmlReport
       env:
         VERSION: ${{ env.version }}
 
