@@ -52,7 +52,7 @@ object Requirement2ValidFilename : Requirement {
 
         // Extract filename out of response?
         @Suppress("SimpleRedundantLet")
-        val filename = ctx.httpResponse?.let { it.request.url.pathSegments.lastOrNull() }
+        val filename = ctx.httpResponse?.let { it.request.url.segments.lastOrNull() }
         return if (filename == should) {
             ValidationSuccessful
         } else {
