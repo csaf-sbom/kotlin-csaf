@@ -20,10 +20,10 @@ package io.github.csaf.sbom.validation
 sealed interface ValidationResult
 
 /** A successful validation. */
-object ValidationSuccessful : ValidationResult
+data object ValidationSuccessful : ValidationResult
 
 // TODO(oxisto): Does it make sense to have something like NotApplicable? Currently, this does not
-// propagate
+//  propagate
 val ValidationNotApplicable = ValidationSuccessful
 
 /**
@@ -34,4 +34,21 @@ data class ValidationFailed(
     val errors: List<String> = emptyList()
 ) : ValidationResult {
     fun toException() = ValidationException(errors)
+}
+
+/** Merges together the content of all [ValidationResult] objects in this list. */
+fun List<ValidationResult>.merge(): ValidationResult {
+    return if (any { it is ValidationFailed }) {
+        ValidationFailed(
+            flatMap {
+                if (it is ValidationFailed) {
+                    it.errors
+                } else {
+                    emptyList()
+                }
+            }
+        )
+    } else {
+        ValidationSuccessful
+    }
 }
