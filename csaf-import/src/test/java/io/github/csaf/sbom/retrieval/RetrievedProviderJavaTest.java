@@ -62,7 +62,7 @@ public class RetrievedProviderJavaTest {
         final var validationException = (ValidationException) documentError1.getCause();
         assertNotNull(validationException);
         assertEquals(
-                "Filename bsi-2022_2-01.json does not match conformance",
+                "Filename \"bsi-2022_2-01.json\" does not match conformance, expected \"bsi-2022-0001.json\"",
                 validationException.getErrors().getFirst()
         );
         // Check document error

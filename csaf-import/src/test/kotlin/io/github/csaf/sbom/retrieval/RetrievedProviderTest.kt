@@ -89,7 +89,9 @@ class RetrievedProviderTest {
         val validationException =
             assertIs<ValidationException>(documentResults[1].exceptionOrNull()?.cause)
         assertContentEquals(
-            listOf("Filename bsi-2022_2-01.json does not match conformance"),
+            listOf(
+                "Filename \"bsi-2022_2-01.json\" does not match conformance, expected \"bsi-2022-0001.json\""
+            ),
             validationException.errors
         )
         // Check download error
