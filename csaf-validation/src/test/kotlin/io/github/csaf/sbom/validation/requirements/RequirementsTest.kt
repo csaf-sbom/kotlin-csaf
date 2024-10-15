@@ -35,8 +35,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.headers
 import io.ktor.util.Attributes
-import io.ktor.util.InternalAPI
 import io.ktor.util.date.GMTDate
+import io.ktor.utils.io.*
 import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
