@@ -129,7 +129,51 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                     listOf(
                         Csaf.Branche(
                             category = Csaf.Category3.vendor,
-                            name = "Test Vendor",
+                            name = "Linux Vendor",
+                            product =
+                                Csaf.Product(
+                                    name = "Linux",
+                                    product_id = "linux-all-versions",
+                                ),
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.vendor,
+                                        name = "Linux Vendor",
+                                        product =
+                                            Csaf.Product(
+                                                name = "Linux 0.1",
+                                                product_id = "linux-0.1",
+                                            )
+                                    ),
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.vendor,
+                                        name = "Linux Vendor",
+                                        product =
+                                            Csaf.Product(
+                                                name = "Linux 0.2",
+                                                product_id = "linux-0.2",
+                                            )
+                                    ),
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.vendor,
+                                        name = "Linux Vendor",
+                                        product =
+                                            Csaf.Product(
+                                                name = "Linux 0.3",
+                                                product_id = "linux-0.3",
+                                            )
+                                    ),
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.vendor,
+                                        name = "Linux Vendor",
+                                        product =
+                                            Csaf.Product(
+                                                name = "Linux 0.4",
+                                                product_id = "linux-0.4",
+                                            )
+                                    )
+                                )
                         )
                     ),
                 full_product_names =
@@ -174,19 +218,19 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                             full_product_name =
                                 Csaf.Product(
                                     name = "Linux",
-                                    product_id = "linux",
+                                    product_id = "linux-all-versions",
                                     product_identification_helper =
                                         Csaf.ProductIdentificationHelper()
                                 ),
-                            product_reference = "linux",
-                            relates_to_product_reference = "linux"
+                            product_reference = "linux-all-versions",
+                            relates_to_product_reference = "linux-all-versions",
                         )
                     ),
                 product_groups =
                     listOf(
                         Csaf.ProductGroup(
                             group_id = "test-group-id",
-                            product_ids = setOf("test-product-name", "test-other-product-name"),
+                            product_ids = setOf("test-product-name", "linux-all-versions"),
                             summary = "Test Group"
                         )
                     )
@@ -267,14 +311,14 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                         ),
                     product_status =
                         Csaf.ProductStatus(
-                            first_affected = setOf("0.1"),
-                            first_fixed = setOf("0.1", "0.2"),
-                            known_affected = setOf("0.1", "0.3"),
-                            known_not_affected = setOf("0.1", "0.4"),
-                            last_affected = setOf("0.1", "0.2"),
-                            recommended = setOf("0.1", "0.3"),
-                            fixed = setOf("0.1", "0.4"),
-                            under_investigation = setOf("0.1", "0.3"),
+                            first_affected = setOf("linux-0.1"),
+                            first_fixed = setOf("linux-0.1", "linux-0.2"),
+                            known_affected = setOf("linux-0.1", "linux-0.3"),
+                            known_not_affected = setOf("linux-0.1", "linux-0.4"),
+                            last_affected = setOf("linux-0.1", "linux-0.2"),
+                            recommended = setOf("linux-0.1", "linux-0.3"),
+                            fixed = setOf("linux-0.1", "linux-0.4"),
+                            under_investigation = setOf("linux-0.1", "linux-0.3"),
                         ),
                     remediations =
                         listOf(
@@ -287,7 +331,7 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                                         details = "just restart your machine"
                                     ),
                                 group_ids = setOf("test-group-id"),
-                                product_ids = setOf("test-product-name", "test-other-product-name"),
+                                product_ids = setOf("test-product-name"),
                                 entitlements = listOf("not-sure-what-this-is"),
                             )
                         ),
@@ -305,7 +349,7 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                                 category = Csaf.Category7.exploit_status,
                                 details = "Can be used to exploit something",
                                 group_ids = setOf("some-group"),
-                                product_ids = setOf("some-product"),
+                                product_ids = setOf("test-product-name"),
                             )
                         )
                 )
@@ -321,7 +365,7 @@ class RequirementsTest {
         assertIs<ValidationFailed>(rule.check(ctx.also { it.json = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.json = goodCsaf() }))
+        assertEquals(ValidationSuccessful, rule.check(ctx.also { it.json = goodCsaf() }))
     }
 
     @Test
