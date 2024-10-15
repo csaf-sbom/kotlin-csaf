@@ -16,22 +16,14 @@
  */
 package io.github.csaf.sbom.validation
 
-/** Result defines the result of a requirement check. It */
-sealed interface ValidationResult
-
-/** A successful validation. */
-object ValidationSuccessful : ValidationResult
-
-// TODO(oxisto): Does it make sense to have something like NotApplicable? Currently, this does not
-//  propagate
-val ValidationNotApplicable = ValidationSuccessful
+import io.github.csaf.sbom.schema.generated.Csaf
 
 /**
- * A [ValidationResult] that represents a failed validation, with extra information why it failed.
+ * Represents a test as described in
+ * [Section 6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6-tests). They all
+ * target a CSAF document, represented by the [Csaf] type.
  */
-data class ValidationFailed(
-    /** Any errors encountered during the validation. */
-    val errors: List<String> = emptyList()
-) : ValidationResult {
-    fun toException() = ValidationException(errors)
+interface Test {
+
+    fun test(doc: Csaf): ValidationResult
 }
