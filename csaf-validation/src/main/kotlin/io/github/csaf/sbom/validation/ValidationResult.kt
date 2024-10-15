@@ -20,10 +20,10 @@ package io.github.csaf.sbom.validation
 sealed interface ValidationResult
 
 /** A successful validation. */
-object ValidationSuccessful : ValidationResult
+data object ValidationSuccessful : ValidationResult
 
 // TODO(oxisto): Does it make sense to have something like NotApplicable? Currently, this does not
-// propagate
+//  propagate
 val ValidationNotApplicable = ValidationSuccessful
 
 /**
