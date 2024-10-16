@@ -28,12 +28,12 @@ fun Double(s: String) = s.toDouble()
  * See https://github.com/pwall567/json-kotlin-schema-codegen/blob/main/CONFIG.md#decimalclassname
  * constraint 3.
  */
-val Double.Companion.ONE: Double
+inline val Double.Companion.ONE: Double
     get() = 1.0
 
 /**
  * See https://github.com/pwall567/json-kotlin-schema-codegen/blob/main/CONFIG.md#decimalclassname
  * constraint 3.
  */
-val Double.Companion.ZERO: Double
+inline val Double.Companion.ZERO: Double
     get() = 0.0
