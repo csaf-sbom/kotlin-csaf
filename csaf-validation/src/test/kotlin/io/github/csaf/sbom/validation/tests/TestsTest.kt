@@ -43,4 +43,21 @@ class TestsTest {
             test.test(fail)
         )
     }
+
+    @Test
+    fun test621() {
+        val test = Test621UnusedDefinitionOfProductID
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/optional/oasis_csaf_tc-csaf_2_0-2021-6-2-01-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(listOf("The following IDs are not used: CSAFPID-9080700")),
+            test.test(fail)
+        )
+    }
 }
