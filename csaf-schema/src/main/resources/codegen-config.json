@@ -12,5 +12,5 @@
       "generic": "kotlinx.serialization.json.JsonObject"
     }
   },
-  "decimalClassName": "io.github.csaf.sbom.schema.JsonBigDecimal"
+  "decimalClassName": "kotlin.Double"
 }
