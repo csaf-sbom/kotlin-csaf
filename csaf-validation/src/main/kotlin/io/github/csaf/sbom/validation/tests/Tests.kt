@@ -25,7 +25,7 @@ import io.github.csaf.sbom.validation.ValidationSuccessful
 object Test611MissingDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.product_tree?.gatherProductIds() ?: setOf()
-        val references = gatherProductReferences(doc)
+        val references = doc.gatherProductReferences()
 
         println(
             "Gathered ${definitions.size} product ID definitions and ${references.size} product ID references"
@@ -46,7 +46,7 @@ object Test611MissingDefinitionOfProductID : Test {
 object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.product_tree?.gatherProductIds() ?: setOf()
-        val references = gatherProductReferences(doc)
+        val references = doc.gatherProductReferences()
 
         println(
             "Gathered ${definitions.size} product ID definitions and ${references.size} product ID references"
@@ -59,57 +59,4 @@ object Test621UnusedDefinitionOfProductID : Test {
             ValidationFailed(listOf("The following IDs are not used: ${notUsed.joinToString(",")}"))
         }
     }
-}
-
-private fun Csaf.Branche.gatherProductIds(): Set<String> {
-    val ids = mutableSetOf<String>()
-
-    // Add ID at this leaf
-    product?.let { ids += it.product_id }
-
-    // Go down the branch
-    this.branches?.flatMapTo(ids) { it.gatherProductIds() }
-
-    return ids
-}
-
-private operator fun <E> MutableSet<E>.plusAssign(set: Collection<E>?) {
-    if (set != null) {
-        this.addAll(set)
-    }
-}
-
-private fun Csaf.ProductTree.gatherProductIds(): Set<String> {
-    val ids = mutableSetOf<String>()
-
-    ids += this.full_product_names?.map { it.product_id }?.toMutableSet() ?: mutableSetOf()
-    ids += this.branches?.flatMap { it.gatherProductIds() }?.toSet() ?: setOf()
-    ids += this.relationships?.map { it.full_product_name.product_id } ?: setOf()
-
-    return ids
-}
-
-private fun gatherProductReferences(doc: Csaf): MutableSet<String> {
-    val ids = mutableSetOf<String>()
-    ids += doc.product_tree?.product_groups?.flatMap { it.product_ids }
-    ids += doc.product_tree?.relationships?.map { it.product_reference }
-    ids += doc.product_tree?.relationships?.map { it.relates_to_product_reference }
-
-    for (vuln in doc.vulnerabilities ?: listOf()) {
-        vuln.product_status?.let {
-            ids += it.first_affected
-            ids += it.first_fixed
-            ids += it.fixed
-            ids += it.known_affected
-            ids += it.known_not_affected
-            ids += it.last_affected
-            ids += it.recommended
-            ids += it.under_investigation
-        }
-
-        ids += vuln.remediations?.flatMap { it.product_ids ?: setOf() }
-        ids += vuln.scores?.flatMap { it.products }
-        ids += vuln.threats?.flatMap { it.product_ids ?: setOf() }
-    }
-    return ids
 }
