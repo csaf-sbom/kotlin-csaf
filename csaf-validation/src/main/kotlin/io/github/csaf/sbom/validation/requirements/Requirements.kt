@@ -19,6 +19,7 @@ package io.github.csaf.sbom.validation.requirements
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label
 import io.github.csaf.sbom.validation.*
+import io.github.csaf.sbom.validation.tests.Test611MissingDefinitionOfProductID
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
@@ -31,10 +32,11 @@ import io.ktor.http.*
 object Requirement1ValidCSAFDocument : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // TODO(oxisto): We need to get the errors from the CSAF schema somehow :(
-        ctx.json ?: return ValidationFailed(listOf("We do not have a valid JSON"))
+        val json =
+            ctx.json as? Csaf ?: return ValidationFailed(listOf("We do not have a valid JSON"))
 
         // TODO(oxisto): Check for further conformance that are not checked by CSAF schema
-        return ValidationSuccessful
+        return Test611MissingDefinitionOfProductID.test(json)
     }
 }
 

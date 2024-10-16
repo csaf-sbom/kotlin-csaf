@@ -47,7 +47,242 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.Job
 
-fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
+fun goodProductTree(): Csaf.ProductTree =
+    Csaf.ProductTree(
+        branches =
+            listOf(
+                Csaf.Branche(
+                    category = Csaf.Category3.vendor,
+                    name = "Linux Vendor",
+                    product =
+                        Csaf.Product(
+                            name = "Linux",
+                            product_id = "linux-all-versions",
+                        ),
+                    branches =
+                        listOf(
+                            Csaf.Branche(
+                                category = Csaf.Category3.vendor,
+                                name = "Linux Vendor",
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.1",
+                                        product_id = "linux-0.1",
+                                    )
+                            ),
+                            Csaf.Branche(
+                                category = Csaf.Category3.vendor,
+                                name = "Linux Vendor",
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.2",
+                                        product_id = "linux-0.2",
+                                    )
+                            ),
+                            Csaf.Branche(
+                                category = Csaf.Category3.vendor,
+                                name = "Linux Vendor",
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.3",
+                                        product_id = "linux-0.3",
+                                    )
+                            ),
+                            Csaf.Branche(
+                                category = Csaf.Category3.vendor,
+                                name = "Linux Vendor",
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.4",
+                                        product_id = "linux-0.4",
+                                    )
+                            )
+                        )
+                )
+            ),
+        full_product_names =
+            listOf(
+                Csaf.Product(
+                    name = "Test Product Name",
+                    product_id = "test-product-name",
+                    product_identification_helper =
+                        Csaf.ProductIdentificationHelper(
+                            cpe = "cpe:2.3:o:vendor:product:-:*:*:*:*:*:*:*",
+                            hashes =
+                                listOf(
+                                    Csaf.Hashe(
+                                        file_hashes =
+                                            listOf(
+                                                Csaf.FileHashe(
+                                                    value =
+                                                        "fa65e4c5ad0e5f7a94337910847bd10f7af10c74"
+                                                )
+                                            ),
+                                        filename = "file.txt"
+                                    )
+                                ),
+                            sbom_urls = listOf(URI("https://example.com/sboms/my-product")),
+                            skus = listOf("123"),
+                            model_numbers = setOf("123"),
+                            serial_numbers = setOf("123"),
+                            x_generic_uris =
+                                listOf(
+                                    Csaf.XGenericUri(
+                                        namespace = URI("https://example.com"),
+                                        uri = URI("https://example.com/my-extension"),
+                                    )
+                                ),
+                        )
+                )
+            ),
+        relationships =
+            listOf(
+                Csaf.Relationship(
+                    category = Csaf.Category4.installed_on,
+                    full_product_name =
+                        Csaf.Product(
+                            name = "Linux",
+                            product_id = "linux-all-versions",
+                            product_identification_helper = Csaf.ProductIdentificationHelper()
+                        ),
+                    product_reference = "linux-all-versions",
+                    relates_to_product_reference = "linux-all-versions",
+                )
+            ),
+        product_groups =
+            listOf(
+                Csaf.ProductGroup(
+                    group_id = "test-group-id",
+                    product_ids = setOf("test-product-name", "linux-all-versions"),
+                    summary = "Test Group"
+                )
+            )
+    )
+
+fun goodVulnerabilities() =
+    listOf(
+        Csaf.Vulnerability(
+            acknowledgments =
+                listOf(
+                    Csaf.Acknowledgment(
+                        names = listOf("hacker-dude"),
+                        organization = "hacker-organization",
+                        summary = "very nice work"
+                    )
+                ),
+            cwe =
+                Csaf.Cwe(
+                    id = "CWE-123",
+                    name = "Test Cwe",
+                ),
+            notes =
+                listOf(
+                    Csaf.Note(
+                        category = Csaf.Category.description,
+                        text = "This is really bad",
+                    )
+                ),
+            title = "A serious vulnerability in our product",
+            flags =
+                setOf(
+                    Csaf.Flag(
+                        date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
+                        label = Csaf.Label1.vulnerable_code_not_in_execute_path,
+                        product_ids = setOf("test-product-name"),
+                        group_ids = setOf("test-group-name"),
+                    )
+                ),
+            ids = setOf(Csaf.Id(system_name = "no-idea", text = "some text")),
+            scores =
+                listOf(
+                    Csaf.Score(
+                        products = setOf("test-product-name"),
+                        cvss_v2 =
+                            Csaf.CvssV2(
+                                version = "2.0",
+                                vectorString = "AV:N/AC:L/Au:N/C:C/I:C/A:C",
+                                baseScore = 9.0,
+                                accessVector = Csaf.AccessVector.NETWORK,
+                                accessComplexity = Csaf.AccessComplexity.LOW,
+                                authentication = Csaf.Authentication.NONE,
+                                confidentialityImpact = Csaf.ConfidentialityImpact.COMPLETE,
+                                integrityImpact = Csaf.ConfidentialityImpact.COMPLETE,
+                                availabilityImpact = Csaf.ConfidentialityImpact.COMPLETE,
+                                exploitability = Csaf.Exploitability.PROOF_OF_CONCEPT,
+                                remediationLevel = Csaf.RemediationLevel.OFFICIAL_FIX,
+                                reportConfidence = Csaf.ReportConfidence.CONFIRMED,
+                                collateralDamagePotential =
+                                    Csaf.CollateralDamagePotential.LOW_MEDIUM,
+                                targetDistribution = Csaf.TargetDistribution.NOT_DEFINED,
+                                confidentialityRequirement =
+                                    Csaf.ConfidentialityRequirement.NOT_DEFINED,
+                                integrityRequirement = Csaf.ConfidentialityRequirement.NOT_DEFINED,
+                                availabilityRequirement =
+                                    Csaf.ConfidentialityRequirement.NOT_DEFINED,
+                                temporalScore = 9.0,
+                                environmentalScore = 9.0,
+                            )
+                    )
+                ),
+            involvements =
+                setOf(
+                    Csaf.Involvement(
+                        party = Csaf.Party.vendor,
+                        summary = "We are the vendor",
+                        status = Csaf.Status1.completed
+                    )
+                ),
+            product_status =
+                Csaf.ProductStatus(
+                    first_affected = setOf("linux-0.1"),
+                    first_fixed = setOf("linux-0.1", "linux-0.2"),
+                    known_affected = setOf("linux-0.1", "linux-0.3"),
+                    known_not_affected = setOf("linux-0.1", "linux-0.4"),
+                    last_affected = setOf("linux-0.1", "linux-0.2"),
+                    recommended = setOf("linux-0.1", "linux-0.3"),
+                    fixed = setOf("linux-0.1", "linux-0.4"),
+                    under_investigation = setOf("linux-0.1", "linux-0.3"),
+                ),
+            remediations =
+                listOf(
+                    Csaf.Remediation(
+                        category = Csaf.Category5.vendor_fix,
+                        details = "We fixed it. Just update",
+                        restart_required =
+                            Csaf.RestartRequired(
+                                category = Csaf.Category6.machine,
+                                details = "just restart your machine"
+                            ),
+                        group_ids = setOf("test-group-id"),
+                        product_ids = setOf("test-product-name"),
+                        entitlements = listOf("not-sure-what-this-is"),
+                    )
+                ),
+            references =
+                listOf(
+                    Csaf.Reference(
+                        category = Csaf.Category2.external,
+                        summary = "Additional reference",
+                        url = URI("https://example.com/reference")
+                    )
+                ),
+            threats =
+                listOf(
+                    Csaf.Threat(
+                        category = Csaf.Category7.exploit_status,
+                        details = "Can be used to exploit something",
+                        group_ids = setOf("some-group"),
+                        product_ids = setOf("test-product-name"),
+                    )
+                )
+        )
+    )
+
+fun goodCsaf(
+    label: Csaf.Label = Csaf.Label.WHITE,
+    productTree: Csaf.ProductTree? = goodProductTree(),
+    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
+): Csaf =
     Csaf(
         document =
             Csaf.Document(
@@ -123,193 +358,8 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                         text = "I don't know that",
                     )
             ),
-        product_tree =
-            Csaf.ProductTree(
-                branches =
-                    listOf(
-                        Csaf.Branche(
-                            category = Csaf.Category3.vendor,
-                            name = "Test Vendor",
-                        )
-                    ),
-                full_product_names =
-                    listOf(
-                        Csaf.Product(
-                            name = "Test Product Name",
-                            product_id = "test-product-name",
-                            product_identification_helper =
-                                Csaf.ProductIdentificationHelper(
-                                    cpe = "cpe:2.3:o:vendor:product:-:*:*:*:*:*:*:*",
-                                    hashes =
-                                        listOf(
-                                            Csaf.Hashe(
-                                                file_hashes =
-                                                    listOf(
-                                                        Csaf.FileHashe(
-                                                            value =
-                                                                "fa65e4c5ad0e5f7a94337910847bd10f7af10c74"
-                                                        )
-                                                    ),
-                                                filename = "file.txt"
-                                            )
-                                        ),
-                                    sbom_urls = listOf(URI("https://example.com/sboms/my-product")),
-                                    skus = listOf("123"),
-                                    model_numbers = setOf("123"),
-                                    serial_numbers = setOf("123"),
-                                    x_generic_uris =
-                                        listOf(
-                                            Csaf.XGenericUri(
-                                                namespace = URI("https://example.com"),
-                                                uri = URI("https://example.com/my-extension"),
-                                            )
-                                        ),
-                                )
-                        )
-                    ),
-                relationships =
-                    listOf(
-                        Csaf.Relationship(
-                            category = Csaf.Category4.installed_on,
-                            full_product_name =
-                                Csaf.Product(
-                                    name = "Linux",
-                                    product_id = "linux",
-                                    product_identification_helper =
-                                        Csaf.ProductIdentificationHelper()
-                                ),
-                            product_reference = "linux",
-                            relates_to_product_reference = "linux"
-                        )
-                    ),
-                product_groups =
-                    listOf(
-                        Csaf.ProductGroup(
-                            group_id = "test-group-id",
-                            product_ids = setOf("test-product-name", "test-other-product-name"),
-                            summary = "Test Group"
-                        )
-                    )
-            ),
-        vulnerabilities =
-            listOf(
-                Csaf.Vulnerability(
-                    acknowledgments =
-                        listOf(
-                            Csaf.Acknowledgment(
-                                names = listOf("hacker-dude"),
-                                organization = "hacker-organization",
-                                summary = "very nice work"
-                            )
-                        ),
-                    cwe =
-                        Csaf.Cwe(
-                            id = "CWE-123",
-                            name = "Test Cwe",
-                        ),
-                    notes =
-                        listOf(
-                            Csaf.Note(
-                                category = Csaf.Category.description,
-                                text = "This is really bad",
-                            )
-                        ),
-                    title = "A serious vulnerability in our product",
-                    flags =
-                        setOf(
-                            Csaf.Flag(
-                                date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-                                label = Csaf.Label1.vulnerable_code_not_in_execute_path,
-                                product_ids = setOf("test-product-name"),
-                                group_ids = setOf("test-group-name"),
-                            )
-                        ),
-                    ids = setOf(Csaf.Id(system_name = "no-idea", text = "some text")),
-                    scores =
-                        listOf(
-                            Csaf.Score(
-                                products = setOf("test-product-name"),
-                                cvss_v2 =
-                                    Csaf.CvssV2(
-                                        version = "2.0",
-                                        vectorString = "AV:N/AC:L/Au:N/C:C/I:C/A:C",
-                                        baseScore = 9.0,
-                                        accessVector = Csaf.AccessVector.NETWORK,
-                                        accessComplexity = Csaf.AccessComplexity.LOW,
-                                        authentication = Csaf.Authentication.NONE,
-                                        confidentialityImpact = Csaf.ConfidentialityImpact.COMPLETE,
-                                        integrityImpact = Csaf.ConfidentialityImpact.COMPLETE,
-                                        availabilityImpact = Csaf.ConfidentialityImpact.COMPLETE,
-                                        exploitability = Csaf.Exploitability.PROOF_OF_CONCEPT,
-                                        remediationLevel = Csaf.RemediationLevel.OFFICIAL_FIX,
-                                        reportConfidence = Csaf.ReportConfidence.CONFIRMED,
-                                        collateralDamagePotential =
-                                            Csaf.CollateralDamagePotential.LOW_MEDIUM,
-                                        targetDistribution = Csaf.TargetDistribution.NOT_DEFINED,
-                                        confidentialityRequirement =
-                                            Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                        integrityRequirement =
-                                            Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                        availabilityRequirement =
-                                            Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                        temporalScore = 9.0,
-                                        environmentalScore = 9.0,
-                                    )
-                            )
-                        ),
-                    involvements =
-                        setOf(
-                            Csaf.Involvement(
-                                party = Csaf.Party.vendor,
-                                summary = "We are the vendor",
-                                status = Csaf.Status1.completed
-                            )
-                        ),
-                    product_status =
-                        Csaf.ProductStatus(
-                            first_affected = setOf("0.1"),
-                            first_fixed = setOf("0.1", "0.2"),
-                            known_affected = setOf("0.1", "0.3"),
-                            known_not_affected = setOf("0.1", "0.4"),
-                            last_affected = setOf("0.1", "0.2"),
-                            recommended = setOf("0.1", "0.3"),
-                            fixed = setOf("0.1", "0.4"),
-                            under_investigation = setOf("0.1", "0.3"),
-                        ),
-                    remediations =
-                        listOf(
-                            Csaf.Remediation(
-                                category = Csaf.Category5.vendor_fix,
-                                details = "We fixed it. Just update",
-                                restart_required =
-                                    Csaf.RestartRequired(
-                                        category = Csaf.Category6.machine,
-                                        details = "just restart your machine"
-                                    ),
-                                group_ids = setOf("test-group-id"),
-                                product_ids = setOf("test-product-name", "test-other-product-name"),
-                                entitlements = listOf("not-sure-what-this-is"),
-                            )
-                        ),
-                    references =
-                        listOf(
-                            Csaf.Reference(
-                                category = Csaf.Category2.external,
-                                summary = "Additional reference",
-                                url = URI("https://example.com/reference")
-                            )
-                        ),
-                    threats =
-                        listOf(
-                            Csaf.Threat(
-                                category = Csaf.Category7.exploit_status,
-                                details = "Can be used to exploit something",
-                                group_ids = setOf("some-group"),
-                                product_ids = setOf("some-product"),
-                            )
-                        )
-                )
-            )
+        product_tree = productTree,
+        vulnerabilities = vulnerabilities
     )
 
 class RequirementsTest {
@@ -321,7 +371,7 @@ class RequirementsTest {
         assertIs<ValidationFailed>(rule.check(ctx.also { it.json = null }))
 
         // Good validate --> success
-        assertIs<ValidationSuccessful>(rule.check(ctx.also { it.json = goodCsaf() }))
+        assertEquals(ValidationSuccessful, rule.check(ctx.also { it.json = goodCsaf() }))
     }
 
     @Test
