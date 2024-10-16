@@ -43,12 +43,14 @@ object Requirement1ValidCSAFDocument : Requirement {
  * [Requirement 2: Filename](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename).
  */
 object Requirement2ValidFilename : Requirement {
+    private val idSanitizerRegex = Regex("[^+\\-a-z0-9]+")
+
     override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable for CSAF documents
         val json = ctx.json as? Csaf ?: return ValidationNotApplicable
 
         // Try to build the filename and then compare it
-        val should = json.document.tracking.id.lowercase().replace("[^+\\-a-z0-9]+", "_") + ".json"
+        val should = json.document.tracking.id.lowercase().replace(idSanitizerRegex, "_") + ".json"
 
         // Extract filename out of response?
         @Suppress("SimpleRedundantLet")
@@ -56,7 +58,9 @@ object Requirement2ValidFilename : Requirement {
         return if (filename == should) {
             ValidationSuccessful
         } else {
-            ValidationFailed(listOf("Filename $filename does not match conformance"))
+            ValidationFailed(
+                listOf("Filename \"$filename\" does not match conformance, expected \"$should\"")
+            )
         }
     }
 }

@@ -8,7 +8,8 @@
   "customClasses": {
     "format": {
       "uri": "io.github.csaf.sbom.schema.JsonUri",
-      "date-time": "io.github.csaf.sbom.schema.JsonOffsetDateTime"
+      "date-time": "io.github.csaf.sbom.schema.JsonOffsetDateTime",
+      "generic": "kotlinx.serialization.json.JsonObject"
     }
   },
   "decimalClassName": "io.github.csaf.sbom.schema.JsonBigDecimal"

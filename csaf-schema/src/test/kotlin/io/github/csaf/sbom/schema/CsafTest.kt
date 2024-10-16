@@ -94,7 +94,6 @@ class CsafTest {
 
     @Test
     fun testCsaf() {
-        /* TODO: Currently incomplete because branch coverage seems broken. */
         PojoTestHelper.testAllNew { valGen ->
             assertNotNull(
                 Csaf(
@@ -354,59 +353,6 @@ class CsafTest {
                                                         Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                                     temporalScore = BigDecimal.valueOf(9.0),
                                                     environmentalScore = BigDecimal.valueOf(9.0),
-                                                ),
-                                            cvss_v3 =
-                                                Csaf.CvssV3(
-                                                    version = "3.1",
-                                                    vectorString =
-                                                        "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N/E:P/RL:O/RC:C/" +
-                                                            "CR:M/IR:M/MAV:N/MAC:L/MPR:L/MUI:N/MS:C/MC:L/MI:L/MA:N",
-                                                    attackVector = Csaf.AttackVector.NETWORK,
-                                                    attackComplexity = Csaf.AttackComplexity.LOW,
-                                                    privilegesRequired =
-                                                        Csaf.PrivilegesRequired.LOW,
-                                                    userInteraction = Csaf.UserInteraction.NONE,
-                                                    scope = Csaf.Scope.CHANGED,
-                                                    confidentialityImpact =
-                                                        Csaf.ConfidentialityImpact1.LOW,
-                                                    integrityImpact =
-                                                        Csaf.ConfidentialityImpact1.LOW,
-                                                    availabilityImpact =
-                                                        Csaf.ConfidentialityImpact1.NONE,
-                                                    baseScore = BigDecimal.valueOf(6.4),
-                                                    baseSeverity = Csaf.BaseSeverity.MEDIUM,
-                                                    exploitCodeMaturity =
-                                                        Csaf.ExploitCodeMaturity.PROOF_OF_CONCEPT,
-                                                    remediationLevel =
-                                                        Csaf.RemediationLevel1.OFFICIAL_FIX,
-                                                    reportConfidence =
-                                                        Csaf.ReportConfidence1.CONFIRMED,
-                                                    temporalScore = BigDecimal.valueOf(5.8),
-                                                    temporalSeverity = Csaf.BaseSeverity.MEDIUM,
-                                                    confidentialityRequirement =
-                                                        Csaf.ConfidentialityRequirement1.MEDIUM,
-                                                    integrityRequirement =
-                                                        Csaf.ConfidentialityRequirement1.MEDIUM,
-                                                    availabilityRequirement =
-                                                        Csaf.ConfidentialityRequirement1
-                                                            .NOT_DEFINED,
-                                                    modifiedAttackVector =
-                                                        Csaf.ModifiedAttackVector.NETWORK,
-                                                    modifiedAttackComplexity =
-                                                        Csaf.ModifiedAttackComplexity.LOW,
-                                                    modifiedPrivilegesRequired =
-                                                        Csaf.ModifiedPrivilegesRequired.LOW,
-                                                    modifiedUserInteraction =
-                                                        Csaf.ModifiedUserInteraction.NONE,
-                                                    modifiedScope = Csaf.ModifiedScope.CHANGED,
-                                                    modifiedConfidentialityImpact =
-                                                        Csaf.ModifiedConfidentialityImpact.LOW,
-                                                    modifiedIntegrityImpact =
-                                                        Csaf.ModifiedConfidentialityImpact.LOW,
-                                                    modifiedAvailabilityImpact =
-                                                        Csaf.ModifiedConfidentialityImpact.NONE,
-                                                    environmentalScore = BigDecimal.valueOf(5.8),
-                                                    environmentalSeverity = Csaf.BaseSeverity.MEDIUM
                                                 )
                                         )
                                     ),

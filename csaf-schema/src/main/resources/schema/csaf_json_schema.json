@@ -1354,7 +1354,8 @@
                   "$ref": "https://www.first.org/cvss/cvss-v2.0.json"
                 },
                 "cvss_v3": {
-                  "$ref": "https://www.first.org/cvss/cvss-v3.1.json"
+                  "format": "generic",
+                  "type": "object"
                 },
                 "products": {
                   "$ref": "#/$defs/products_t"
