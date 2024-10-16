@@ -37,7 +37,6 @@ import io.ktor.http.headers
 import io.ktor.util.Attributes
 import io.ktor.util.date.GMTDate
 import io.ktor.utils.io.*
-import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -234,7 +233,7 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                                     Csaf.CvssV2(
                                         version = "2.0",
                                         vectorString = "AV:N/AC:L/Au:N/C:C/I:C/A:C",
-                                        baseScore = BigDecimal.valueOf(9.0),
+                                        baseScore = 9.0,
                                         accessVector = Csaf.AccessVector.NETWORK,
                                         accessComplexity = Csaf.AccessComplexity.LOW,
                                         authentication = Csaf.Authentication.NONE,
@@ -253,8 +252,8 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                                             Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                         availabilityRequirement =
                                             Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                        temporalScore = BigDecimal.valueOf(9.0),
-                                        environmentalScore = BigDecimal.valueOf(9.0),
+                                        temporalScore = 9.0,
+                                        environmentalScore = 9.0,
                                     )
                             )
                         ),

@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.schema
 
-import java.math.BigDecimal
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlinx.serialization.Serializable
@@ -24,5 +23,3 @@ import kotlinx.serialization.Serializable
 typealias JsonUri = @Serializable(UriSerializer::class) URI
 
 typealias JsonOffsetDateTime = @Serializable(OffsetDateTimeSerializer::class) OffsetDateTime
-
-typealias JsonBigDecimal = @Serializable(BigDecimalSerializer::class) BigDecimal

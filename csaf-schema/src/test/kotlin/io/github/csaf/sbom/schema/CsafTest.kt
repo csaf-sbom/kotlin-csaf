@@ -18,7 +18,6 @@ package io.github.csaf.sbom.schema
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
-import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -34,7 +33,7 @@ class CsafTest {
                 Csaf.CvssV2(
                     version = "2.0",
                     vectorString = "not-a-vector",
-                    baseScore = BigDecimal.ONE,
+                    baseScore = 1.0,
                 )
             }
         assertContains(exception.message.toString(), "vectorString does not match pattern")
@@ -94,6 +93,7 @@ class CsafTest {
 
     @Test
     fun testCsaf() {
+        /* TODO: Currently incomplete because branch coverage seems broken. */
         PojoTestHelper.testAllNew { valGen ->
             assertNotNull(
                 Csaf(
@@ -325,7 +325,7 @@ class CsafTest {
                                                 Csaf.CvssV2(
                                                     version = "2.0",
                                                     vectorString = "AV:N/AC:L/Au:N/C:C/I:C/A:C",
-                                                    baseScore = BigDecimal.valueOf(9.0),
+                                                    baseScore = 9.0,
                                                     accessVector = Csaf.AccessVector.NETWORK,
                                                     accessComplexity = Csaf.AccessComplexity.LOW,
                                                     authentication = Csaf.Authentication.NONE,
@@ -351,8 +351,8 @@ class CsafTest {
                                                         Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                                     availabilityRequirement =
                                                         Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                                    temporalScore = BigDecimal.valueOf(9.0),
-                                                    environmentalScore = BigDecimal.valueOf(9.0),
+                                                    temporalScore = 9.0,
+                                                    environmentalScore = 9.0,
                                                 )
                                         )
                                     ),
