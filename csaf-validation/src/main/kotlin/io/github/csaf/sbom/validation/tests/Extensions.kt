@@ -17,36 +17,57 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.plusAssign
+import io.github.csaf.sbom.schema.generated.Csaf.Product
 
-private fun Csaf.Branche.gatherProductIds(): Set<String> {
-    val ids = mutableSetOf<String>()
+private fun Csaf.Branche.gatherProducts(): Set<Product> {
+    val ids = mutableSetOf<Product>()
 
     // Add ID at this leaf
-    product?.let { ids += it.product_id }
+    product?.let { ids += it }
 
     // Go down the branch
-    this.branches?.flatMapTo(ids) { it.gatherProductIds() }
+    this.branches?.flatMapTo(ids) { it.gatherProducts() }
 
     return ids
 }
 
-fun List<Csaf.Product>?.gatherProductIds(): Set<String> {
-    return if (this == null) {
-        setOf()
-    } else {
-        map { it.product_id }.toMutableSet()
+fun List<*>?.gatherProducts(): Set<Product> {
+    if (this == null) return setOf()
+
+    var products = mutableSetOf<Product>()
+    for (e in this) {
+        if (e is Product) {
+            products += e
+        } else if (e is Csaf.Relationship) {
+            products += e.full_product_name
+        } else if (e is Csaf.Branche) {
+            products += e.gatherProducts()
+        }
     }
+
+    return products
 }
 
-fun Csaf.ProductTree.gatherProductIds(): Set<String> {
-    val ids = mutableSetOf<String>()
+fun Csaf.ProductTree?.gatherProducts(): Set<Product> {
+    if (this == null) return setOf()
 
-    ids += this.full_product_names.gatherProductIds()
-    ids += this.branches?.flatMap { it.gatherProductIds() }?.toSet() ?: setOf()
-    ids += this.relationships?.map { it.full_product_name.product_id } ?: setOf()
+    val ids = mutableSetOf<Product>()
+
+    ids += this.full_product_names.gatherProducts()
+    ids += this.branches.gatherProducts()
+    ids += this.relationships.gatherProducts()
 
     return ids
+}
+
+/**
+ * Gathers all [Product] definitions in the current document.
+ *
+ * Note: We could optimize this further by only retrieving the ID, but it might not hurt to have
+ * access to the complete [Product].
+ */
+fun Csaf.gatherProducts(): Set<Product> {
+    return this.product_tree.gatherProducts()
 }
 
 fun Csaf.gatherProductReferences(): MutableSet<String> {

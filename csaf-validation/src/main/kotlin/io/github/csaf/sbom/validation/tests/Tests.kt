@@ -24,7 +24,7 @@ import io.github.csaf.sbom.validation.ValidationSuccessful
 
 object Test611MissingDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.product_tree?.gatherProductIds() ?: setOf()
+        val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
         println(
@@ -45,7 +45,7 @@ object Test611MissingDefinitionOfProductID : Test {
 
 object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.product_tree?.gatherProductIds() ?: setOf()
+        val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
         println(
