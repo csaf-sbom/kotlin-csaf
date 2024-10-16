@@ -41,7 +41,8 @@ import io.github.csaf.sbom.validation.requirements.Requirement23
 import io.github.csaf.sbom.validation.requirements.Requirement2ValidFilename
 import io.github.csaf.sbom.validation.requirements.Requirement3UsageOfTls
 import io.github.csaf.sbom.validation.requirements.Requirement4TlpWhiteAccessible
-import io.github.csaf.sbom.validation.requirements.Requirement5
+import io.github.csaf.sbom.validation.requirements.Requirement5TlpAmberRedNotAccessible
+import io.github.csaf.sbom.validation.requirements.Requirement5TlpAmberRedNotListedWithWhite
 import io.github.csaf.sbom.validation.requirements.Requirement6
 import io.github.csaf.sbom.validation.requirements.Requirement7
 import io.github.csaf.sbom.validation.requirements.Requirement8SecurityTxt
@@ -71,12 +72,13 @@ object CSAFPublisherRole : Role {
 object CSAFProviderRole : Role {
     override val roleRequirements =
         CSAFPublisherRole.roleRequirements +
-            allOf(Requirement6, Requirement7) +
+            allOf(Requirement5TlpAmberRedNotListedWithWhite, Requirement6, Requirement7) +
             oneOf(Requirement8SecurityTxt, Requirement9WellKnownURL, Requirement10DNSPath) +
             (allOf(Requirement11YearInFolder, Requirement12, Requirement13, Requirement14) or
                 allOf(Requirement15, Requirement16, Requirement17))
 
-    override val documentRequirements = CSAFPublisherRole.documentRequirements + Requirement5
+    override val documentRequirements =
+        CSAFPublisherRole.documentRequirements + Requirement5TlpAmberRedNotAccessible
 }
 
 /**
@@ -105,7 +107,8 @@ object CSAFListerRole : Role {
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#725-role-csaf-aggregator.
  */
 object CSAFAggregatorRole : Role {
-    override val roleRequirements: Requirement = CSAFListerRole.roleRequirements + Requirement23
+    override val roleRequirements: Requirement =
+        CSAFListerRole.roleRequirements + Requirement5TlpAmberRedNotListedWithWhite + Requirement23
 
     override val documentRequirements =
         allOf(
@@ -113,6 +116,6 @@ object CSAFAggregatorRole : Role {
             Requirement2ValidFilename,
             Requirement3UsageOfTls,
             Requirement4TlpWhiteAccessible,
-            Requirement5,
+            Requirement5TlpAmberRedNotAccessible,
         )
 }

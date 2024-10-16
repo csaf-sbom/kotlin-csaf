@@ -18,11 +18,13 @@ package io.github.csaf.sbom.validation.requirements
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label
+import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.validation.*
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.*
+import kotlin.io.path.toPath
 
 /**
  * Represents
@@ -115,9 +117,83 @@ object Requirement4TlpWhiteAccessible : Requirement {
     }
 }
 
-object Requirement5 : Requirement {
+/**
+ * Represents
+ * [Requirement 5: TLP:AMBER and TLP:RED](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#715-requirement-5-tlpamber-and-tlpred).
+ *
+ * We make use of the [HttpResponse] / [HttpRequest] to check for a "good" status code and check for
+ * the existence of authorization headers in the request or for the non-existence with a "bad"
+ * status code.
+ */
+// TODO: This should be split into a document requirement and a role requirement
+object Requirement5TlpAmberRedNotAccessible : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        // TODO: actually implement the requirement
+        // Only applicable to Csaf document, because all the others do not have a TLP
+        val json = ctx.json as? Csaf ?: return ValidationNotApplicable
+
+        // Only for TLP:AMBER and TLP:RED
+        if (
+            json.document.distribution?.tlp?.label != Label.AMBER ||
+                json.document.distribution?.tlp?.label != Label.RED
+        ) {
+            return ValidationNotApplicable
+        }
+
+        // If we do not have a response, we can assume that it's not accessible and we fail
+        val response = ctx.httpResponse ?: return ValidationFailed(listOf("Response is null"))
+
+        // We assume that it is access protected, if
+        // - We got access denied/permission denied and did not see authorization request headers or
+        // - We got a successful status code but did see authorization headers
+        return when {
+            (response.status == HttpStatusCode.Forbidden ||
+                response.status == HttpStatusCode.Unauthorized) &&
+                !response.request.headers.contains("Authorization") -> ValidationSuccessful
+            response.status.isSuccess() && response.request.headers.contains("Authorization") -> {
+                ValidationSuccessful
+            }
+
+            // Otherwise, we fail
+            else -> ValidationFailed(listOf("TLP:WHITE document is not freely accessible"))
+        }
+    }
+}
+
+object Requirement5TlpAmberRedNotListedWithWhite : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        // Only applicable to the provider
+        val json = ctx.json as? Provider ?: return ValidationNotApplicable
+
+        // We can only check for that ROLIE feeds, because the directory-based ones do not have
+        // labels. First, gather all RED/AMBER feeds.
+        var redAmberFeeds =
+            json.distributions
+                ?.flatMap { it.rolie?.feeds ?: listOf() }
+                ?.filter {
+                    it.tlp_label == Provider.TlpLabel.RED || it.tlp_label == Provider.TlpLabel.AMBER
+                } ?: listOf()
+        var otherFeeds =
+            json.distributions
+                ?.flatMap { it.rolie?.feeds ?: listOf() }
+                ?.filter {
+                    it.tlp_label != Provider.TlpLabel.RED && it.tlp_label != Provider.TlpLabel.AMBER
+                } ?: listOf()
+
+        // If we have a feed that contains AMBER or RED, they must not be on the same (base) path as
+        // TLP:WHITE.
+        for (feed in redAmberFeeds) {
+            var basePath = feed.url.toPath().parent
+            var otherPaths = otherFeeds.map { it.url.toPath().parent }
+            if (basePath in otherPaths) {
+                return ValidationFailed(
+                    listOf(
+                        "Path of ${feed.tlp_label} feed conflicts with path of ${feed.tlp_label} feed: $basePath"
+                    )
+                )
+            }
+        }
+
+        // If there is no conflict, we pass
         return ValidationSuccessful
     }
 }
