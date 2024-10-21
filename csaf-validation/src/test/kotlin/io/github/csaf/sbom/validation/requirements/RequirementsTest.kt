@@ -57,7 +57,7 @@ fun goodProductTree(): Csaf.ProductTree =
                     product =
                         Csaf.Product(
                             name = "Linux",
-                            product_id = "linux-all-versions",
+                            product_id = "linux-all",
                         ),
                     branches =
                         listOf(
@@ -141,19 +141,19 @@ fun goodProductTree(): Csaf.ProductTree =
                     category = Csaf.Category4.installed_on,
                     full_product_name =
                         Csaf.Product(
-                            name = "Linux",
-                            product_id = "linux-all-versions",
+                            name = "LinuxProduct",
+                            product_id = "linux-product",
                             product_identification_helper = Csaf.ProductIdentificationHelper()
                         ),
-                    product_reference = "linux-all-versions",
-                    relates_to_product_reference = "linux-all-versions",
+                    product_reference = "test-product-name",
+                    relates_to_product_reference = "linux-all",
                 )
             ),
         product_groups =
             listOf(
                 Csaf.ProductGroup(
-                    group_id = "test-group-id",
-                    product_ids = setOf("test-product-name", "linux-all-versions"),
+                    group_id = "some-group",
+                    product_ids = setOf("test-product-name", "linux-all", "linux-product"),
                     summary = "Test Group"
                 )
             )
@@ -253,7 +253,7 @@ fun goodVulnerabilities() =
                                 category = Csaf.Category6.machine,
                                 details = "just restart your machine"
                             ),
-                        group_ids = setOf("test-group-id"),
+                        group_ids = setOf("some-group"),
                         product_ids = setOf("test-product-name"),
                         entitlements = listOf("not-sure-what-this-is"),
                     )
