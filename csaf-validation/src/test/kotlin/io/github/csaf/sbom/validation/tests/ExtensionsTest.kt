@@ -117,13 +117,24 @@ class ExtensionsTest {
     }
 
     @Test
+    fun testNullGatherProductGroups() {
+        val groups = mutableSetOf<Csaf.ProductGroup>()
+        (null as Csaf.ProductTree?).gatherProductGroupsTo(groups)
+        assertEquals(emptySet<Csaf.ProductGroup>(), groups)
+    }
+
+    @Test
     fun testListOfIncompatible() {
         val products = mutableSetOf<Csaf.Product>()
         (listOf(Any())).gatherProductsTo(products)
         assertEquals(emptySet<Csaf.Product>(), products)
 
-        val ids = mutableSetOf<String>()
+        var ids = mutableSetOf<String>()
         (listOf(Any())).gatherProductReferencesTo(ids)
+        assertEquals(emptySet<String>(), ids)
+
+        ids = mutableSetOf<String>()
+        (listOf(Any())).gatherProductGroupReferencesTo(ids)
         assertEquals(emptySet<String>(), ids)
     }
 }

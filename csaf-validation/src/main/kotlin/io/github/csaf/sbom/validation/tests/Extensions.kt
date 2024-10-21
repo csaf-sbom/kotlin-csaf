@@ -47,7 +47,7 @@ fun Csaf.ProductTree?.gatherProductsTo(products: MutableCollection<Product>) {
     this.relationships.gatherProductsTo(products)
 }
 
-fun Csaf.ProductTree?.gatherProductGroupTo(groups: MutableCollection<Csaf.ProductGroup>) {
+fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.ProductGroup>) {
     if (this == null) return
 
     groups += this.product_groups
@@ -76,7 +76,7 @@ fun Csaf.gatherProducts(): Set<Product> {
 fun Csaf.gatherProductGroups(): Set<Csaf.ProductGroup> {
     val groups = mutableSetOf<Csaf.ProductGroup>()
 
-    this.product_tree.gatherProductGroupTo(groups)
+    this.product_tree.gatherProductGroupsTo(groups)
 
     return groups
 }
