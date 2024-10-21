@@ -47,6 +47,77 @@ class TestsTest {
     }
 
     @Test
+    fun test612() {
+        val test = Test612MultipleDefinitionOfProductID
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-02-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(listOf("The following IDs are duplicate: CSAFPID-9080700")),
+            test.test(fail)
+        )
+    }
+
+    @Test
+    fun test613() {
+        val test = Test613CircularDefinitionOfProductID
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-03-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(listOf("The following IDs are defined in circles: CSAFPID-9080701")),
+            test.test(fail)
+        )
+
+        assertEquals(ValidationSuccessful, test.test(goodCsaf(productTree = null)))
+        assertEquals(ValidationSuccessful, test.test(goodCsaf(productTree = Csaf.ProductTree())))
+    }
+
+    @Test
+    fun test614() {
+        val test = Test614MissingDefinitionOfProductGroupID
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-04-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(listOf("The following IDs are not defined: CSAFGID-1020301")),
+            test.test(fail)
+        )
+    }
+
+    @Test
+    fun test615() {
+        val test = Test615MultipleDefinitionOfProductGroupID
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-05-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(listOf("The following IDs are duplicate: CSAFGID-1020300")),
+            test.test(fail)
+        )
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
         val fail =
@@ -66,7 +137,15 @@ class TestsTest {
     @Test
     fun testAllGood() {
         val good = goodCsaf()
-        val tests = listOf(Test611MissingDefinitionOfProductID, Test621UnusedDefinitionOfProductID)
+        val tests =
+            listOf(
+                Test611MissingDefinitionOfProductID,
+                Test612MultipleDefinitionOfProductID,
+                Test613CircularDefinitionOfProductID,
+                Test614MissingDefinitionOfProductGroupID,
+                Test615MultipleDefinitionOfProductGroupID,
+                Test621UnusedDefinitionOfProductID,
+            )
         tests.forEach {
             assertEquals(
                 ValidationSuccessful,
