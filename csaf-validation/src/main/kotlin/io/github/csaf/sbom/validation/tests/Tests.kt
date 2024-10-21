@@ -34,6 +34,7 @@ var mandatoryTests =
         Test613CircularDefinitionOfProductID,
         Test614MissingDefinitionOfProductGroupID,
         Test615MultipleDefinitionOfProductGroupID,
+        Test616ContradictingProductStatus,
     )
 
 /**
@@ -160,6 +161,48 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
         } else {
             ValidationFailed(
                 listOf("The following IDs are duplicate: ${duplicates.keys.joinToString(",")}")
+            )
+        }
+    }
+}
+
+object Test616ContradictingProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val affected = mutableSetOf<String>()
+        val notAffected = mutableSetOf<String>()
+        val fixed = mutableSetOf<String>()
+        val underInvestigation = mutableSetOf<String>()
+
+        val contradicted = mutableSetOf<String>()
+
+        for (vulnerability in doc.vulnerabilities ?: listOf()) {
+            affected.clear()
+            notAffected.clear()
+            fixed.clear()
+            underInvestigation.clear()
+
+            vulnerability.product_status.gatherAffectedProductReferencesTo(affected)
+            vulnerability.product_status.gatherNotAffectedProductReferencesTo(notAffected)
+            vulnerability.product_status.gatherFixedProductReferencesTo(fixed)
+            vulnerability.product_status.gatherUnderInvestigationProductReferencesTo(
+                underInvestigation
+            )
+
+            contradicted += affected.intersect(notAffected)
+            contradicted += affected.intersect(fixed)
+            contradicted += affected.intersect(underInvestigation)
+            contradicted += notAffected.intersect(fixed)
+            contradicted += notAffected.intersect(underInvestigation)
+            contradicted += fixed.intersect(underInvestigation)
+        }
+
+        return if (contradicted.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following IDs have contradicting statuses: ${contradicted.joinToString(",")}"
+                )
             )
         }
     }
