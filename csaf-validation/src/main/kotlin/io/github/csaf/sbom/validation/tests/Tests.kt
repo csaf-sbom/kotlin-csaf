@@ -22,6 +22,10 @@ import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 
+/**
+ * Implementation of
+ * [Test 6.1.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#611-missing-definition-of-product-id).
+ */
 object Test611MissingDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
@@ -43,6 +47,10 @@ object Test611MissingDefinitionOfProductID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612-multiple-definition-of-product-id).
+ */
 object Test612MultipleDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
@@ -59,6 +67,10 @@ object Test612MultipleDefinitionOfProductID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#613-circular-definition-of-product-id).
+ */
 object Test613CircularDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val circles = mutableSetOf<String>()
@@ -82,6 +94,10 @@ object Test613CircularDefinitionOfProductID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#614-missing-definition-of-product-group-id).
+ */
 object Test614MissingDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProductGroups().map { it.group_id }
@@ -103,6 +119,10 @@ object Test614MissingDefinitionOfProductGroupID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.5](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#615-multiple-definition-of-product-group-id)
+ */
 object Test615MultipleDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProductGroups().map { it.group_id }
@@ -119,6 +139,10 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.2.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#621-unused-definition-of-product-id).
+ */
 object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
