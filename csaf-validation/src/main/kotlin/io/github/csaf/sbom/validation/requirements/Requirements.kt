@@ -18,11 +18,22 @@ package io.github.csaf.sbom.validation.requirements
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label
+import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.validation.*
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.*
+import kotlin.io.path.toPath
+
+/** A list of [Label]s that denote that this document is access protected. */
+var protectedDocumentLabels: List<Label> = listOf(Label.AMBER, Label.RED)
+
+/**
+ * A list of [HttpStatusCode]s that denote that this document is access protected and no
+ * authorization data was sent with the request.
+ */
+var protectedStatusCodes = listOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized)
 
 /**
  * Represents
@@ -73,9 +84,7 @@ object Requirement2ValidFilename : Requirement {
  */
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        return if (
-            ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } != false
-        ) {
+        return if (ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } == true) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("JSON was not retrieved via HTTPS"))
@@ -115,9 +124,88 @@ object Requirement4TlpWhiteAccessible : Requirement {
     }
 }
 
-object Requirement5 : Requirement {
+/**
+ * Represents
+ * [Requirement 5: TLP:AMBER and TLP:RED](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#715-requirement-5-tlpamber-and-tlpred).
+ *
+ * We make use of the [HttpResponse] / [HttpRequest] to check for a "good" status code and check for
+ * the existence of authorization headers in the request or for the non-existence with a "bad"
+ * status code.
+ */
+object Requirement5TlpAmberRedNotAccessible : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        // TODO: actually implement the requirement
+        // Only applicable to Csaf document, because all the others do not have a TLP
+        val json = ctx.json as? Csaf ?: return ValidationNotApplicable
+
+        // Only for TLP:AMBER and TLP:RED
+        if (json.document.distribution?.tlp?.label !in protectedDocumentLabels) {
+            return ValidationNotApplicable
+        }
+
+        // If we do not have a response, we can assume that it's not accessible, and we succeed
+        // (sort
+        // of)
+        val response = ctx.httpResponse ?: return ValidationSuccessful
+
+        // We assume that it is access protected, if
+        return when {
+            // - We got a successful status code but did see authorization headers
+            response.status.isSuccess() && response.request.headers.contains("Authorization") -> {
+                ValidationSuccessful
+            }
+            // - We got access denied/permission denied
+            response.status in protectedStatusCodes -> {
+                ValidationSuccessful
+            }
+            // Otherwise, we fail
+            else -> ValidationFailed(listOf("TLP:RED/AMBER document is not access protected"))
+        }
+    }
+}
+
+/**
+ * Represents
+ * [Requirement 5: TLP:AMBER and TLP:RED](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#715-requirement-5-tlpamber-and-tlpred).
+ *
+ * In addition to [Requirement5TlpAmberRedNotAccessible] we also need to check, if WHITE/GREEN
+ * documents are not serves on the same document feed as RED/AMBER. To do this, we iterate through
+ * the ROLIE feeds.
+ */
+object Requirement5TlpAmberRedNotListedWithWhite : Requirement {
+    override fun check(ctx: ValidationContext): ValidationResult {
+        // Only applicable to the provider
+        val json = ctx.json as? Provider ?: return ValidationNotApplicable
+
+        // We can only check for that ROLIE feeds, because the directory-based ones do not have
+        // labels. First, gather all RED/AMBER feeds.
+        var redAmberFeeds =
+            json.distributions
+                ?.flatMap { it.rolie?.feeds ?: listOf() }
+                ?.filter {
+                    it.tlp_label == Provider.TlpLabel.RED || it.tlp_label == Provider.TlpLabel.AMBER
+                } ?: listOf()
+        var otherFeeds =
+            json.distributions
+                ?.flatMap { it.rolie?.feeds ?: listOf() }
+                ?.filter {
+                    it.tlp_label != Provider.TlpLabel.RED && it.tlp_label != Provider.TlpLabel.AMBER
+                } ?: listOf()
+
+        // If we have a feed that contains AMBER or RED, they must not be on the same (base) path as
+        // TLP:WHITE.
+        for (feed in redAmberFeeds) {
+            var basePath = feed.url.toPath().parent
+            var otherPaths = otherFeeds.map { it.url.toPath().parent }
+            if (basePath in otherPaths) {
+                return ValidationFailed(
+                    listOf(
+                        "Path of ${feed.tlp_label} feed conflicts with path of ${feed.tlp_label} feed: $basePath"
+                    )
+                )
+            }
+        }
+
+        // If there is no conflict, we pass
         return ValidationSuccessful
     }
 }

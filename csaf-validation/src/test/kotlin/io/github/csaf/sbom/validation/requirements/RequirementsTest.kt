@@ -47,7 +47,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.Job
 
-fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
+fun goodDistribution(label: Csaf.Label? = Csaf.Label.WHITE): Csaf.Distribution {
+    return Csaf.Distribution(
+        tlp = label?.let { Csaf.Tlp(label = it) },
+        text = "can be distributed freely",
+    )
+}
+
+fun goodCsaf(distribution: Csaf.Distribution? = goodDistribution(Csaf.Label.WHITE)): Csaf =
     Csaf(
         document =
             Csaf.Document(
@@ -97,11 +104,7 @@ fun goodCsaf(label: Csaf.Label = Csaf.Label.WHITE): Csaf =
                         status = Csaf.Status.final,
                         version = "1.0.0-alpha1",
                     ),
-                distribution =
-                    Csaf.Distribution(
-                        tlp = Csaf.Tlp(label = label),
-                        text = "can be distributed freely",
-                    ),
+                distribution = distribution,
                 notes =
                     listOf(
                         Csaf.Note(
@@ -341,9 +344,18 @@ class RequirementsTest {
                 }
             )
         )
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf()
+                    it.httpResponse = null
+                }
+            )
+        )
 
         // Valid filename
-        assertIs<ValidationSuccessful>(
+        assertEquals(
+            ValidationSuccessful,
             rule.check(
                 ctx.also {
                     it.json = goodCsaf()
@@ -369,8 +381,19 @@ class RequirementsTest {
             )
         )
 
+        // No response -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    @Suppress("HttpUrlsUsage")
+                    it.httpResponse = null
+                }
+            )
+        )
+
         // TLS -> success
-        assertIs<ValidationSuccessful>(
+        assertEquals(
+            ValidationSuccessful,
             rule.check(
                 ctx.also {
                     it.httpResponse =
@@ -390,7 +413,20 @@ class RequirementsTest {
         // Document is not TlpWhite -> not applicable
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { it.json = goodCsaf(Csaf.Label.RED) })
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED)) }
+            )
+        )
+        // Document has no distribution or has no label -> not applicable
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { it.json = goodCsaf(distribution = null) })
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = Csaf.Distribution(tlp = null)) }
+            )
         )
 
         // URL was retrieved with authorization headers -> fail
@@ -409,6 +445,9 @@ class RequirementsTest {
                 }
             )
         )
+
+        // No request -> fail
+        assertIs<ValidationFailed>(rule.check(ctx.also { it.httpResponse = null }))
 
         // URL was not retrieved because of unauthorized -> fail
         assertIs<ValidationFailed>(
@@ -430,6 +469,120 @@ class RequirementsTest {
                     it.httpResponse =
                         mockResponse(
                             mockRequest(Url("https://example.com")),
+                            HttpStatusCode.OK,
+                        )
+                }
+            )
+        )
+    }
+
+    @Test
+    fun testRequirement5RedAmberNotAccessible() {
+        val (rule, ctx) = testRule(Requirement5TlpAmberRedNotAccessible)
+
+        // Validatable is something else -> not applicable
+        assertEquals(ValidationNotApplicable, rule.check(ctx.also { it.json = null }))
+
+        // No distribution, tlp -> not applicable
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { it.json = goodCsaf(distribution = null) })
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = Csaf.Distribution(tlp = null)) }
+            )
+        )
+
+        // Document is not RED/AMBER -> not applicable
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { it.json = goodCsaf(distribution = goodDistribution(null)) })
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.WHITE)) }
+            )
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.GREEN)) }
+            )
+        )
+
+        // Document was not retrieved -> we sort of have to succeed here
+        assertEquals(
+            ValidationSuccessful,
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED))
+                    it.httpResponse = null
+                }
+            )
+        )
+
+        // URL was retrieved without authorization headers and returned "OK" -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED))
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(
+                                Url("https://example.com"),
+                            ),
+                            HttpStatusCode.OK
+                        )
+                }
+            )
+        )
+
+        // URL was not retrieved because of unauthorized -> success
+        assertEquals(
+            ValidationSuccessful,
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED))
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(Url("https://example.com")),
+                            HttpStatusCode.Unauthorized,
+                        )
+                }
+            )
+        )
+
+        // URL was successfully retrieved with authorization headers -> success
+        assertEquals(
+            ValidationSuccessful,
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED))
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(
+                                Url("https://example.com"),
+                                headers = headers { set("Authorization", "Bearer: 1234") }
+                            ),
+                            HttpStatusCode.OK,
+                        )
+                }
+            )
+        )
+
+        // URL was successfully retrieved without authorization headers -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED))
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(
+                                Url("https://example.com"),
+                            ),
                             HttpStatusCode.OK,
                         )
                 }
