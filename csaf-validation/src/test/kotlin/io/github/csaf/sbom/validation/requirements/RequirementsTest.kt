@@ -344,9 +344,18 @@ class RequirementsTest {
                 }
             )
         )
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    it.json = goodCsaf()
+                    it.httpResponse = null
+                }
+            )
+        )
 
         // Valid filename
-        assertIs<ValidationSuccessful>(
+        assertEquals(
+            ValidationSuccessful,
             rule.check(
                 ctx.also {
                     it.json = goodCsaf()
@@ -372,8 +381,19 @@ class RequirementsTest {
             )
         )
 
+        // No response -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    @Suppress("HttpUrlsUsage")
+                    it.httpResponse = null
+                }
+            )
+        )
+
         // TLS -> success
-        assertIs<ValidationSuccessful>(
+        assertEquals(
+            ValidationSuccessful,
             rule.check(
                 ctx.also {
                     it.httpResponse =
@@ -397,6 +417,17 @@ class RequirementsTest {
                 ctx.also { it.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED)) }
             )
         )
+        // Document has no distribution or has no label -> not applicable
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { it.json = goodCsaf(distribution = null) })
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = Csaf.Distribution(tlp = null)) }
+            )
+        )
 
         // URL was retrieved with authorization headers -> fail
         assertIs<ValidationFailed>(
@@ -414,6 +445,9 @@ class RequirementsTest {
                 }
             )
         )
+
+        // No request -> fail
+        assertIs<ValidationFailed>(rule.check(ctx.also { it.httpResponse = null }))
 
         // URL was not retrieved because of unauthorized -> fail
         assertIs<ValidationFailed>(
@@ -443,7 +477,7 @@ class RequirementsTest {
     }
 
     @Test
-    fun requirement5RedAmberNotAccessible() {
+    fun testRequirement5RedAmberNotAccessible() {
         val (rule, ctx) = testRule(Requirement5TlpAmberRedNotAccessible)
 
         // Validatable is something else -> not applicable
@@ -456,7 +490,9 @@ class RequirementsTest {
         )
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { it.json = goodCsaf(distribution = Csaf.Distribution()) })
+            rule.check(
+                ctx.also { it.json = goodCsaf(distribution = Csaf.Distribution(tlp = null)) }
+            )
         )
 
         // Document is not RED/AMBER -> not applicable

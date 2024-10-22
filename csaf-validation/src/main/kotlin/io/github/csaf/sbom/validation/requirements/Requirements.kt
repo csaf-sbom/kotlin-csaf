@@ -84,9 +84,7 @@ object Requirement2ValidFilename : Requirement {
  */
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
-        return if (
-            ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } != false
-        ) {
+        return if (ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } == true) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("JSON was not retrieved via HTTPS"))
@@ -144,7 +142,8 @@ object Requirement5TlpAmberRedNotAccessible : Requirement {
             return ValidationNotApplicable
         }
 
-        // If we do not have a response, we can assume that it's not accessible and we succeed (sort
+        // If we do not have a response, we can assume that it's not accessible, and we succeed
+        // (sort
         // of)
         val response = ctx.httpResponse ?: return ValidationSuccessful
 
