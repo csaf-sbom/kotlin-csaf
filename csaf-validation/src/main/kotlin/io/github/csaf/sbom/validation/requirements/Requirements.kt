@@ -26,6 +26,15 @@ import io.ktor.client.statement.request
 import io.ktor.http.*
 import kotlin.io.path.toPath
 
+/** A list of [Label]s that denote that this document is access protected. */
+var protectedDocumentLabels: List<Label> = listOf(Label.AMBER, Label.RED)
+
+/**
+ * A list of [HttpStatusCode]s that denote that this document is access protected and no
+ * authorization data was sent with the request.
+ */
+var protectedStatusCodes = listOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized)
+
 /**
  * Represents
  * [Requirement 1: Valid CSAF document](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document).
@@ -125,40 +134,44 @@ object Requirement4TlpWhiteAccessible : Requirement {
  * the existence of authorization headers in the request or for the non-existence with a "bad"
  * status code.
  */
-// TODO: This should be split into a document requirement and a role requirement
 object Requirement5TlpAmberRedNotAccessible : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable to Csaf document, because all the others do not have a TLP
         val json = ctx.json as? Csaf ?: return ValidationNotApplicable
 
         // Only for TLP:AMBER and TLP:RED
-        if (
-            json.document.distribution?.tlp?.label != Label.AMBER ||
-                json.document.distribution?.tlp?.label != Label.RED
-        ) {
+        if (json.document.distribution?.tlp?.label !in protectedDocumentLabels) {
             return ValidationNotApplicable
         }
 
-        // If we do not have a response, we can assume that it's not accessible and we fail
-        val response = ctx.httpResponse ?: return ValidationFailed(listOf("Response is null"))
+        // If we do not have a response, we can assume that it's not accessible and we succeed (sort
+        // of)
+        val response = ctx.httpResponse ?: return ValidationSuccessful
 
         // We assume that it is access protected, if
-        // - We got access denied/permission denied and did not see authorization request headers or
-        // - We got a successful status code but did see authorization headers
         return when {
-            (response.status == HttpStatusCode.Forbidden ||
-                response.status == HttpStatusCode.Unauthorized) &&
-                !response.request.headers.contains("Authorization") -> ValidationSuccessful
+            // - We got a successful status code but did see authorization headers
             response.status.isSuccess() && response.request.headers.contains("Authorization") -> {
                 ValidationSuccessful
             }
-
+            // - We got access denied/permission denied
+            response.status in protectedStatusCodes -> {
+                ValidationSuccessful
+            }
             // Otherwise, we fail
-            else -> ValidationFailed(listOf("TLP:WHITE document is not freely accessible"))
+            else -> ValidationFailed(listOf("TLP:RED/AMBER document is not access protected"))
         }
     }
 }
 
+/**
+ * Represents
+ * [Requirement 5: TLP:AMBER and TLP:RED](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#715-requirement-5-tlpamber-and-tlpred).
+ *
+ * In addition to [Requirement5TlpAmberRedNotAccessible] we also need to check, if WHITE/GREEN
+ * documents are not serves on the same document feed as RED/AMBER. To do this, we iterate through
+ * the ROLIE feeds.
+ */
 object Requirement5TlpAmberRedNotListedWithWhite : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         // Only applicable to the provider
