@@ -117,6 +117,7 @@ class TestsTest {
                     .readText()
             )
 
+        assertEquals(ValidationSuccessful, test.test(goodCsaf(vulnerabilities = null)))
         assertEquals(
             ValidationFailed(
                 listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
