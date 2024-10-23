@@ -14,7 +14,16 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.validation
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-annotation class KoverIgnore(@Suppress("unused") val reason: String)
+import io.github.csaf.sbom.schema.generated.Csaf
+
+/**
+ * Represents a test as described in
+ * [Section 6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6-tests). They all
+ * target a CSAF document, represented by the [Csaf] type.
+ */
+interface Test {
+
+    fun test(doc: Csaf): ValidationResult
+}

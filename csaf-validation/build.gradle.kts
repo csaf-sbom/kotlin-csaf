@@ -1,5 +1,10 @@
 plugins {
     id("buildlogic.kotlin-library-conventions")
+    application
+}
+
+application {
+    mainClass = "io.github.csaf.sbom.validation.MainKt"
 }
 
 mavenPublishing {
