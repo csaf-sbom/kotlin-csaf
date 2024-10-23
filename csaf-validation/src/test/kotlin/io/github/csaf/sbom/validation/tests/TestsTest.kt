@@ -110,13 +110,43 @@ class TestsTest {
     fun test616() {
         val test = Test616ContradictingProductStatus
 
+        // failing examples
         assertEquals(
             ValidationFailed(
                 listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
             ),
             test.test(mandatoryTest("6-1-06-01"))
         )
+        assertEquals(
+            ValidationFailed(
+                listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
+            ),
+            test.test(mandatoryTest("6-1-06-02"))
+        )
+        assertEquals(
+            ValidationFailed(
+                listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
+            ),
+            test.test(mandatoryTest("6-1-06-03"))
+        )
+        assertEquals(
+            ValidationFailed(
+                listOf(
+                    "The following IDs have contradicting statuses: CSAFPID-9080700,CSAFPID-9080701"
+                )
+            ),
+            test.test(mandatoryTest("6-1-06-04"))
+        )
+        assertEquals(
+            ValidationFailed(
+                listOf(
+                    "The following IDs have contradicting statuses: CSAFPID-9080702,CSAFPID-9080700,CSAFPID-9080701"
+                )
+            ),
+            test.test(mandatoryTest("6-1-06-05"))
+        )
 
+        // good examples
         assertEquals(ValidationSuccessful, test.test(goodCsaf(vulnerabilities = null)))
     }
 
