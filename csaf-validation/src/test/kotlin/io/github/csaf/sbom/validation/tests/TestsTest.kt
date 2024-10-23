@@ -127,6 +127,25 @@ class TestsTest {
     }
 
     @Test
+    fun test617() {
+        val test = Test617MultipleScoresWithSameVersionPerProduct
+        val fail =
+            Json.decodeFromString<Csaf>(
+                Path(
+                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-07-01.json"
+                    )
+                    .readText()
+            )
+
+        assertEquals(
+            ValidationFailed(
+                listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
+            ),
+            test.test(fail)
+        )
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 

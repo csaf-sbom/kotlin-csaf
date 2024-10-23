@@ -22,6 +22,7 @@ import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Mandatory tests as defined in
@@ -166,6 +167,10 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#616-contradicting-product-status).
+ */
 object Test616ContradictingProductStatus : Test {
     override fun test(doc: Csaf): ValidationResult {
         val affected = mutableSetOf<String>()
@@ -205,6 +210,30 @@ object Test616ContradictingProductStatus : Test {
                 )
             )
         }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.7](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#617-multiple-scores-with-same-version-per-product).
+ */
+object Test617MultipleScoresWithSameVersionPerProduct : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        for (vulnerability in doc.vulnerabilities ?: listOf()) {
+            var productScoreVersions = mutableMapOf<String, MutableList<String>>()
+            // Gather a Pair of (product_id, cvss_version)
+            for (score in vulnerability.scores ?: listOf()) {
+                score.products.forEach {
+                    var versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
+                    versions += score.cvss_v3?.get("version")?.jsonPrimitive?.content
+                    versions += score.cvss_v2?.version
+                }
+            }
+
+            println(productScoreVersions)
+        }
+
+        return ValidationSuccessful
     }
 }
 

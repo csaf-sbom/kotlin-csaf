@@ -191,13 +191,13 @@ fun List<*>?.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
     }
 }
 
-private operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
+internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
     if (set != null) {
         this.addAll(set)
     }
 }
 
-private operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
+internal operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
     if (item != null) {
         this.add(item)
     }
