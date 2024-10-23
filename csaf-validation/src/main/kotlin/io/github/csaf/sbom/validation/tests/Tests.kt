@@ -37,6 +37,7 @@ var mandatoryTests =
         Test614MissingDefinitionOfProductGroupID,
         Test615MultipleDefinitionOfProductGroupID,
         Test616ContradictingProductStatus,
+        Test617MultipleScoresWithSameVersionPerProduct,
     )
 
 /**
