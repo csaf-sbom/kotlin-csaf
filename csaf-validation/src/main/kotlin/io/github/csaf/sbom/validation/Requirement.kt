@@ -51,19 +51,7 @@ fun allOf(vararg requirements: Requirement): Requirement {
 private class AllOf(private val list: List<Requirement>) : Requirement {
     override fun check(ctx: ValidationContext): ValidationResult {
         val results = list.map { it.check(ctx) }
-        return if (results.any { it is ValidationFailed }) {
-            ValidationFailed(
-                results.flatMap {
-                    if (it is ValidationFailed) {
-                        it.errors
-                    } else {
-                        emptyList()
-                    }
-                }
-            )
-        } else {
-            ValidationSuccessful
-        }
+        return results.merge()
     }
 }
 

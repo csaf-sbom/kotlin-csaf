@@ -35,3 +35,20 @@ data class ValidationFailed(
 ) : ValidationResult {
     fun toException() = ValidationException(errors)
 }
+
+/** Merges together the content of all [ValidationResult] objects in this list. */
+fun List<ValidationResult>.merge(): ValidationResult {
+    return if (any { it is ValidationFailed }) {
+        ValidationFailed(
+            flatMap {
+                if (it is ValidationFailed) {
+                    it.errors
+                } else {
+                    emptyList()
+                }
+            }
+        )
+    } else {
+        ValidationSuccessful
+    }
+}

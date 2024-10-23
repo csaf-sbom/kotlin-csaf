@@ -21,6 +21,40 @@ import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
+import io.github.csaf.sbom.validation.merge
+
+/**
+ * Mandatory tests as defined in
+ * [Section 6.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61-mandatory-tests).
+ */
+var mandatoryTests =
+    listOf(
+        Test611MissingDefinitionOfProductID,
+        Test612MultipleDefinitionOfProductID,
+        Test613CircularDefinitionOfProductID,
+        Test614MissingDefinitionOfProductGroupID,
+        Test615MultipleDefinitionOfProductGroupID,
+    )
+
+/**
+ * Optional tests as defined in
+ * [Section 6.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#62-optional-tests).
+ */
+var optionalTests =
+    listOf(
+        Test621UnusedDefinitionOfProductID,
+    )
+
+/**
+ * Informative tests as defined in
+ * [Section 6.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#63-informative-test).
+ */
+var informativeTests = listOf<Test>()
+
+/** Executes all tests in this list of [Test] objects. */
+fun List<Test>.test(doc: Csaf): ValidationResult {
+    return this.map { it.test(doc) }.merge()
+}
 
 /**
  * Implementation of

@@ -127,15 +127,7 @@ class TestsTest {
     @Test
     fun testAllGood() {
         val good = goodCsaf()
-        val tests =
-            listOf(
-                Test611MissingDefinitionOfProductID,
-                Test612MultipleDefinitionOfProductID,
-                Test613CircularDefinitionOfProductID,
-                Test614MissingDefinitionOfProductGroupID,
-                Test615MultipleDefinitionOfProductGroupID,
-                Test621UnusedDefinitionOfProductID,
-            )
+        val tests = mandatoryTests + optionalTests + informativeTests
         tests.forEach {
             assertEquals(
                 ValidationSuccessful,
