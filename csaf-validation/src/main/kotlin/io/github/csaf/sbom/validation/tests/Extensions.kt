@@ -119,16 +119,46 @@ fun Csaf.Vulnerability.gatherProductGroupReferencesTo(ids: MutableCollection<Str
 }
 
 fun Csaf.ProductStatus?.gatherProductReferencesTo(ids: MutableCollection<String>) {
+    gatherAffectedProductReferencesTo(ids)
+    gatherNotAffectedProductReferencesTo(ids)
+    gatherFixedProductReferencesTo(ids)
+    gatherUnderInvestigationProductReferencesTo(ids)
+    gatherRecommendedProductReferencesTo(ids)
+}
+
+fun Csaf.ProductStatus?.gatherAffectedProductReferencesTo(ids: MutableCollection<String>) {
     if (this == null) return
 
     ids += first_affected
+    ids += known_affected
+    ids += last_affected
+}
+
+fun Csaf.ProductStatus?.gatherNotAffectedProductReferencesTo(ids: MutableCollection<String>) {
+    if (this == null) return
+
+    ids += known_not_affected
+}
+
+fun Csaf.ProductStatus?.gatherFixedProductReferencesTo(ids: MutableCollection<String>) {
+    if (this == null) return
+
     ids += first_fixed
     ids += fixed
-    ids += known_affected
-    ids += known_not_affected
-    ids += last_affected
-    ids += recommended
+}
+
+fun Csaf.ProductStatus?.gatherUnderInvestigationProductReferencesTo(
+    ids: MutableCollection<String>
+) {
+    if (this == null) return
+
     ids += under_investigation
+}
+
+fun Csaf.ProductStatus?.gatherRecommendedProductReferencesTo(ids: MutableCollection<String>) {
+    if (this == null) return
+
+    ids += recommended
 }
 
 fun List<*>?.gatherProductReferencesTo(ids: MutableCollection<String>) {
@@ -161,13 +191,13 @@ fun List<*>?.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
     }
 }
 
-private operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
+internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
     if (set != null) {
         this.addAll(set)
     }
 }
 
-private operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
+internal operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
     if (item != null) {
         this.add(item)
     }

@@ -17,11 +17,16 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.schema.generated.CvssV30
+import io.github.csaf.sbom.schema.generated.CvssV31Json20211103
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Mandatory tests as defined in
@@ -34,6 +39,9 @@ var mandatoryTests =
         Test613CircularDefinitionOfProductID,
         Test614MissingDefinitionOfProductGroupID,
         Test615MultipleDefinitionOfProductGroupID,
+        Test616ContradictingProductStatus,
+        Test617MultipleScoresWithSameVersionPerProduct,
+        Test618InvalidCVSS
     )
 
 /**
@@ -65,7 +73,7 @@ object Test611MissingDefinitionOfProductID : Test {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
-        val notDefined = references.subtract(definitions)
+        val notDefined = references.subtract(definitions.toSet())
 
         return if (notDefined.isEmpty()) {
             ValidationSuccessful
@@ -85,7 +93,7 @@ object Test612MultipleDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
 
-        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+        val duplicates = definitions.duplicates()
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
@@ -97,6 +105,10 @@ object Test612MultipleDefinitionOfProductID : Test {
     }
 }
 
+private fun <T> List<T>.duplicates(): Map<T, Int> {
+    return groupingBy { it }.eachCount().filter { it.value > 1 }
+}
+
 /**
  * Implementation of
  * [Test 6.1.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#613-circular-definition-of-product-id).
@@ -106,8 +118,8 @@ object Test613CircularDefinitionOfProductID : Test {
         val circles = mutableSetOf<String>()
 
         for (relationship in doc.product_tree?.relationships ?: listOf()) {
-            var definedId = relationship.full_product_name.product_id
-            var notAllowed =
+            val definedId = relationship.full_product_name.product_id
+            val notAllowed =
                 listOf(relationship.product_reference, relationship.relates_to_product_reference)
             if (definedId in notAllowed) {
                 circles += definedId
@@ -133,7 +145,7 @@ object Test614MissingDefinitionOfProductGroupID : Test {
         val definitions = doc.gatherProductGroups().map { it.group_id }
         val references = doc.gatherProductGroupReferences()
 
-        val notDefined = references.subtract(definitions)
+        val notDefined = references.subtract(definitions.toSet())
 
         return if (notDefined.isEmpty()) {
             ValidationSuccessful
@@ -153,7 +165,7 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProductGroups().map { it.group_id }
 
-        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+        val duplicates = definitions.duplicates()
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
@@ -167,6 +179,135 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#616-contradicting-product-status).
+ */
+object Test616ContradictingProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val affected = mutableSetOf<String>()
+        val notAffected = mutableSetOf<String>()
+        val fixed = mutableSetOf<String>()
+        val underInvestigation = mutableSetOf<String>()
+
+        val contradicted = mutableSetOf<String>()
+
+        for (vulnerability in doc.vulnerabilities ?: listOf()) {
+            affected.clear()
+            notAffected.clear()
+            fixed.clear()
+            underInvestigation.clear()
+
+            vulnerability.product_status.gatherAffectedProductReferencesTo(affected)
+            vulnerability.product_status.gatherNotAffectedProductReferencesTo(notAffected)
+            vulnerability.product_status.gatherFixedProductReferencesTo(fixed)
+            vulnerability.product_status.gatherUnderInvestigationProductReferencesTo(
+                underInvestigation
+            )
+
+            contradicted += affected.intersect(notAffected)
+            contradicted += affected.intersect(fixed)
+            contradicted += affected.intersect(underInvestigation)
+            contradicted += notAffected.intersect(fixed)
+            contradicted += notAffected.intersect(underInvestigation)
+            contradicted += fixed.intersect(underInvestigation)
+        }
+
+        return if (contradicted.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following IDs have contradicting statuses: ${contradicted.joinToString(",")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.7](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#617-multiple-scores-with-same-version-per-product).
+ */
+object Test617MultipleScoresWithSameVersionPerProduct : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val multiples = mutableSetOf<String>()
+
+        for (vulnerability in doc.vulnerabilities ?: listOf()) {
+            // Gather a map of product_id => list of cvss_version
+            val productScoreVersions = mutableMapOf<String, MutableList<String>>()
+            for (score in vulnerability.scores ?: listOf()) {
+                score.products.forEach {
+                    val versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
+                    versions += score.cvss_v3.version
+                    versions += score.cvss_v2?.version
+                }
+            }
+
+            multiples +=
+                productScoreVersions
+                    .filter {
+                        // We need to look for potential duplicates in the versions
+                        val versions = it.value
+                        val duplicates = versions.duplicates()
+
+                        duplicates.isNotEmpty()
+                    }
+                    .map { it.key }
+        }
+
+        return if (multiples.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following IDs have multiple scores: ${multiples.joinToString(",")}")
+            )
+        }
+    }
+}
+
+val cvssSerializersMap =
+    mapOf("3.0" to CvssV30.serializer(), "3.1" to CvssV31Json20211103.serializer())
+
+/**
+ * Implementation of
+ * [Test 6.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#618-invalid-cvss).
+ */
+object Test618InvalidCVSS : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        // Actually, this would be easy if our parser would parse the CVSS 3.0 correctly,but
+        // unfortunately our JSON schema generator does not implement one_of, and therefore we need
+        // to resort to having a generic JSON object.
+
+        val illegals = mutableSetOf<String>()
+
+        for (score in doc.vulnerabilities?.flatMap { it.scores ?: listOf() } ?: listOf()) {
+            // For CVSS 2.0 the JSON schema is checked at object creation, so nothing to do
+
+            // For CVSS 3.0/3.1 we need to first check the version
+            val cvss3 = score.cvss_v3
+            if (cvss3 != null) {
+                val serializer = cvssSerializersMap[cvss3.version]
+                if (serializer == null) {
+                    illegals += "Invalid CVSS version ${cvss3.version}"
+                } else {
+                    try {
+                        Json.decodeFromJsonElement(serializer, cvss3)
+                    } catch (ex: IllegalArgumentException) {
+                        illegals += ex.message
+                    }
+                }
+            }
+        }
+
+        return if (illegals.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid CVSS detected: ${illegals.joinToString(", ")}"))
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.2.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#621-unused-definition-of-product-id).
  */
 object Test621UnusedDefinitionOfProductID : Test {
@@ -174,7 +315,7 @@ object Test621UnusedDefinitionOfProductID : Test {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
-        val notUsed = definitions.subtract(references)
+        val notUsed = definitions.subtract(references.toSet())
         return if (notUsed.isEmpty()) {
             ValidationSuccessful
         } else {
@@ -182,3 +323,13 @@ object Test621UnusedDefinitionOfProductID : Test {
         }
     }
 }
+
+val JsonObject?.version: String?
+    get() {
+        val primitive = this?.get("version") as? JsonPrimitive
+        return if (primitive?.isString == true) {
+            primitive.content
+        } else {
+            null
+        }
+    }

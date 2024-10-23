@@ -26,7 +26,14 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /** The path to the test folder for the CSAF 2.0 tests. */
 var testFolder: String = "../csaf/csaf_2.0/test/validator/data/"
@@ -107,6 +114,114 @@ class TestsTest {
     }
 
     @Test
+    fun test616() {
+        val test = Test616ContradictingProductStatus
+
+        // failing examples
+        assertValidationFailed(
+            "The following IDs have contradicting statuses: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-06-01"))
+        )
+        assertValidationFailed(
+            "The following IDs have contradicting statuses: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-06-02"))
+        )
+        assertValidationFailed(
+            "The following IDs have contradicting statuses: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-06-03"))
+        )
+        assertValidationFailed(
+            "The following IDs have contradicting statuses: CSAFPID-9080700,CSAFPID-9080701",
+            test.test(mandatoryTest("6-1-06-04"))
+        )
+        assertValidationFailed(
+            "The following IDs have contradicting statuses: CSAFPID-9080702,CSAFPID-9080700,CSAFPID-9080701",
+            test.test(mandatoryTest("6-1-06-05"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-06-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-06-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-06-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-06-14")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-06-15")))
+    }
+
+    @Test
+    fun test617() {
+        val test = Test617MultipleScoresWithSameVersionPerProduct
+
+        // failing examples
+        assertValidationFailed(
+            "The following IDs have multiple scores: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-07-01"))
+        )
+
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(scores = null))))
+        )
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-07-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-07-12")))
+    }
+
+    @Test
+    fun test618() {
+        val test = Test618InvalidCVSS
+
+        // failing examples
+        assertValidationFailed(
+            "Invalid CVSS detected: Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.CvssV31Json20211103', but it was missing",
+            test.test(mandatoryTest("6-1-08-01"))
+        )
+        assertValidationFailed(
+            "Invalid CVSS detected: Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.CvssV30', but it was missing",
+            test.test(mandatoryTest("6-1-08-02"))
+        )
+        assertValidationFailed(
+            "Invalid CVSS detected: Invalid CVSS version 3.2",
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                scores =
+                                    listOf(
+                                        Csaf.Score(
+                                            cvss_v3 =
+                                                JsonObject(
+                                                    content =
+                                                        mapOf("version" to JsonPrimitive("3.2"))
+                                                ),
+                                            products = setOf("some-product")
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+
+        // CVSS 2.0 will already fail to produce a valid document
+        val ex = assertFailsWith<SerializationException> { test.test(mandatoryTest("6-1-08-03")) }
+        val msg = ex.message
+        assertNotNull(msg)
+        assertTrue(
+            msg.contains(
+                "Field 'version' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV2'"
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-14")))
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
@@ -120,6 +235,7 @@ class TestsTest {
     fun testAllGood() {
         val good = goodCsaf()
         val tests = mandatoryTests + optionalTests + informativeTests
+
         tests.forEach {
             assertEquals(
                 ValidationSuccessful,
@@ -127,5 +243,14 @@ class TestsTest {
                 "${it::class.simpleName} was not successful"
             )
         }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test
+    fun testVersion() {
+        @Suppress("USELESS_CAST") assertEquals(null, (null as? JsonObject).version)
+        assertEquals(null, JsonObject(content = mapOf()).version)
+        assertEquals(null, JsonObject(content = mapOf("version" to JsonPrimitive(null))).version)
+        assertEquals("3.0", JsonObject(content = mapOf("version" to JsonPrimitive("3.0"))).version)
     }
 }
