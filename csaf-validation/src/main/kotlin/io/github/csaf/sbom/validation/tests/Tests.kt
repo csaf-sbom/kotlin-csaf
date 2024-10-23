@@ -274,9 +274,8 @@ val cvssSerializersMap =
 object Test618InvalidCVSS : Test {
     override fun test(doc: Csaf): ValidationResult {
         // Actually, this would be easy if our parser would parse the CVSS 3.0 correctly,but
-        // unfortunately our JSON schema generator does not implement one_of and therefore we need
-        // to
-        // resort to having a generic JSON object.
+        // unfortunately our JSON schema generator does not implement one_of, and therefore we need
+        // to resort to having a generic JSON object.
 
         val illegals = mutableSetOf<String>()
 
