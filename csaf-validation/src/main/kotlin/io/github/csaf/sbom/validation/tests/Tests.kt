@@ -22,6 +22,7 @@ import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
@@ -219,21 +220,31 @@ object Test616ContradictingProductStatus : Test {
  */
 object Test617MultipleScoresWithSameVersionPerProduct : Test {
     override fun test(doc: Csaf): ValidationResult {
+        val multiples = mutableSetOf<String>()
+
         for (vulnerability in doc.vulnerabilities ?: listOf()) {
             var productScoreVersions = mutableMapOf<String, MutableList<String>>()
             // Gather a Pair of (product_id, cvss_version)
             for (score in vulnerability.scores ?: listOf()) {
                 score.products.forEach {
                     var versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
-                    versions += score.cvss_v3?.get("version")?.jsonPrimitive?.content
+                    versions += score.cvss_v3.version
                     versions += score.cvss_v2?.version
                 }
             }
 
-            println(productScoreVersions)
+            multiples += productScoreVersions.filter { it.value.size > 1 }.map { it.key }
         }
 
-        return ValidationSuccessful
+        return if (multiples.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following IDs have contradicting statuses: ${multiples.joinToString(",")}"
+                )
+            )
+        }
     }
 }
 
@@ -254,3 +265,8 @@ object Test621UnusedDefinitionOfProductID : Test {
         }
     }
 }
+
+val JsonObject?.version: String?
+    get() {
+        return this?.get("version")?.jsonPrimitive?.content
+    }

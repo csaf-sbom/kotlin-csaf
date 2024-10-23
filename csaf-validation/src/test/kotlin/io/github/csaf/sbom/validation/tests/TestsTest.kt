@@ -109,39 +109,32 @@ class TestsTest {
     @Test
     fun test616() {
         val test = Test616ContradictingProductStatus
-        val fail =
-            Json.decodeFromString<Csaf>(
-                Path(
-                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-06-01.json"
-                    )
-                    .readText()
-            )
 
-        assertEquals(ValidationSuccessful, test.test(goodCsaf(vulnerabilities = null)))
         assertEquals(
             ValidationFailed(
                 listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
             ),
-            test.test(fail)
+            test.test(mandatoryTest("6-1-06-01"))
         )
+
+        assertEquals(ValidationSuccessful, test.test(goodCsaf(vulnerabilities = null)))
     }
 
     @Test
     fun test617() {
         val test = Test617MultipleScoresWithSameVersionPerProduct
-        val fail =
-            Json.decodeFromString<Csaf>(
-                Path(
-                        "../csaf/csaf_2.0/test/validator/data/mandatory/oasis_csaf_tc-csaf_2_0-2021-6-1-07-01.json"
-                    )
-                    .readText()
-            )
 
         assertEquals(
             ValidationFailed(
                 listOf("The following IDs have contradicting statuses: CSAFPID-9080700")
             ),
-            test.test(fail)
+            test.test(mandatoryTest("6-1-07-01"))
+        )
+
+        assertEquals(ValidationSuccessful, test.test(goodCsaf(vulnerabilities = null)))
+        assertEquals(
+            ValidationSuccessful,
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(scores = null))))
         )
     }
 
