@@ -17,11 +17,14 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.schema.generated.CvssV30
+import io.github.csaf.sbom.schema.generated.CvssV31Json20211103
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -38,6 +41,7 @@ var mandatoryTests =
         Test615MultipleDefinitionOfProductGroupID,
         Test616ContradictingProductStatus,
         Test617MultipleScoresWithSameVersionPerProduct,
+        Test618InvalidCVSS
     )
 
 /**
@@ -69,7 +73,7 @@ object Test611MissingDefinitionOfProductID : Test {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
-        val notDefined = references.subtract(definitions)
+        val notDefined = references.subtract(definitions.toSet())
 
         return if (notDefined.isEmpty()) {
             ValidationSuccessful
@@ -114,8 +118,8 @@ object Test613CircularDefinitionOfProductID : Test {
         val circles = mutableSetOf<String>()
 
         for (relationship in doc.product_tree?.relationships ?: listOf()) {
-            var definedId = relationship.full_product_name.product_id
-            var notAllowed =
+            val definedId = relationship.full_product_name.product_id
+            val notAllowed =
                 listOf(relationship.product_reference, relationship.relates_to_product_reference)
             if (definedId in notAllowed) {
                 circles += definedId
@@ -141,7 +145,7 @@ object Test614MissingDefinitionOfProductGroupID : Test {
         val definitions = doc.gatherProductGroups().map { it.group_id }
         val references = doc.gatherProductGroupReferences()
 
-        val notDefined = references.subtract(definitions)
+        val notDefined = references.subtract(definitions.toSet())
 
         return if (notDefined.isEmpty()) {
             ValidationSuccessful
@@ -229,10 +233,10 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
 
         for (vulnerability in doc.vulnerabilities ?: listOf()) {
             // Gather a map of product_id => list of cvss_version
-            var productScoreVersions = mutableMapOf<String, MutableList<String>>()
+            val productScoreVersions = mutableMapOf<String, MutableList<String>>()
             for (score in vulnerability.scores ?: listOf()) {
                 score.products.forEach {
-                    var versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
+                    val versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
                     versions += score.cvss_v3.version
                     versions += score.cvss_v2?.version
                 }
@@ -260,6 +264,49 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
     }
 }
 
+val cvssSerializersMap =
+    mapOf("3.0" to CvssV30.serializer(), "3.1" to CvssV31Json20211103.serializer())
+
+/**
+ * Implementation of
+ * [Test 6.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#618-invalid-cvss).
+ */
+object Test618InvalidCVSS : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        // Actually, this would be easy if our parser would parse the CVSS 3.0 correctly,but
+        // unfortunately our JSON schema generator does not implement one_of and therefore we need
+        // to
+        // resort to having a generic JSON object.
+
+        val illegals = mutableSetOf<String>()
+
+        for (score in doc.vulnerabilities?.flatMap { it.scores ?: listOf() } ?: listOf()) {
+            // For CVSS 2.0 the JSON schema is checked at object creation, so nothing to do
+
+            // For CVSS 3.0/3.1 we need to first check the version
+            val cvss3 = score.cvss_v3
+            if (cvss3 != null) {
+                val serializer = cvssSerializersMap[cvss3.version]
+                if (serializer == null) {
+                    illegals += "Invalid CVSS version ${cvss3.version}"
+                } else {
+                    try {
+                        Json.decodeFromJsonElement(serializer, cvss3)
+                    } catch (ex: IllegalArgumentException) {
+                        illegals += ex.message
+                    }
+                }
+            }
+        }
+
+        return if (illegals.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid CVSS detected: ${illegals.joinToString(", ")}"))
+        }
+    }
+}
+
 /**
  * Implementation of
  * [Test 6.2.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#621-unused-definition-of-product-id).
@@ -269,7 +316,7 @@ object Test621UnusedDefinitionOfProductID : Test {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
-        val notUsed = definitions.subtract(references)
+        val notUsed = definitions.subtract(references.toSet())
         return if (notUsed.isEmpty()) {
             ValidationSuccessful
         } else {
@@ -280,7 +327,7 @@ object Test621UnusedDefinitionOfProductID : Test {
 
 val JsonObject?.version: String?
     get() {
-        var primitive = this?.get("version") as? JsonPrimitive
+        val primitive = this?.get("version") as? JsonPrimitive
         return if (primitive?.isString == true) {
             primitive.content
         } else {
