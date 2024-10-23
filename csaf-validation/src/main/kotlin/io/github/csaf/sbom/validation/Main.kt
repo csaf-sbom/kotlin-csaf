@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
 
     val globalStart = Instant.now()
 
-    var allTests =
+    val allTests =
         mapOf(
             mandatoryTests to "mandatory",
             optionalTests to "optional",
@@ -47,8 +47,8 @@ fun main(args: Array<String>) {
         println("== ${entry.value.uppercase()} TESTS ==")
 
         for (test in entry.key) {
-            var start = Instant.now()
-            var result = test.test(doc)
+            val start = Instant.now()
+            val result = test.test(doc)
             println(
                 "Test ${test::class.simpleName}: $result. It took ${
                     Duration.between(start, Instant.now()).toMillis()
