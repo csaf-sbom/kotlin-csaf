@@ -16,15 +16,11 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationContext
 import io.github.csaf.sbom.validation.ValidationException
 import io.ktor.http.*
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import kotlin.io.path.Path
-import kotlin.io.path.readText
 import kotlin.test.*
+import kotlinx.coroutines.test.runTest
 
 class CsafLoaderTest {
     private val loader = CsafLoader(mockEngine())
@@ -107,5 +103,4 @@ class CsafLoaderTest {
             }
         assertFalse { result.isSuccess }
     }
-
 }
