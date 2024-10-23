@@ -22,9 +22,27 @@ import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.io.path.Path
+import kotlin.io.path.readText
 import kotlin.test.*
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 
 class CsafTest {
+
+    @Test
+    fun testStrict() {
+        val file = Path("src/test/resources/csaf-strict-test.json")
+        val ex =
+            assertFailsWith<SerializationException> { Json.decodeFromString<Csaf>(file.readText()) }
+        val msg = ex.message
+        assertNotNull(msg)
+        assertTrue(
+            msg.contains(
+                "Unexpected JSON token at offset 5: Encountered an unknown key 'this_property_does_not_exist' at path"
+            )
+        )
+    }
 
     @Test
     fun testFailCVSSVector() {
