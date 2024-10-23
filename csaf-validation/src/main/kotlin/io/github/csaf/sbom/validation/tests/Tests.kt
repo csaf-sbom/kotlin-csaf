@@ -65,10 +65,6 @@ object Test611MissingDefinitionOfProductID : Test {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
 
-        println(
-            "Gathered ${definitions.size} product ID definitions and ${references.size} product ID references"
-        )
-
         val notDefined = references.subtract(definitions)
 
         return if (notDefined.isEmpty()) {
@@ -137,10 +133,6 @@ object Test614MissingDefinitionOfProductGroupID : Test {
         val definitions = doc.gatherProductGroups().map { it.group_id }
         val references = doc.gatherProductGroupReferences()
 
-        println(
-            "Gathered ${definitions.size} product group ID definitions and ${references.size} product group ID references"
-        )
-
         val notDefined = references.subtract(definitions)
 
         return if (notDefined.isEmpty()) {
@@ -181,10 +173,6 @@ object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
         val references = doc.gatherProductReferences()
-
-        println(
-            "Gathered ${definitions.size} product ID definitions and ${references.size} product ID references"
-        )
 
         val notUsed = definitions.subtract(references)
         return if (notUsed.isEmpty()) {

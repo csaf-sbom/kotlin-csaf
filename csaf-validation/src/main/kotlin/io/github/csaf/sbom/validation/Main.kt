@@ -18,8 +18,9 @@ package io.github.csaf.sbom.validation
 
 import io.github.csaf.sbom.schema.KoverIgnore
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.Test611MissingDefinitionOfProductID
-import io.github.csaf.sbom.validation.tests.Test621UnusedDefinitionOfProductID
+import io.github.csaf.sbom.validation.tests.informativeTests
+import io.github.csaf.sbom.validation.tests.mandatoryTests
+import io.github.csaf.sbom.validation.tests.optionalTests
 import java.time.Duration
 import java.time.Instant
 import kotlin.io.path.Path
@@ -31,12 +32,34 @@ fun main(args: Array<String>) {
     val path = Path(args[0])
     val doc = Json.decodeFromString<Csaf>(path.readText())
 
-    // Do some basic testing
-    var start = Instant.now()
-    var result = Test611MissingDefinitionOfProductID.test(doc)
-    println("Test 6.1.1: $result. It took ${Duration.between(start, Instant.now()).toMillis()} ms")
+    println("Analyzing file ${path}...\n")
 
-    start = Instant.now()
-    result = Test621UnusedDefinitionOfProductID.test(doc)
-    println("Test 6.2.1: $result. It took ${Duration.between(start, Instant.now()).toMillis()} ms")
+    val globalStart = Instant.now()
+
+    var allTests =
+        mapOf(
+            mandatoryTests to "mandatory",
+            optionalTests to "optional",
+            informativeTests to "informative",
+        )
+
+    for (entry in allTests) {
+        println("== ${entry.value.uppercase()} TESTS ==")
+
+        for (test in entry.key) {
+            var start = Instant.now()
+            var result = test.test(doc)
+            println(
+                "Test ${test::class.simpleName}: $result. It took ${
+                    Duration.between(start, Instant.now()).toMillis()
+                } ms"
+            )
+        }
+
+        println("")
+    }
+
+    println(
+        "Executing all tests took ${Duration.between(globalStart, Instant.now()).toMillis()} ms"
+    )
 }
