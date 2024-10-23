@@ -89,7 +89,7 @@ object Test612MultipleDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProducts().map { it.product_id }
 
-        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+        val duplicates = definitions.duplicates()
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
@@ -99,6 +99,10 @@ object Test612MultipleDefinitionOfProductID : Test {
             )
         }
     }
+}
+
+private fun <T> List<T>.duplicates(): Map<T, Int> {
+    return groupingBy { it }.eachCount().filter { it.value > 1 }
 }
 
 /**
@@ -157,7 +161,7 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
         val definitions = doc.gatherProductGroups().map { it.group_id }
 
-        val duplicates = definitions.groupingBy { it }.eachCount().filter { it.value > 1 }
+        val duplicates = definitions.duplicates()
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
@@ -224,8 +228,8 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
         val multiples = mutableSetOf<String>()
 
         for (vulnerability in doc.vulnerabilities ?: listOf()) {
+            // Gather a map of product_id => list of cvss_version
             var productScoreVersions = mutableMapOf<String, MutableList<String>>()
-            // Gather a Pair of (product_id, cvss_version)
             for (score in vulnerability.scores ?: listOf()) {
                 score.products.forEach {
                     var versions = productScoreVersions.computeIfAbsent(it) { mutableListOf() }
@@ -234,16 +238,23 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
                 }
             }
 
-            multiples += productScoreVersions.filter { it.value.size > 1 }.map { it.key }
+            multiples +=
+                productScoreVersions
+                    .filter {
+                        // We need to look for potential duplicates in the versions
+                        val versions = it.value
+                        val duplicates = versions.duplicates()
+
+                        duplicates.isNotEmpty()
+                    }
+                    .map { it.key }
         }
 
         return if (multiples.isEmpty()) {
             ValidationSuccessful
         } else {
             ValidationFailed(
-                listOf(
-                    "The following IDs have contradicting statuses: ${multiples.joinToString(",")}"
-                )
+                listOf("The following IDs have multiple scores: ${multiples.joinToString(",")}")
             )
         }
     }
