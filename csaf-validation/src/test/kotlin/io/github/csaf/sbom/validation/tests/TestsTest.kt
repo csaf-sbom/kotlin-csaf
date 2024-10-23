@@ -26,7 +26,11 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -148,6 +152,7 @@ class TestsTest {
     fun test617() {
         val test = Test617MultipleScoresWithSameVersionPerProduct
 
+        // failing examples
         assertValidationFailed(
             "The following IDs have multiple scores: CSAFPID-9080700",
             test.test(mandatoryTest("6-1-07-01"))
@@ -159,6 +164,61 @@ class TestsTest {
         )
         assertValidationSuccessful(test.test(mandatoryTest("6-1-07-11")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-07-12")))
+    }
+
+    @Test
+    fun test618() {
+        val test = Test618InvalidCVSS
+
+        // failing examples
+        assertValidationFailed(
+            "Invalid CVSS detected: Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.CvssV31Json20211103', but it was missing",
+            test.test(mandatoryTest("6-1-08-01"))
+        )
+        assertValidationFailed(
+            "Invalid CVSS detected: Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.CvssV30', but it was missing",
+            test.test(mandatoryTest("6-1-08-02"))
+        )
+        assertValidationFailed(
+            "Invalid CVSS detected: Invalid CVSS version 3.2",
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                scores =
+                                    listOf(
+                                        Csaf.Score(
+                                            cvss_v3 =
+                                                JsonObject(
+                                                    content =
+                                                        mapOf("version" to JsonPrimitive("3.2"))
+                                                ),
+                                            products = setOf("some-product")
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+
+        // CVSS 2.0 will already fail to produce a valid document
+        val ex = assertFailsWith<SerializationException> { test.test(mandatoryTest("6-1-08-03")) }
+        val msg = ex.message
+        assertNotNull(msg)
+        assertTrue(
+            msg.contains(
+                "Field 'version' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV2'"
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-14")))
     }
 
     @Test
