@@ -81,21 +81,21 @@ class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
 }
 
 interface Metric<PropertyEnum : Enum<PropertyEnum>> {
-    val score: Double
-    val value: PropertyEnum
+    val numericalValue: Double
+    val enumValue: PropertyEnum
 }
 
-data class BaseMetric<PropertyEnum : Enum<PropertyEnum>>(override val value: PropertyEnum) :
+data class BaseMetric<PropertyEnum : Enum<PropertyEnum>>(override val enumValue: PropertyEnum) :
     Metric<PropertyEnum> {
-    override val score: Double
+    override val numericalValue: Double
         get() {
-            return value.numericalValue()
+            return enumValue.numericalValue()
         }
 }
 
 class ModifiedMetric<PropertyEnum : Enum<PropertyEnum>>(
     /** The enum value of this metric, as defined in [PropertyEnum]. */
-    override val value: PropertyEnum,
+    override val enumValue: PropertyEnum,
 
     /** The value of [PropertyEnum] that specifies the "not defined" state. */
     val notDefinedValue: PropertyEnum,
@@ -106,21 +106,21 @@ class ModifiedMetric<PropertyEnum : Enum<PropertyEnum>>(
      */
     val baseValue: Metric<*>
 ) : Metric<PropertyEnum> {
-    override val score: Double
+    override val numericalValue: Double
         get() =
-            if (value == notDefinedValue) {
-                baseValue.score
+            if (enumValue == notDefinedValue) {
+                baseValue.numericalValue
             } else {
-                value.numericalValue()
+                enumValue.numericalValue()
             }
 }
 
-class BaseMetricDelegate<PropertyEnum : Enum<PropertyEnum>, Metrics : CVSSMetrics>(
+class BaseMetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
     val shortName: MetricShortName,
     val propertyType: KClass<out PropertyEnum>,
     val required: Boolean = true
 ) {
-    operator fun getValue(thisRef: Metrics, property: KProperty<*>): BaseMetric<PropertyEnum> {
+    operator fun getValue(thisRef: CVSSMetrics, property: KProperty<*>): BaseMetric<PropertyEnum> {
         // First, find out the short name
         var stringValue = thisRef.metrics[shortName]
         if (stringValue == null && required) {
@@ -169,7 +169,7 @@ fun <PropertyEnum : Enum<*>, Metrics : CVSSMetrics> metric(
     required: Boolean = true
 ) = MetricDelegate<PropertyEnum, Metrics>(shortName, propertyType, required)
 
-inline fun <reified PropertyEnum : Enum<PropertyEnum>, Metrics : CVSSMetrics> metric2(
+inline fun <reified PropertyEnum : Enum<PropertyEnum>> baseMetric(
     shortName: MetricShortName,
     required: Boolean = true
-) = BaseMetricDelegate<PropertyEnum, Metrics>(shortName, PropertyEnum::class, required)
+) = BaseMetricDelegate<PropertyEnum>(shortName, PropertyEnum::class, required)

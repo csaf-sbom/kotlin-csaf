@@ -47,15 +47,15 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
             temporalSeverity = temporalScore.toSeverity(),
             environmentalScore = environmentalScore,
             environmentalSeverity = environmentalScore.toSeverity(),
-            scope = metrics.scope,
-            availabilityImpact = metrics.availabilityImpact,
-            confidentialityImpact = metrics.confidentialityImpact,
-            integrityImpact = metrics.integrityImpact,
-            attackVector = metrics.attackVector,
-            attackComplexity = metrics.attackComplexity,
-            privilegesRequired = metrics.privilegesRequired,
-            userInteraction = metrics.userInteraction.value,
-            modifiedAttackVector = metrics.modifiedAttackVector as? CvssV30.ModifiedAttackVector,
+            scope = metrics.scope.enumValue,
+            availabilityImpact = metrics.availabilityImpact.enumValue,
+            confidentialityImpact = metrics.confidentialityImpact.enumValue,
+            integrityImpact = metrics.integrityImpact.enumValue,
+            attackVector = metrics.attackVector.enumValue,
+            attackComplexity = metrics.attackComplexity.enumValue,
+            privilegesRequired = metrics.privilegesRequired.enumValue,
+            userInteraction = metrics.userInteraction.enumValue,
+            modifiedAttackVector = metrics.modifiedAttackVector.enumValue,
         )
 
     return score
@@ -176,6 +176,17 @@ fun <T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {
                 CvssV30.ConfidentialityRequirement.HIGH to 1.5,
                 CvssV30.ConfidentialityRequirement.MEDIUM to 1.0,
                 CvssV30.ConfidentialityRequirement.LOW to 0.5,
+            )
+        // This mapping is not in the standard, but we use it so that we can use our delegate system
+        is CvssV30.Scope ->
+            mapOf(
+                CvssV30.Scope.UNCHANGED to 0.0,
+                CvssV30.Scope.CHANGED to 1.0,
+            )
+        is CvssV30.ModifiedScope ->
+            mapOf(
+                CvssV30.ModifiedScope.UNCHANGED to 0.0,
+                CvssV30.ModifiedScope.CHANGED to 1.0,
             )
         else -> throw IllegalArgumentException("invalid enum class: ${x::class.simpleName}")
     }

@@ -20,10 +20,7 @@ import io.github.csaf.sbom.schema.MetricShortName
 import io.github.csaf.sbom.schema.ceil
 import io.github.csaf.sbom.schema.cvss.*
 import io.github.csaf.sbom.schema.cvss.CVSSMetrics
-import io.github.csaf.sbom.schema.cvss.metric
-import io.github.csaf.sbom.schema.cvss.modifiedMetric
 import io.github.csaf.sbom.schema.generated.CvssV30
-import io.github.csaf.sbom.schema.generated.CvssV30.Scope
 import io.github.csaf.sbom.schema.valueOf
 import kotlin.math.min
 import kotlin.math.pow
@@ -206,33 +203,31 @@ class CVSS30Metrics(
         CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
 ) : CVSSMetrics {
 
-    val scope by metric("S", CvssV30.Scope::class)
-    val confidentialityImpact by metric("C", CvssV30.ConfidentialityImpact::class)
-    val integrityImpact by metric("I", CvssV30.ConfidentialityImpact::class)
-    val availabilityImpact by metric("A", CvssV30.ConfidentialityImpact::class)
-    val attackVector by metric("AV", CvssV30.AttackVector::class)
-    val attackComplexity by metric("AC", CvssV30.AttackComplexity::class)
-    val privilegesRequired by metric("PR", CvssV30.PrivilegesRequired::class)
-    // val userInteraction by metric("UI", CvssV30.UserInteraction::class)
-
-    val userInteraction by metric2<CvssV30.UserInteraction, CVSS30Metrics>("UI")
+    val scope by baseMetric<CvssV30.Scope>("S")
+    val confidentialityImpact by baseMetric<CvssV30.ConfidentialityImpact>("C")
+    val integrityImpact by baseMetric<CvssV30.ConfidentialityImpact>("I")
+    val availabilityImpact by baseMetric<CvssV30.ConfidentialityImpact>("A")
+    val attackVector by baseMetric<CvssV30.AttackVector>("AV")
+    val attackComplexity by baseMetric<CvssV30.AttackComplexity>("AC")
+    val privilegesRequired by baseMetric<CvssV30.PrivilegesRequired>("PR")
+    val userInteraction by baseMetric<CvssV30.UserInteraction>("UI")
 
     val modifiedAttackVector by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedAttackVector,
             CvssV30.ModifiedAttackVector.NOT_DEFINED,
             CVSS30Metrics::attackVector
         )
 
     val modifiedAttackComplexity by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedAttackComplexity,
             CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
             CVSS30Metrics::attackComplexity
         )
 
     val modifiedPrivilegesRequired by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedPrivilegesRequired,
             CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
             CVSS30Metrics::privilegesRequired
@@ -246,24 +241,24 @@ class CVSS30Metrics(
         )
 
     val modifiedScope by
-        modifiedMetric(modifiedScope, CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
+        modifiedMetric2(modifiedScope, CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
 
     val modifiedConfidentialityImpact by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedConfidentialityImpact,
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::confidentialityImpact
         )
 
     val modifiedIntegrityImpact by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedIntegrityImpact,
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::integrityImpact
         )
 
     val modifiedAvailabilityImpact by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedAvailabilityImpact,
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::availabilityImpact
@@ -274,7 +269,7 @@ class CVSS30Metrics(
         val exploit = calculateExploitability()
         return if (impact <= 0.0) {
             0.0
-        } else if (scope == Scope.UNCHANGED) {
+        } else if (scope.numericalValue == 0.0) {
             ceil(min(impact + exploit, 10.0), digits = 1)
         } else {
             ceil(min(1.08 * (impact + exploit), 10.0), digits = 1)
@@ -350,7 +345,7 @@ fun CVSS30Metrics.calculateModifiedImpact(): Double {
                     (1 - modifiedAvailabilityImpact * availabilityRequirement)),
             0.915
         )
-    return if (modifiedScope == CvssV30.ModifiedScope.UNCHANGED) {
+    return if (modifiedScope.numericalValue == 0.0) {
         6.42 * iscModified
     } else {
         7.52 * (iscModified - 0.029) - 3.25 * (iscModified - 0.02).pow(15)
@@ -372,16 +367,10 @@ fun CVSS30Metrics.calculateTemporalScore(baseScore: Double): Double {
 fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
     val impact = calculateModifiedImpact()
     val exploitability = calculateModifiedExploitability()
-    val scope =
-        if (modifiedScope != CvssV30.ModifiedScope.NOT_DEFINED) {
-            modifiedScope
-        } else {
-            scope
-        }
 
     return if (impact <= 0.0) {
         0.0
-    } else if (scope == CvssV30.ModifiedScope.UNCHANGED) {
+    } else if (modifiedScope.numericalValue == 0.0) {
         ceil(
             ceil(min((impact + exploitability), 10.0), digits = 1) *
                 exploitCodeMaturity *
@@ -403,7 +392,7 @@ fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
 fun CVSS30Metrics.calculateImpact(): Double {
     val iscBase =
         1.0 - ((1.0 - confidentialityImpact) * (1.0 - integrityImpact) * (1.0 - availabilityImpact))
-    return if (scope == CvssV30.Scope.UNCHANGED) {
+    return if (scope.numericalValue == 0.0) {
         6.42 * iscBase
     } else {
         7.52 * (iscBase - 0.029) - 3.52 * (iscBase - 0.02).pow(15)
