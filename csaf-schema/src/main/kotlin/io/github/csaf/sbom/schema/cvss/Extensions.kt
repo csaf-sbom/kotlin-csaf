@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.schema.cvss.common
+package io.github.csaf.sbom.schema.cvss
 
 import io.github.csaf.sbom.schema.generated.CvssV30
+import io.github.csaf.sbom.schema.numericalValue
 
 fun Double.toSeverity(): CvssV30.BaseSeverity {
     return when {
@@ -27,6 +28,22 @@ fun Double.toSeverity(): CvssV30.BaseSeverity {
         this <= 10.0 -> CvssV30.BaseSeverity.CRITICAL
         else -> throw IllegalArgumentException("invalid score")
     }
+}
+
+operator fun Double.minus(value: Enum<*>): Double {
+    return this - value.numericalValue()
+}
+
+operator fun Double.times(value: Enum<*>): Double {
+    return this * value.numericalValue()
+}
+
+operator fun Enum<*>.times(value: Enum<*>): Double {
+    return this.numericalValue() * value.numericalValue()
+}
+
+operator fun Enum<*>.times(value: Double): Double {
+    return this.numericalValue() * value
 }
 
 interface CVSSMetrics {

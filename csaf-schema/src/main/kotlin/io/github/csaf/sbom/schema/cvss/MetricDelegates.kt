@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.schema.cvss.common
+package io.github.csaf.sbom.schema.cvss
 
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1

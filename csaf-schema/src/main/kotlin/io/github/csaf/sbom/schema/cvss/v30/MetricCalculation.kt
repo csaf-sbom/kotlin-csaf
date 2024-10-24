@@ -17,18 +17,161 @@
 package io.github.csaf.sbom.schema.cvss.v30
 
 import io.github.csaf.sbom.schema.MetricShortName
-import io.github.csaf.sbom.schema.calculateExploitability
-import io.github.csaf.sbom.schema.calculateImpact
 import io.github.csaf.sbom.schema.ceil
-import io.github.csaf.sbom.schema.cvss.common.CVSSMetrics
-import io.github.csaf.sbom.schema.cvss.common.modifiedMetric
+import io.github.csaf.sbom.schema.cvss.*
+import io.github.csaf.sbom.schema.cvss.CVSSMetrics
+import io.github.csaf.sbom.schema.cvss.modifiedMetric
 import io.github.csaf.sbom.schema.generated.CvssV30
 import io.github.csaf.sbom.schema.generated.CvssV30.Scope
 import io.github.csaf.sbom.schema.numericalValue
-import io.github.csaf.sbom.schema.times
 import io.github.csaf.sbom.schema.valueOf
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.reflect.KProperty1
+
+val shortNames =
+    mapOf<KProperty1<CvssV30, Any?>, String>(
+        // Base
+        CvssV30::attackVector to "AV",
+        CvssV30::attackComplexity to "AC",
+        CvssV30::privilegesRequired to "PR",
+        CvssV30::userInteraction to "UI",
+        CvssV30::scope to "S",
+        CvssV30::confidentialityImpact to "C",
+        CvssV30::integrityImpact to "I",
+        CvssV30::availabilityImpact to "A",
+
+        // Temporal
+        CvssV30::exploitCodeMaturity to "E",
+        CvssV30::remediationLevel to "RL",
+        CvssV30::reportConfidence to "RC",
+
+        // Environmental
+        CvssV30::confidentialityRequirement to "CR",
+        CvssV30::integrityRequirement to "IR",
+        CvssV30::availabilityRequirement to "AR",
+        CvssV30::modifiedAttackVector to "MAV",
+        CvssV30::modifiedAttackComplexity to "MAC",
+        CvssV30::modifiedPrivilegesRequired to "MPR",
+        CvssV30::modifiedUserInteraction to "MUI",
+        CvssV30::modifiedScope to "MS",
+        CvssV30::modifiedConfidentialityImpact to "MC",
+        CvssV30::modifiedIntegrityImpact to "MI",
+        CvssV30::modifiedAvailabilityImpact to "MA",
+    )
+
+val valueMapping =
+    mapOf(
+        // Base
+        CvssV30.AttackVector::class to
+            mapOf(
+                "N" to CvssV30.AttackVector.NETWORK,
+                "A" to CvssV30.AttackVector.ADJACENT_NETWORK,
+                "L" to CvssV30.AttackVector.LOCAL,
+                "P" to CvssV30.AttackVector.PHYSICAL,
+            ),
+        CvssV30.AttackComplexity::class to
+            mapOf(
+                "L" to CvssV30.AttackComplexity.LOW,
+                "H" to CvssV30.AttackComplexity.HIGH,
+            ),
+        CvssV30.PrivilegesRequired::class to
+            mapOf(
+                "N" to CvssV30.PrivilegesRequired.NONE,
+                "L" to CvssV30.PrivilegesRequired.LOW,
+                "H" to CvssV30.PrivilegesRequired.HIGH,
+            ),
+        CvssV30.UserInteraction::class to
+            mapOf(
+                "N" to CvssV30.UserInteraction.NONE,
+                "R" to CvssV30.UserInteraction.REQUIRED,
+            ),
+        CvssV30.Scope::class to
+            mapOf(
+                "U" to CvssV30.Scope.UNCHANGED,
+                "C" to CvssV30.Scope.CHANGED,
+            ),
+        CvssV30.ConfidentialityImpact::class to
+            mapOf(
+                "H" to CvssV30.ConfidentialityImpact.HIGH,
+                "L" to CvssV30.ConfidentialityImpact.LOW,
+                "N" to CvssV30.ConfidentialityImpact.NONE,
+            ),
+
+        // Temporal
+        CvssV30.ExploitCodeMaturity::class to
+            mapOf(
+                "X" to CvssV30.ExploitCodeMaturity.NOT_DEFINED,
+                "H" to CvssV30.ExploitCodeMaturity.HIGH,
+                "F" to CvssV30.ExploitCodeMaturity.FUNCTIONAL,
+                "P" to CvssV30.ExploitCodeMaturity.PROOF_OF_CONCEPT,
+                "U" to CvssV30.ExploitCodeMaturity.UNPROVEN,
+            ),
+        CvssV30.RemediationLevel::class to
+            mapOf(
+                "X" to CvssV30.RemediationLevel.NOT_DEFINED,
+                "U" to CvssV30.RemediationLevel.UNAVAILABLE,
+                "W" to CvssV30.RemediationLevel.WORKAROUND,
+                "T" to CvssV30.RemediationLevel.TEMPORARY_FIX,
+                "O" to CvssV30.RemediationLevel.OFFICIAL_FIX,
+            ),
+        CvssV30.ReportConfidence::class to
+            mapOf(
+                "X" to CvssV30.ReportConfidence.NOT_DEFINED,
+                "C" to CvssV30.ReportConfidence.CONFIRMED,
+                "R" to CvssV30.ReportConfidence.REASONABLE,
+                "U" to CvssV30.ReportConfidence.UNKNOWN,
+            ),
+
+        // Environmental
+        CvssV30.ConfidentialityRequirement::class to
+            mapOf(
+                "X" to CvssV30.ConfidentialityRequirement.NOT_DEFINED,
+                "H" to CvssV30.ConfidentialityRequirement.HIGH,
+                "M" to CvssV30.ConfidentialityRequirement.MEDIUM,
+                "L" to CvssV30.ConfidentialityRequirement.LOW
+            ),
+        CvssV30.ModifiedAttackVector::class to
+            mapOf(
+                "X" to CvssV30.ModifiedAttackVector.NOT_DEFINED,
+                "N" to CvssV30.ModifiedAttackVector.NETWORK,
+                "A" to CvssV30.ModifiedAttackVector.ADJACENT_NETWORK,
+                "L" to CvssV30.ModifiedAttackVector.LOCAL,
+                "P" to CvssV30.ModifiedAttackVector.PHYSICAL
+            ),
+        CvssV30.ModifiedAttackComplexity::class to
+            mapOf(
+                "X" to CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
+                "L" to CvssV30.ModifiedAttackComplexity.LOW,
+                "H" to CvssV30.ModifiedAttackComplexity.HIGH
+            ),
+        CvssV30.ModifiedPrivilegesRequired::class to
+            mapOf(
+                "X" to CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
+                "N" to CvssV30.ModifiedPrivilegesRequired.NONE,
+                "L" to CvssV30.ModifiedPrivilegesRequired.LOW,
+                "H" to CvssV30.ModifiedPrivilegesRequired.HIGH,
+            ),
+        CvssV30.ModifiedUserInteraction::class to
+            mapOf(
+                "X" to CvssV30.ModifiedUserInteraction.NOT_DEFINED,
+                "N" to CvssV30.ModifiedUserInteraction.NONE,
+                "R" to CvssV30.ModifiedUserInteraction.REQUIRED,
+            ),
+        CvssV30.ModifiedScope::class to
+            mapOf(
+                "X" to CvssV30.ModifiedScope.NOT_DEFINED,
+                "U" to CvssV30.ModifiedScope.UNCHANGED,
+                "C" to CvssV30.ModifiedScope.CHANGED,
+            ),
+        CvssV30.ModifiedConfidentialityImpact::class to
+            mapOf(
+                "X" to CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
+                "N" to CvssV30.ModifiedConfidentialityImpact.NONE,
+                "L" to CvssV30.ModifiedConfidentialityImpact.LOW,
+                "H" to CvssV30.ModifiedConfidentialityImpact.HIGH
+            ),
+    )
 
 class CVSS30Metrics(
     // Base
@@ -273,4 +416,32 @@ fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
             digits = 1
         )
     }
+}
+
+fun calculateImpact(
+    scope: CvssV30.Scope,
+    confidentialityImpact: CvssV30.ConfidentialityImpact,
+    integrityImpact: CvssV30.ConfidentialityImpact,
+    availabilityImpact: CvssV30.ConfidentialityImpact
+): Double {
+    val iscBase =
+        1.0 - ((1.0 - confidentialityImpact) * (1.0 - integrityImpact) * (1.0 - availabilityImpact))
+    return if (scope == CvssV30.Scope.UNCHANGED) {
+        6.42 * iscBase
+    } else {
+        7.52 * (iscBase - 0.029) - 3.52 * (iscBase - 0.02).pow(15)
+    }
+}
+
+fun calculateExploitability(
+    attackVector: CvssV30.AttackVector,
+    attackComplexity: CvssV30.AttackComplexity,
+    privilegesRequired: CvssV30.PrivilegesRequired,
+    userInteraction: CvssV30.UserInteraction
+): Double {
+    return 8.22 *
+        attackVector.numericalValue() *
+        attackComplexity.numericalValue() *
+        privilegesRequired.numericalValue() *
+        userInteraction.numericalValue()
 }
