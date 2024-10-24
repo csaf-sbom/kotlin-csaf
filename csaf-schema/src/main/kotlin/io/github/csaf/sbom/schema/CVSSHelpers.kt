@@ -30,7 +30,7 @@ import kotlin.reflect.KProperty1
 typealias MetricShortName = String
 
 fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
-    // First, father all the metrics
+    // First, gather all the metrics
     val metrics = CVSS30Metrics.fromVectorString(vec)
 
     val base = metrics.calculateBaseScore()
@@ -47,15 +47,15 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
             temporalSeverity = temporalScore.toSeverity(),
             environmentalScore = environmentalScore,
             environmentalSeverity = environmentalScore.toSeverity(),
-            scope = metrics.scope as? CvssV30.Scope,
+            scope = metrics.scope,
             availabilityImpact = metrics.availabilityImpact,
-            confidentialityImpact =
-                metrics.confidentialityImpact as? CvssV30.ConfidentialityImpact?,
+            confidentialityImpact = metrics.confidentialityImpact,
             integrityImpact = metrics.integrityImpact,
             attackVector = metrics.attackVector,
             attackComplexity = metrics.attackComplexity,
             privilegesRequired = metrics.privilegesRequired,
-            userInteraction = metrics.userInteraction
+            userInteraction = metrics.userInteraction.value,
+            modifiedAttackVector = metrics.modifiedAttackVector as? CvssV30.ModifiedAttackVector,
         )
 
     return score
@@ -87,7 +87,7 @@ inline fun <reified T : Enum<*>> Map<MetricShortName, String>.valueOf(
     return value as T
 }
 
-inline fun <reified T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {
+fun <T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {
     return when (x) {
         is CvssV30.AttackVector ->
             return mapOf(
@@ -181,7 +181,7 @@ inline fun <reified T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {
     }
 }
 
-inline fun <reified T : Enum<*>> T.numericalValue(): Double {
+fun <T : Enum<*>> T.numericalValue(): Double {
     val mapping = metricLevel(this)
     return mapping[this]
         ?: throw IllegalArgumentException("unknown value: $this of ${this::class.simpleName}")

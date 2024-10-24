@@ -18,7 +18,7 @@ package io.github.csaf.sbom.schema.cvss
 
 import io.github.csaf.sbom.schema.MetricShortName
 import io.github.csaf.sbom.schema.cvss.v30.valueMapping
-import jdk.internal.platform.Container.metrics
+import io.github.csaf.sbom.schema.numericalValue
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
@@ -40,6 +40,20 @@ class ModifiedMetricDelegate<
 
         // Otherwise, we can return the value
         return value
+    }
+}
+
+class ModifiedMetricDelegate2<
+    ModifiedPropertyEnum : Enum<ModifiedPropertyEnum>,
+    BasePropertyEnum : Enum<BasePropertyEnum>,
+    Metrics : CVSSMetrics
+>(
+    var value: ModifiedPropertyEnum,
+    var notDefinedValue: ModifiedPropertyEnum,
+    var baseProperty: KProperty1<Metrics, BaseMetric<BasePropertyEnum>>
+) {
+    operator fun getValue(thisRef: Metrics, property: KProperty<*>): Metric<ModifiedPropertyEnum> {
+        return ModifiedMetric(value, notDefinedValue, baseProperty.get(thisRef))
     }
 }
 
@@ -66,6 +80,64 @@ class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
     }
 }
 
+interface Metric<PropertyEnum : Enum<PropertyEnum>> {
+    val score: Double
+    val value: PropertyEnum
+}
+
+data class BaseMetric<PropertyEnum : Enum<PropertyEnum>>(override val value: PropertyEnum) :
+    Metric<PropertyEnum> {
+    override val score: Double
+        get() {
+            return value.numericalValue()
+        }
+}
+
+class ModifiedMetric<PropertyEnum : Enum<PropertyEnum>>(
+    /** The enum value of this metric, as defined in [PropertyEnum]. */
+    override val value: PropertyEnum,
+
+    /** The value of [PropertyEnum] that specifies the "not defined" state. */
+    val notDefinedValue: PropertyEnum,
+
+    /**
+     * The value of the associated "base" metrics, that is used as a fallback, if the modified
+     * metric is not defined.
+     */
+    val baseValue: Metric<*>
+) : Metric<PropertyEnum> {
+    override val score: Double
+        get() =
+            if (value == notDefinedValue) {
+                baseValue.score
+            } else {
+                value.numericalValue()
+            }
+}
+
+class BaseMetricDelegate<PropertyEnum : Enum<PropertyEnum>, Metrics : CVSSMetrics>(
+    val shortName: MetricShortName,
+    val propertyType: KClass<out PropertyEnum>,
+    val required: Boolean = true
+) {
+    operator fun getValue(thisRef: Metrics, property: KProperty<*>): BaseMetric<PropertyEnum> {
+        // First, find out the short name
+        var stringValue = thisRef.metrics[shortName]
+        if (stringValue == null && required) {
+            throw IllegalArgumentException("required property not present: ${property.name}")
+        } else if (stringValue == null) {
+            stringValue = "X"
+        }
+
+        val value = valueMapping[propertyType]?.get(stringValue)
+        if (value == null) {
+            throw IllegalArgumentException("invalid value: $stringValue")
+        }
+
+        @Suppress("UNCHECKED_CAST") return BaseMetric(value as PropertyEnum)
+    }
+}
+
 fun <
     ModifiedPropertyEnum : Enum<*>,
     BasePropertyEnum : Enum<*>,
@@ -76,8 +148,28 @@ fun <
     property: KProperty1<Metrics, BasePropertyEnum>
 ) = ModifiedMetricDelegate(value, notDefinedValue, property)
 
+fun <
+    ModifiedPropertyEnum : Enum<ModifiedPropertyEnum>,
+    BasePropertyEnum : Enum<BasePropertyEnum>,
+    Metrics : CVSSMetrics
+> modifiedMetric2(
+    value: ModifiedPropertyEnum,
+    notDefinedValue: ModifiedPropertyEnum,
+    property: KProperty1<Metrics, BaseMetric<BasePropertyEnum>>
+) =
+    ModifiedMetricDelegate2<ModifiedPropertyEnum, BasePropertyEnum, Metrics>(
+        value,
+        notDefinedValue,
+        property
+    )
+
 fun <PropertyEnum : Enum<*>, Metrics : CVSSMetrics> metric(
     shortName: MetricShortName,
     propertyType: KClass<PropertyEnum>,
     required: Boolean = true
 ) = MetricDelegate<PropertyEnum, Metrics>(shortName, propertyType, required)
+
+inline fun <reified PropertyEnum : Enum<PropertyEnum>, Metrics : CVSSMetrics> metric2(
+    shortName: MetricShortName,
+    required: Boolean = true
+) = BaseMetricDelegate<PropertyEnum, Metrics>(shortName, PropertyEnum::class, required)

@@ -24,7 +24,6 @@ import io.github.csaf.sbom.schema.cvss.metric
 import io.github.csaf.sbom.schema.cvss.modifiedMetric
 import io.github.csaf.sbom.schema.generated.CvssV30
 import io.github.csaf.sbom.schema.generated.CvssV30.Scope
-import io.github.csaf.sbom.schema.numericalValue
 import io.github.csaf.sbom.schema.valueOf
 import kotlin.math.min
 import kotlin.math.pow
@@ -214,7 +213,9 @@ class CVSS30Metrics(
     val attackVector by metric("AV", CvssV30.AttackVector::class)
     val attackComplexity by metric("AC", CvssV30.AttackComplexity::class)
     val privilegesRequired by metric("PR", CvssV30.PrivilegesRequired::class)
-    val userInteraction by metric("UI", CvssV30.UserInteraction::class)
+    // val userInteraction by metric("UI", CvssV30.UserInteraction::class)
+
+    val userInteraction by metric2<CvssV30.UserInteraction, CVSS30Metrics>("UI")
 
     val modifiedAttackVector by
         modifiedMetric(
@@ -238,7 +239,7 @@ class CVSS30Metrics(
         )
 
     val modifiedUserInteraction by
-        modifiedMetric(
+        modifiedMetric2(
             modifiedUserInteraction,
             CvssV30.ModifiedUserInteraction.NOT_DEFINED,
             CVSS30Metrics::userInteraction
@@ -365,13 +366,7 @@ fun CVSS30Metrics.calculateModifiedExploitability(): Double {
 }
 
 fun CVSS30Metrics.calculateTemporalScore(baseScore: Double): Double {
-    return ceil(
-        baseScore *
-            exploitCodeMaturity.numericalValue() *
-            remediationLevel.numericalValue() *
-            reportConfidence.numericalValue(),
-        digits = 1
-    )
+    return ceil(baseScore * exploitCodeMaturity * remediationLevel * reportConfidence, digits = 1)
 }
 
 fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
@@ -416,9 +411,5 @@ fun CVSS30Metrics.calculateImpact(): Double {
 }
 
 fun CVSS30Metrics.calculateExploitability(): Double {
-    return 8.22 *
-        attackVector.numericalValue() *
-        attackComplexity.numericalValue() *
-        privilegesRequired.numericalValue() *
-        userInteraction.numericalValue()
+    return 8.22 * attackVector * attackComplexity * privilegesRequired * userInteraction
 }
