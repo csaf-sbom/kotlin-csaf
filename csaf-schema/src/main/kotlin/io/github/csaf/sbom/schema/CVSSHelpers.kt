@@ -16,123 +16,18 @@
  */
 package io.github.csaf.sbom.schema
 
+import io.github.csaf.sbom.schema.cvss.common.toSeverity
+import io.github.csaf.sbom.schema.cvss.v30.CVSS30Metrics
+import io.github.csaf.sbom.schema.cvss.v30.calculateEnvironmentalScore
+import io.github.csaf.sbom.schema.cvss.v30.calculateTemporalScore
 import io.github.csaf.sbom.schema.generated.CvssV30
 import io.github.csaf.sbom.schema.generated.CvssV30.ConfidentialityImpact
 import io.github.csaf.sbom.schema.generated.CvssV30.Scope
 import kotlin.math.ceil
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.reflect.KProperty1
 
 typealias MetricShortName = String
-
-class CVSS30Metrics(
-    // Base
-    val scope: CvssV30.Scope,
-    val confidentialityImpact: CvssV30.ConfidentialityImpact,
-    val integrityImpact: CvssV30.ConfidentialityImpact,
-    val availabilityImpact: CvssV30.ConfidentialityImpact,
-    val attackVector: CvssV30.AttackVector,
-    val attackComplexity: CvssV30.AttackComplexity,
-    val privilegesRequired: CvssV30.PrivilegesRequired,
-    val userInteraction: CvssV30.UserInteraction,
-
-    // Temporal
-    val exploitCodeMaturity: CvssV30.ExploitCodeMaturity = CvssV30.ExploitCodeMaturity.NOT_DEFINED,
-    val remediationLevel: CvssV30.RemediationLevel = CvssV30.RemediationLevel.NOT_DEFINED,
-    val reportConfidence: CvssV30.ReportConfidence = CvssV30.ReportConfidence.NOT_DEFINED,
-
-    // Environmental
-    val confidentialityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
-    val integrityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
-    val availabilityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
-    val modifiedAttackVector: CvssV30.ModifiedAttackVector =
-        CvssV30.ModifiedAttackVector.NOT_DEFINED,
-    val modifiedAttackComplexity: CvssV30.ModifiedAttackComplexity =
-        CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
-    val modifiedPrivilegesRequired: CvssV30.ModifiedPrivilegesRequired =
-        CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
-    val modifiedUserInteraction: CvssV30.ModifiedUserInteraction =
-        CvssV30.ModifiedUserInteraction.NOT_DEFINED,
-    val modifiedScope: CvssV30.ModifiedScope = CvssV30.ModifiedScope.NOT_DEFINED,
-    val modifiedConfidentialityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-    val modifiedIntegrityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-    val modifiedAvailabilityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-) {
-
-    companion object {
-        fun fromVectorString(vec: String): CVSS30Metrics {
-            // Split the vector into parts
-            val parts = vec.split("/")
-
-            // First part must be CVSS:3.0
-            if (parts.isEmpty() || parts[0] != "CVSS:3.0") {
-                throw IllegalArgumentException("Invalid CVSS format or version")
-            }
-
-            // A map of metrics and their values.
-            val metrics = mutableMapOf<MetricShortName, String>()
-
-            for (part in parts) {
-                val (key, value) = part.split(":")
-
-                if (key in metrics) {
-                    // Metric was already defined -> illegal
-                    throw IllegalArgumentException("metric $key already defined")
-                } else {
-                    metrics[key] = value
-                }
-            }
-
-            return CVSS30Metrics(
-                // Base
-                scope = metrics.valueOf(CvssV30::scope),
-                confidentialityImpact = metrics.valueOf(CvssV30::confidentialityImpact),
-                integrityImpact = metrics.valueOf(CvssV30::integrityImpact),
-                availabilityImpact = metrics.valueOf(CvssV30::availabilityImpact),
-                attackVector = metrics.valueOf(CvssV30::attackVector),
-                attackComplexity = metrics.valueOf(CvssV30::attackComplexity),
-                privilegesRequired = metrics.valueOf(CvssV30::privilegesRequired),
-                userInteraction = metrics.valueOf(CvssV30::userInteraction),
-
-                // Temporal
-                exploitCodeMaturity =
-                    metrics.valueOf(CvssV30::exploitCodeMaturity, required = false),
-                remediationLevel = metrics.valueOf(CvssV30::remediationLevel, required = false),
-                reportConfidence = metrics.valueOf(CvssV30::reportConfidence, required = false),
-
-                // Environmental
-                confidentialityRequirement =
-                    metrics.valueOf(CvssV30::confidentialityRequirement, required = false),
-                integrityRequirement =
-                    metrics.valueOf(CvssV30::integrityRequirement, required = false),
-                availabilityRequirement =
-                    metrics.valueOf(CvssV30::availabilityRequirement, required = false),
-                modifiedAttackVector =
-                    metrics.valueOf(CvssV30::modifiedAttackVector, required = false),
-                modifiedAttackComplexity =
-                    metrics.valueOf(CvssV30::modifiedAttackComplexity, required = false),
-                modifiedPrivilegesRequired =
-                    metrics.valueOf(CvssV30::modifiedPrivilegesRequired, required = false),
-                modifiedUserInteraction =
-                    metrics.valueOf(CvssV30::modifiedUserInteraction, required = false),
-                modifiedScope = metrics.valueOf(CvssV30::modifiedScope, required = false),
-                modifiedConfidentialityImpact =
-                    metrics.valueOf(CvssV30::modifiedConfidentialityImpact, required = false),
-                modifiedIntegrityImpact =
-                    metrics.valueOf(CvssV30::modifiedIntegrityImpact, required = false),
-                modifiedAvailabilityImpact =
-                    metrics.valueOf(CvssV30::modifiedAvailabilityImpact, required = false),
-            )
-        }
-    }
-}
 
 fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
     // First, father all the metrics
@@ -140,7 +35,6 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
 
     val base = metrics.calculateBaseScore()
     val temporalScore = metrics.calculateTemporalScore(baseScore = base)
-
     val environmentalScore = metrics.calculateEnvironmentalScore()
 
     val score =
@@ -166,17 +60,6 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
     return score
 }
 
-private fun Double.toSeverity(): CvssV30.BaseSeverity {
-    return when {
-        this == 0.0 -> CvssV30.BaseSeverity.NONE
-        this < 4.0 -> CvssV30.BaseSeverity.LOW
-        this < 7.0 -> CvssV30.BaseSeverity.MEDIUM
-        this < 9.0 -> CvssV30.BaseSeverity.HIGH
-        this <= 10.0 -> CvssV30.BaseSeverity.CRITICAL
-        else -> throw IllegalArgumentException("invalid score")
-    }
-}
-
 fun calculateImpact(
     scope: Scope,
     confidentialityImpact: ConfidentialityImpact,
@@ -190,36 +73,6 @@ fun calculateImpact(
     } else {
         7.52 * (iscBase - 0.029) - 3.52 * (iscBase - 0.02).pow(15)
     }
-}
-
-fun CVSS30Metrics.calculateModifiedImpact(): Double {
-    val iscModified =
-        min(
-            (1 -
-                (1 -
-                    checkForNotDefined(CVSS30Metrics::modifiedConfidentialityImpact) *
-                        checkForNotDefined(CVSS30Metrics::confidentialityRequirement)) *
-                    (1 -
-                        checkForNotDefined(CVSS30Metrics::modifiedIntegrityImpact) *
-                            checkForNotDefined(CVSS30Metrics::integrityRequirement)) *
-                    (1 -
-                        checkForNotDefined(CVSS30Metrics::modifiedAvailabilityImpact) *
-                            checkForNotDefined(CVSS30Metrics::availabilityRequirement))),
-            0.915
-        )
-    return if (modifiedScope == CvssV30.ModifiedScope.UNCHANGED) {
-        6.42 * iscModified
-    } else {
-        7.52 * (iscModified - 0.029) - 3.25 * (iscModified - 0.02).pow(15)
-    }
-}
-
-fun CVSS30Metrics.calculateModifiedExploitability(): Double {
-    return 8.22 *
-        checkForNotDefined(CVSS30Metrics::modifiedAttackVector) *
-        checkForNotDefined(CVSS30Metrics::modifiedAttackComplexity) *
-        checkForNotDefined(CVSS30Metrics::modifiedPrivilegesRequired) *
-        checkForNotDefined(CVSS30Metrics::modifiedUserInteraction)
 }
 
 /**
@@ -294,60 +147,6 @@ fun calculateExploitability(
         attackComplexity.numericalValue() *
         privilegesRequired.numericalValue() *
         userInteraction.numericalValue()
-}
-
-fun CVSS30Metrics.calculateBaseScore(): Double {
-    val impact = calculateImpact(scope, confidentialityImpact, integrityImpact, availabilityImpact)
-    val exploit =
-        calculateExploitability(attackVector, attackComplexity, privilegesRequired, userInteraction)
-    return if (impact <= 0.0) {
-        0.0
-    } else if (scope == Scope.UNCHANGED) {
-        ceil(min(impact + exploit, 10.0), digits = 1)
-    } else {
-        ceil(min(1.08 * (impact + exploit), 10.0), digits = 1)
-    }
-}
-
-fun CVSS30Metrics.calculateTemporalScore(baseScore: Double): Double {
-    return ceil(
-        baseScore *
-            exploitCodeMaturity.numericalValue() *
-            remediationLevel.numericalValue() *
-            reportConfidence.numericalValue(),
-        digits = 1
-    )
-}
-
-fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
-    val impact = calculateModifiedImpact()
-    val exploitability = calculateModifiedExploitability()
-    val scope =
-        if (modifiedScope != CvssV30.ModifiedScope.NOT_DEFINED) {
-            modifiedScope
-        } else {
-            scope
-        }
-
-    return if (impact <= 0.0) {
-        0.0
-    } else if (scope == CvssV30.ModifiedScope.UNCHANGED) {
-        ceil(
-            ceil(min((impact + exploitability), 10.0), digits = 1) *
-                exploitCodeMaturity *
-                remediationLevel *
-                reportConfidence,
-            digits = 1
-        )
-    } else {
-        ceil(
-            ceil(min(1.08 * (impact + exploitability), 10.0), digits = 1) *
-                exploitCodeMaturity *
-                remediationLevel *
-                reportConfidence,
-            digits = 1
-        )
-    }
 }
 
 val shortNames =

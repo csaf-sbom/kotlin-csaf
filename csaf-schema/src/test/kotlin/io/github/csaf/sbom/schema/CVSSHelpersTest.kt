@@ -35,35 +35,4 @@ class CVSSHelpersTest {
         assertEquals(6.0, cvss.environmentalScore)
         assertEquals(CvssV30.BaseSeverity.MEDIUM, cvss.environmentalSeverity)
     }
-
-    @Test
-    fun testCalculateBaseScore() {
-        var metrics =
-            CVSS30Metrics(
-                scope = CvssV30.Scope.CHANGED,
-                confidentialityImpact = CvssV30.ConfidentialityImpact.LOW,
-                integrityImpact = CvssV30.ConfidentialityImpact.LOW,
-                availabilityImpact = CvssV30.ConfidentialityImpact.NONE,
-                attackVector = CvssV30.AttackVector.NETWORK,
-                attackComplexity = CvssV30.AttackComplexity.LOW,
-                privilegesRequired = CvssV30.PrivilegesRequired.NONE,
-                userInteraction = CvssV30.UserInteraction.REQUIRED,
-            )
-        var score = metrics.calculateBaseScore()
-        assertEquals(6.1, score)
-
-        metrics =
-            CVSS30Metrics(
-                scope = CvssV30.Scope.UNCHANGED,
-                confidentialityImpact = CvssV30.ConfidentialityImpact.LOW,
-                integrityImpact = CvssV30.ConfidentialityImpact.NONE,
-                availabilityImpact = CvssV30.ConfidentialityImpact.NONE,
-                attackVector = CvssV30.AttackVector.NETWORK,
-                attackComplexity = CvssV30.AttackComplexity.HIGH,
-                privilegesRequired = CvssV30.PrivilegesRequired.NONE,
-                userInteraction = CvssV30.UserInteraction.REQUIRED,
-            )
-        score = metrics.calculateBaseScore()
-        assertEquals(3.1, score)
-    }
 }
