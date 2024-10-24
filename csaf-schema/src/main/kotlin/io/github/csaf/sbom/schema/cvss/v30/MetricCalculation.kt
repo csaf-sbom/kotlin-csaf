@@ -24,6 +24,111 @@ import io.github.csaf.sbom.schema.generated.CvssV30
 import kotlin.math.min
 import kotlin.math.pow
 
+fun <T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {
+    return when (x) {
+        is CvssV30.AttackVector ->
+            return mapOf(
+                CvssV30.AttackVector.NETWORK to 0.85,
+                CvssV30.AttackVector.ADJACENT_NETWORK to 0.62,
+                CvssV30.AttackVector.LOCAL to 0.55,
+                CvssV30.AttackVector.PHYSICAL to 0.2
+            )
+        is CvssV30.ModifiedAttackVector ->
+            return mapOf(
+                CvssV30.ModifiedAttackVector.NETWORK to 0.85,
+                CvssV30.ModifiedAttackVector.ADJACENT_NETWORK to 0.62,
+                CvssV30.ModifiedAttackVector.LOCAL to 0.55,
+                CvssV30.ModifiedAttackVector.PHYSICAL to 0.2
+            )
+        is CvssV30.AttackComplexity ->
+            mapOf(
+                CvssV30.AttackComplexity.LOW to 0.77,
+                CvssV30.AttackComplexity.HIGH to 0.44,
+            )
+        is CvssV30.ModifiedAttackComplexity ->
+            mapOf(
+                CvssV30.ModifiedAttackComplexity.LOW to 0.77,
+                CvssV30.ModifiedAttackComplexity.HIGH to 0.44,
+            )
+        is CvssV30.PrivilegesRequired ->
+            mapOf(
+                CvssV30.PrivilegesRequired.NONE to 0.85,
+                CvssV30.PrivilegesRequired.LOW to 0.62,
+                CvssV30.PrivilegesRequired.HIGH to 0.27,
+            )
+        is CvssV30.ModifiedPrivilegesRequired ->
+            mapOf(
+                CvssV30.ModifiedPrivilegesRequired.NONE to 0.85,
+                CvssV30.ModifiedPrivilegesRequired.LOW to 0.62,
+                CvssV30.ModifiedPrivilegesRequired.HIGH to 0.27,
+            )
+        is CvssV30.UserInteraction ->
+            mapOf(
+                CvssV30.UserInteraction.NONE to 0.85,
+                CvssV30.UserInteraction.REQUIRED to 0.62,
+            )
+        is CvssV30.ModifiedUserInteraction ->
+            mapOf(
+                CvssV30.ModifiedUserInteraction.NONE to 0.85,
+                CvssV30.ModifiedUserInteraction.REQUIRED to 0.62,
+            )
+        is CvssV30.ConfidentialityImpact ->
+            mapOf(
+                CvssV30.ConfidentialityImpact.HIGH to 0.56,
+                CvssV30.ConfidentialityImpact.LOW to 0.22,
+                CvssV30.ConfidentialityImpact.NONE to 0.0,
+            )
+        is CvssV30.ModifiedConfidentialityImpact ->
+            mapOf(
+                CvssV30.ModifiedConfidentialityImpact.HIGH to 0.56,
+                CvssV30.ModifiedConfidentialityImpact.LOW to 0.22,
+                CvssV30.ModifiedConfidentialityImpact.NONE to 0.0,
+            )
+        is CvssV30.ExploitCodeMaturity ->
+            mapOf(
+                CvssV30.ExploitCodeMaturity.NOT_DEFINED to 1.0,
+                CvssV30.ExploitCodeMaturity.HIGH to 1.0,
+                CvssV30.ExploitCodeMaturity.FUNCTIONAL to 0.97,
+                CvssV30.ExploitCodeMaturity.PROOF_OF_CONCEPT to 0.94,
+                CvssV30.ExploitCodeMaturity.UNPROVEN to 0.91,
+            )
+        is CvssV30.RemediationLevel ->
+            mapOf(
+                CvssV30.RemediationLevel.NOT_DEFINED to 1.0,
+                CvssV30.RemediationLevel.UNAVAILABLE to 1.0,
+                CvssV30.RemediationLevel.WORKAROUND to 0.97,
+                CvssV30.RemediationLevel.TEMPORARY_FIX to 0.96,
+                CvssV30.RemediationLevel.OFFICIAL_FIX to 0.95,
+            )
+        is CvssV30.ReportConfidence ->
+            mapOf(
+                CvssV30.ReportConfidence.NOT_DEFINED to 1.0,
+                CvssV30.ReportConfidence.CONFIRMED to 1.0,
+                CvssV30.ReportConfidence.REASONABLE to 0.96,
+                CvssV30.ReportConfidence.UNKNOWN to 0.92,
+            )
+        is CvssV30.ConfidentialityRequirement ->
+            mapOf(
+                CvssV30.ConfidentialityRequirement.NOT_DEFINED to 1.0,
+                CvssV30.ConfidentialityRequirement.HIGH to 1.5,
+                CvssV30.ConfidentialityRequirement.MEDIUM to 1.0,
+                CvssV30.ConfidentialityRequirement.LOW to 0.5,
+            )
+        // This mapping is not in the standard, but we use it so that we can use our delegate system
+        is CvssV30.Scope ->
+            mapOf(
+                CvssV30.Scope.UNCHANGED to 0.0,
+                CvssV30.Scope.CHANGED to 1.0,
+            )
+        is CvssV30.ModifiedScope ->
+            mapOf(
+                CvssV30.ModifiedScope.UNCHANGED to 0.0,
+                CvssV30.ModifiedScope.CHANGED to 1.0,
+            )
+        else -> throw IllegalArgumentException("invalid enum class: ${x::class.simpleName}")
+    }
+}
+
 val valueMapping =
     mapOf(
         // Base
@@ -162,45 +267,41 @@ class CVSS30Metrics(
 
     // Environmental (modified, delegates)
     val modifiedAttackVector by
-        modifiedMetric2(
-            "MAV",
-            CvssV30.ModifiedAttackVector.NOT_DEFINED,
-            CVSS30Metrics::attackVector
-        )
+        modifiedMetric("MAV", CvssV30.ModifiedAttackVector.NOT_DEFINED, CVSS30Metrics::attackVector)
     val modifiedAttackComplexity by
-        modifiedMetric2(
+        modifiedMetric(
             "MAC",
             CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
             CVSS30Metrics::attackComplexity
         )
     val modifiedPrivilegesRequired by
-        modifiedMetric2(
+        modifiedMetric(
             "MPR",
             CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
             CVSS30Metrics::privilegesRequired
         )
     val modifiedUserInteraction by
-        modifiedMetric2(
+        modifiedMetric(
             "MUI",
             CvssV30.ModifiedUserInteraction.NOT_DEFINED,
             CVSS30Metrics::userInteraction
         )
     val modifiedScope by
-        modifiedMetric2("MS", CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
+        modifiedMetric("MS", CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
     val modifiedConfidentialityImpact by
-        modifiedMetric2(
+        modifiedMetric(
             "MC",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::confidentialityImpact
         )
     val modifiedIntegrityImpact by
-        modifiedMetric2(
+        modifiedMetric(
             "MI",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::integrityImpact
         )
     val modifiedAvailabilityImpact by
-        modifiedMetric2(
+        modifiedMetric(
             "MA",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::availabilityImpact

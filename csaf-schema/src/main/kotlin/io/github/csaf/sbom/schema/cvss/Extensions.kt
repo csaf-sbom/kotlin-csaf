@@ -18,7 +18,6 @@ package io.github.csaf.sbom.schema.cvss
 
 import io.github.csaf.sbom.schema.MetricShortName
 import io.github.csaf.sbom.schema.generated.CvssV30
-import io.github.csaf.sbom.schema.numericalValue
 
 fun Double.toSeverity(): CvssV30.BaseSeverity {
     return when {
@@ -31,40 +30,16 @@ fun Double.toSeverity(): CvssV30.BaseSeverity {
     }
 }
 
-operator fun Double.minus(value: Enum<*>): Double {
-    return this - value.numericalValue()
-}
-
 operator fun Double.minus(value: Metric<*>): Double {
     return this - value.numericalValue
-}
-
-operator fun Double.times(value: Enum<*>): Double {
-    return this * value.numericalValue()
 }
 
 operator fun Double.times(value: Metric<*>): Double {
     return this * value.numericalValue
 }
 
-operator fun Enum<*>.times(value: Enum<*>): Double {
-    return this.numericalValue() * value.numericalValue()
-}
-
-operator fun Enum<*>.times(value: Double): Double {
-    return this.numericalValue() * value
-}
-
-operator fun Enum<*>.times(value: Metric<*>): Double {
-    return this.numericalValue() * value.numericalValue
-}
-
 operator fun Metric<*>.times(value: Metric<*>): Double {
     return this.numericalValue * value.numericalValue
-}
-
-operator fun Metric<*>.times(value: Enum<*>): Double {
-    return this.numericalValue * value.numericalValue()
 }
 
 operator fun Metric<*>.times(value: Double): Double {
