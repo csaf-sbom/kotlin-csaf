@@ -21,41 +21,8 @@ import io.github.csaf.sbom.schema.ceil
 import io.github.csaf.sbom.schema.cvss.*
 import io.github.csaf.sbom.schema.cvss.CVSSMetrics
 import io.github.csaf.sbom.schema.generated.CvssV30
-import io.github.csaf.sbom.schema.valueOf
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.reflect.KProperty1
-
-val shortNames =
-    mapOf<KProperty1<CvssV30, Any?>, String>(
-        // Base
-        CvssV30::attackVector to "AV",
-        CvssV30::attackComplexity to "AC",
-        CvssV30::privilegesRequired to "PR",
-        CvssV30::userInteraction to "UI",
-        CvssV30::scope to "S",
-        CvssV30::confidentialityImpact to "C",
-        CvssV30::integrityImpact to "I",
-        CvssV30::availabilityImpact to "A",
-
-        // Temporal
-        CvssV30::exploitCodeMaturity to "E",
-        CvssV30::remediationLevel to "RL",
-        CvssV30::reportConfidence to "RC",
-
-        // Environmental
-        CvssV30::confidentialityRequirement to "CR",
-        CvssV30::integrityRequirement to "IR",
-        CvssV30::availabilityRequirement to "AR",
-        CvssV30::modifiedAttackVector to "MAV",
-        CvssV30::modifiedAttackComplexity to "MAC",
-        CvssV30::modifiedPrivilegesRequired to "MPR",
-        CvssV30::modifiedUserInteraction to "MUI",
-        CvssV30::modifiedScope to "MS",
-        CvssV30::modifiedConfidentialityImpact to "MC",
-        CvssV30::modifiedIntegrityImpact to "MI",
-        CvssV30::modifiedAvailabilityImpact to "MA",
-    )
 
 val valueMapping =
     mapOf(
@@ -172,94 +139,69 @@ val valueMapping =
 
 class CVSS30Metrics(
     override val metrics: MutableMap<MetricShortName, String>,
+) : CVSSMetrics {
+    // Base
+    val scope by requiredMetric<CvssV30.Scope>("S")
+    val confidentialityImpact by requiredMetric<CvssV30.ConfidentialityImpact>("C")
+    val integrityImpact by requiredMetric<CvssV30.ConfidentialityImpact>("I")
+    val availabilityImpact by requiredMetric<CvssV30.ConfidentialityImpact>("A")
+    val attackVector by requiredMetric<CvssV30.AttackVector>("AV")
+    val attackComplexity by requiredMetric<CvssV30.AttackComplexity>("AC")
+    val privilegesRequired by requiredMetric<CvssV30.PrivilegesRequired>("PR")
+    val userInteraction by requiredMetric<CvssV30.UserInteraction>("UI")
 
     // Temporal
-    val exploitCodeMaturity: CvssV30.ExploitCodeMaturity = CvssV30.ExploitCodeMaturity.NOT_DEFINED,
-    val remediationLevel: CvssV30.RemediationLevel = CvssV30.RemediationLevel.NOT_DEFINED,
-    val reportConfidence: CvssV30.ReportConfidence = CvssV30.ReportConfidence.NOT_DEFINED,
+    val exploitCodeMaturity by optionalMetric<CvssV30.ExploitCodeMaturity>("E")
+    val remediationLevel by optionalMetric<CvssV30.RemediationLevel>("RL")
+    val reportConfidence by optionalMetric<CvssV30.ReportConfidence>("RC")
 
     // Environmental (additional properties)
-    val confidentialityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
-    val integrityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
-    val availabilityRequirement: CvssV30.ConfidentialityRequirement =
-        CvssV30.ConfidentialityRequirement.NOT_DEFINED,
+    val confidentialityRequirement by optionalMetric<CvssV30.ConfidentialityRequirement>("CR")
+    val integrityRequirement by optionalMetric<CvssV30.ConfidentialityRequirement>("IR")
+    val availabilityRequirement by optionalMetric<CvssV30.ConfidentialityRequirement>("AR")
 
-    // Environmental (modified, delegated properties)
-    modifiedAttackVector: CvssV30.ModifiedAttackVector = CvssV30.ModifiedAttackVector.NOT_DEFINED,
-    modifiedAttackComplexity: CvssV30.ModifiedAttackComplexity =
-        CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
-    modifiedPrivilegesRequired: CvssV30.ModifiedPrivilegesRequired =
-        CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
-    modifiedUserInteraction: CvssV30.ModifiedUserInteraction =
-        CvssV30.ModifiedUserInteraction.NOT_DEFINED,
-    modifiedScope: CvssV30.ModifiedScope = CvssV30.ModifiedScope.NOT_DEFINED,
-    modifiedConfidentialityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-    modifiedIntegrityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-    modifiedAvailabilityImpact: CvssV30.ModifiedConfidentialityImpact =
-        CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
-) : CVSSMetrics {
-
-    val scope by baseMetric<CvssV30.Scope>("S")
-    val confidentialityImpact by baseMetric<CvssV30.ConfidentialityImpact>("C")
-    val integrityImpact by baseMetric<CvssV30.ConfidentialityImpact>("I")
-    val availabilityImpact by baseMetric<CvssV30.ConfidentialityImpact>("A")
-    val attackVector by baseMetric<CvssV30.AttackVector>("AV")
-    val attackComplexity by baseMetric<CvssV30.AttackComplexity>("AC")
-    val privilegesRequired by baseMetric<CvssV30.PrivilegesRequired>("PR")
-    val userInteraction by baseMetric<CvssV30.UserInteraction>("UI")
-
+    // Environmental (modified, delegates)
     val modifiedAttackVector by
         modifiedMetric2(
-            modifiedAttackVector,
+            "MAV",
             CvssV30.ModifiedAttackVector.NOT_DEFINED,
             CVSS30Metrics::attackVector
         )
-
     val modifiedAttackComplexity by
         modifiedMetric2(
-            modifiedAttackComplexity,
+            "MAC",
             CvssV30.ModifiedAttackComplexity.NOT_DEFINED,
             CVSS30Metrics::attackComplexity
         )
-
     val modifiedPrivilegesRequired by
         modifiedMetric2(
-            modifiedPrivilegesRequired,
+            "MPR",
             CvssV30.ModifiedPrivilegesRequired.NOT_DEFINED,
             CVSS30Metrics::privilegesRequired
         )
-
     val modifiedUserInteraction by
         modifiedMetric2(
-            modifiedUserInteraction,
+            "MUI",
             CvssV30.ModifiedUserInteraction.NOT_DEFINED,
             CVSS30Metrics::userInteraction
         )
-
     val modifiedScope by
-        modifiedMetric2(modifiedScope, CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
-
+        modifiedMetric2("MS", CvssV30.ModifiedScope.NOT_DEFINED, CVSS30Metrics::scope)
     val modifiedConfidentialityImpact by
         modifiedMetric2(
-            modifiedConfidentialityImpact,
+            "MC",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::confidentialityImpact
         )
-
     val modifiedIntegrityImpact by
         modifiedMetric2(
-            modifiedIntegrityImpact,
+            "MI",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::integrityImpact
         )
-
     val modifiedAvailabilityImpact by
         modifiedMetric2(
-            modifiedAvailabilityImpact,
+            "MA",
             CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
             CVSS30Metrics::availabilityImpact
         )
@@ -300,38 +242,7 @@ class CVSS30Metrics(
                 }
             }
 
-            return CVSS30Metrics(
-                metrics,
-
-                // Temporal
-                exploitCodeMaturity =
-                    metrics.valueOf(CvssV30::exploitCodeMaturity, required = false),
-                remediationLevel = metrics.valueOf(CvssV30::remediationLevel, required = false),
-                reportConfidence = metrics.valueOf(CvssV30::reportConfidence, required = false),
-
-                // Environmental
-                confidentialityRequirement =
-                    metrics.valueOf(CvssV30::confidentialityRequirement, required = false),
-                integrityRequirement =
-                    metrics.valueOf(CvssV30::integrityRequirement, required = false),
-                availabilityRequirement =
-                    metrics.valueOf(CvssV30::availabilityRequirement, required = false),
-                modifiedAttackVector =
-                    metrics.valueOf(CvssV30::modifiedAttackVector, required = false),
-                modifiedAttackComplexity =
-                    metrics.valueOf(CvssV30::modifiedAttackComplexity, required = false),
-                modifiedPrivilegesRequired =
-                    metrics.valueOf(CvssV30::modifiedPrivilegesRequired, required = false),
-                modifiedUserInteraction =
-                    metrics.valueOf(CvssV30::modifiedUserInteraction, required = false),
-                modifiedScope = metrics.valueOf(CvssV30::modifiedScope, required = false),
-                modifiedConfidentialityImpact =
-                    metrics.valueOf(CvssV30::modifiedConfidentialityImpact, required = false),
-                modifiedIntegrityImpact =
-                    metrics.valueOf(CvssV30::modifiedIntegrityImpact, required = false),
-                modifiedAvailabilityImpact =
-                    metrics.valueOf(CvssV30::modifiedAvailabilityImpact, required = false),
-            )
+            return CVSS30Metrics(metrics)
         }
     }
 }

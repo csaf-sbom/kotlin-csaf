@@ -20,12 +20,9 @@ import io.github.csaf.sbom.schema.cvss.*
 import io.github.csaf.sbom.schema.cvss.v30.CVSS30Metrics
 import io.github.csaf.sbom.schema.cvss.v30.calculateEnvironmentalScore
 import io.github.csaf.sbom.schema.cvss.v30.calculateTemporalScore
-import io.github.csaf.sbom.schema.cvss.v30.shortNames
-import io.github.csaf.sbom.schema.cvss.v30.valueMapping
 import io.github.csaf.sbom.schema.generated.CvssV30
 import kotlin.math.ceil
 import kotlin.math.pow
-import kotlin.reflect.KProperty1
 
 typealias MetricShortName = String
 
@@ -59,32 +56,6 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
         )
 
     return score
-}
-
-inline fun <reified T : Enum<*>> Map<MetricShortName, String>.valueOf(
-    prop: KProperty1<CvssV30, T?>,
-    required: Boolean = false
-): T {
-    // First, find out the short name
-    val shortName = shortNames[prop]
-
-    if (shortName == null) {
-        throw IllegalArgumentException("invalid property: ${prop.name}")
-    }
-
-    var stringValue = this[shortName]
-    if (stringValue == null && required) {
-        throw IllegalArgumentException("required property not present: ${prop.name}")
-    } else if (stringValue == null) {
-        stringValue = "X"
-    }
-
-    val value = valueMapping[T::class]?.get(stringValue)
-    if (value == null) {
-        throw IllegalArgumentException("invalid value: $stringValue")
-    }
-
-    return value as T
 }
 
 fun <T : Enum<*>> metricLevel(x: T): Map<Enum<*>, Double> {

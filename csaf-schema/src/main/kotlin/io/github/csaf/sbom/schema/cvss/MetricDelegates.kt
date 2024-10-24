@@ -48,26 +48,15 @@ class ModifiedMetricDelegate2<
     BasePropertyEnum : Enum<BasePropertyEnum>,
     Metrics : CVSSMetrics
 >(
-    var value: ModifiedPropertyEnum,
+    var shortName: MetricShortName,
+    var propertyType: KClass<ModifiedPropertyEnum>,
     var notDefinedValue: ModifiedPropertyEnum,
     var baseProperty: KProperty1<Metrics, BaseMetric<BasePropertyEnum>>
 ) {
     operator fun getValue(thisRef: Metrics, property: KProperty<*>): Metric<ModifiedPropertyEnum> {
-        return ModifiedMetric(value, notDefinedValue, baseProperty.get(thisRef))
-    }
-}
-
-class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
-    val shortName: MetricShortName,
-    val propertyType: KClass<PropertyEnum>,
-    val required: Boolean = true
-) {
-    operator fun getValue(thisRef: Metrics, property: KProperty<*>): PropertyEnum {
         // First, find out the short name
         var stringValue = thisRef.metrics[shortName]
-        if (stringValue == null && required) {
-            throw IllegalArgumentException("required property not present: ${property.name}")
-        } else if (stringValue == null) {
+        if (stringValue == null) {
             stringValue = "X"
         }
 
@@ -76,7 +65,12 @@ class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
             throw IllegalArgumentException("invalid value: $stringValue")
         }
 
-        @Suppress("UNCHECKED_CAST") return value as PropertyEnum
+        @Suppress("UNCHECKED_CAST")
+        return ModifiedMetric(
+            value as ModifiedPropertyEnum,
+            notDefinedValue,
+            baseProperty.get(thisRef)
+        )
     }
 }
 
@@ -115,7 +109,7 @@ class ModifiedMetric<PropertyEnum : Enum<PropertyEnum>>(
             }
 }
 
-class BaseMetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
+open class BaseMetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
     val shortName: MetricShortName,
     val propertyType: KClass<out PropertyEnum>,
     val required: Boolean = true
@@ -148,28 +142,26 @@ fun <
     property: KProperty1<Metrics, BasePropertyEnum>
 ) = ModifiedMetricDelegate(value, notDefinedValue, property)
 
-fun <
-    ModifiedPropertyEnum : Enum<ModifiedPropertyEnum>,
+inline fun <
+    reified ModifiedPropertyEnum : Enum<ModifiedPropertyEnum>,
     BasePropertyEnum : Enum<BasePropertyEnum>,
     Metrics : CVSSMetrics
 > modifiedMetric2(
-    value: ModifiedPropertyEnum,
+    shortName: MetricShortName,
     notDefinedValue: ModifiedPropertyEnum,
     property: KProperty1<Metrics, BaseMetric<BasePropertyEnum>>
 ) =
     ModifiedMetricDelegate2<ModifiedPropertyEnum, BasePropertyEnum, Metrics>(
-        value,
+        shortName,
+        ModifiedPropertyEnum::class,
         notDefinedValue,
         property
     )
 
-fun <PropertyEnum : Enum<*>, Metrics : CVSSMetrics> metric(
+inline fun <reified PropertyEnum : Enum<PropertyEnum>> requiredMetric(
     shortName: MetricShortName,
-    propertyType: KClass<PropertyEnum>,
-    required: Boolean = true
-) = MetricDelegate<PropertyEnum, Metrics>(shortName, propertyType, required)
+) = BaseMetricDelegate<PropertyEnum>(shortName, PropertyEnum::class, true)
 
-inline fun <reified PropertyEnum : Enum<PropertyEnum>> baseMetric(
+inline fun <reified PropertyEnum : Enum<PropertyEnum>> optionalMetric(
     shortName: MetricShortName,
-    required: Boolean = true
-) = BaseMetricDelegate<PropertyEnum>(shortName, PropertyEnum::class, required)
+) = BaseMetricDelegate<PropertyEnum>(shortName, PropertyEnum::class, false)
