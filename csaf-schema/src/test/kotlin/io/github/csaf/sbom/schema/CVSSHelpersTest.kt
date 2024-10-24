@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2024, The Authors. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package io.github.csaf.sbom.schema
+
+import io.github.csaf.sbom.schema.generated.CvssV30
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
+class CVSSHelpersTest {
+    @Test
+    fun testFromVectorString() {
+        val cvss =
+            CvssV30.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N/RL:O/CR:L")
+        assertNotNull(cvss)
+        assertEquals("3.0", cvss.version)
+        assertEquals(8.6, cvss.baseScore)
+        assertEquals(CvssV30.BaseSeverity.HIGH, cvss.baseSeverity)
+        assertEquals(8.2, cvss.temporalScore)
+        assertEquals(CvssV30.BaseSeverity.HIGH, cvss.temporalSeverity)
+        assertEquals(6.0, cvss.environmentalScore)
+        assertEquals(CvssV30.BaseSeverity.MEDIUM, cvss.environmentalSeverity)
+    }
+}
