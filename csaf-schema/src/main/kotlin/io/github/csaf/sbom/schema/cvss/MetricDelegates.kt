@@ -48,7 +48,7 @@ class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
     val propertyType: KClass<PropertyEnum>,
     val required: Boolean = true
 ) {
-    operator fun getValue(thisRef: Metrics, property: KProperty<*>): Enum<*> {
+    operator fun getValue(thisRef: Metrics, property: KProperty<*>): PropertyEnum {
         // First, find out the short name
         var stringValue = thisRef.metrics[shortName]
         if (stringValue == null && required) {
@@ -62,7 +62,7 @@ class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
             throw IllegalArgumentException("invalid value: $stringValue")
         }
 
-        return value
+        @Suppress("UNCHECKED_CAST") return value as PropertyEnum
     }
 }
 

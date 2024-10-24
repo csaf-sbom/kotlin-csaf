@@ -47,7 +47,7 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
             temporalSeverity = temporalScore.toSeverity(),
             environmentalScore = environmentalScore,
             environmentalSeverity = environmentalScore.toSeverity(),
-            scope = metrics.scope,
+            scope = metrics.scope as? CvssV30.Scope,
             availabilityImpact = metrics.availabilityImpact,
             confidentialityImpact =
                 metrics.confidentialityImpact as? CvssV30.ConfidentialityImpact?,

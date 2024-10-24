@@ -20,6 +20,7 @@ import io.github.csaf.sbom.schema.MetricShortName
 import io.github.csaf.sbom.schema.ceil
 import io.github.csaf.sbom.schema.cvss.*
 import io.github.csaf.sbom.schema.cvss.CVSSMetrics
+import io.github.csaf.sbom.schema.cvss.metric
 import io.github.csaf.sbom.schema.cvss.modifiedMetric
 import io.github.csaf.sbom.schema.generated.CvssV30
 import io.github.csaf.sbom.schema.generated.CvssV30.Scope
@@ -175,15 +176,6 @@ val valueMapping =
 
 class CVSS30Metrics(
     override val metrics: MutableMap<MetricShortName, String>,
-    // Base
-    val scope: CvssV30.Scope,
-    // val confidentialityImpact: CvssV30.ConfidentialityImpact,
-    val integrityImpact: CvssV30.ConfidentialityImpact,
-    val availabilityImpact: CvssV30.ConfidentialityImpact,
-    val attackVector: CvssV30.AttackVector,
-    val attackComplexity: CvssV30.AttackComplexity,
-    val privilegesRequired: CvssV30.PrivilegesRequired,
-    val userInteraction: CvssV30.UserInteraction,
 
     // Temporal
     val exploitCodeMaturity: CvssV30.ExploitCodeMaturity = CvssV30.ExploitCodeMaturity.NOT_DEFINED,
@@ -215,8 +207,14 @@ class CVSS30Metrics(
         CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
 ) : CVSSMetrics {
 
-    val scope2 by metric("S", CvssV30.Scope::class)
+    val scope by metric("S", CvssV30.Scope::class)
     val confidentialityImpact by metric("C", CvssV30.ConfidentialityImpact::class)
+    val integrityImpact by metric("I", CvssV30.ConfidentialityImpact::class)
+    val availabilityImpact by metric("A", CvssV30.ConfidentialityImpact::class)
+    val attackVector by metric("AV", CvssV30.AttackVector::class)
+    val attackComplexity by metric("AC", CvssV30.AttackComplexity::class)
+    val privilegesRequired by metric("PR", CvssV30.PrivilegesRequired::class)
+    val userInteraction by metric("UI", CvssV30.UserInteraction::class)
 
     val modifiedAttackVector by
         modifiedMetric(
@@ -308,15 +306,6 @@ class CVSS30Metrics(
 
             return CVSS30Metrics(
                 metrics,
-                // Base
-                scope = metrics.valueOf(CvssV30::scope),
-                // confidentialityImpact = metrics.valueOf(CvssV30::confidentialityImpact),
-                integrityImpact = metrics.valueOf(CvssV30::integrityImpact),
-                availabilityImpact = metrics.valueOf(CvssV30::availabilityImpact),
-                attackVector = metrics.valueOf(CvssV30::attackVector),
-                attackComplexity = metrics.valueOf(CvssV30::attackComplexity),
-                privilegesRequired = metrics.valueOf(CvssV30::privilegesRequired),
-                userInteraction = metrics.valueOf(CvssV30::userInteraction),
 
                 // Temporal
                 exploitCodeMaturity =
