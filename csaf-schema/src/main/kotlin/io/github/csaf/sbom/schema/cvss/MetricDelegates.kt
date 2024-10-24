@@ -16,6 +16,10 @@
  */
 package io.github.csaf.sbom.schema.cvss
 
+import io.github.csaf.sbom.schema.MetricShortName
+import io.github.csaf.sbom.schema.cvss.v30.valueMapping
+import jdk.internal.platform.Container.metrics
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
@@ -39,6 +43,29 @@ class ModifiedMetricDelegate<
     }
 }
 
+class MetricDelegate<PropertyEnum : Enum<*>, Metrics : CVSSMetrics>(
+    val shortName: MetricShortName,
+    val propertyType: KClass<PropertyEnum>,
+    val required: Boolean = true
+) {
+    operator fun getValue(thisRef: Metrics, property: KProperty<*>): Enum<*> {
+        // First, find out the short name
+        var stringValue = thisRef.metrics[shortName]
+        if (stringValue == null && required) {
+            throw IllegalArgumentException("required property not present: ${property.name}")
+        } else if (stringValue == null) {
+            stringValue = "X"
+        }
+
+        val value = valueMapping[propertyType]?.get(stringValue)
+        if (value == null) {
+            throw IllegalArgumentException("invalid value: $stringValue")
+        }
+
+        return value
+    }
+}
+
 fun <
     ModifiedPropertyEnum : Enum<*>,
     BasePropertyEnum : Enum<*>,
@@ -48,3 +75,9 @@ fun <
     notDefinedValue: ModifiedPropertyEnum,
     property: KProperty1<Metrics, BasePropertyEnum>
 ) = ModifiedMetricDelegate(value, notDefinedValue, property)
+
+fun <PropertyEnum : Enum<*>, Metrics : CVSSMetrics> metric(
+    shortName: MetricShortName,
+    propertyType: KClass<PropertyEnum>,
+    required: Boolean = true
+) = MetricDelegate<PropertyEnum, Metrics>(shortName, propertyType, required)

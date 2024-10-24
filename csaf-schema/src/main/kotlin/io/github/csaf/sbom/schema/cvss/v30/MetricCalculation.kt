@@ -174,9 +174,10 @@ val valueMapping =
     )
 
 class CVSS30Metrics(
+    override val metrics: MutableMap<MetricShortName, String>,
     // Base
     val scope: CvssV30.Scope,
-    val confidentialityImpact: CvssV30.ConfidentialityImpact,
+    // val confidentialityImpact: CvssV30.ConfidentialityImpact,
     val integrityImpact: CvssV30.ConfidentialityImpact,
     val availabilityImpact: CvssV30.ConfidentialityImpact,
     val attackVector: CvssV30.AttackVector,
@@ -213,6 +214,9 @@ class CVSS30Metrics(
     modifiedAvailabilityImpact: CvssV30.ModifiedConfidentialityImpact =
         CvssV30.ModifiedConfidentialityImpact.NOT_DEFINED,
 ) : CVSSMetrics {
+
+    val scope2 by metric("S", CvssV30.Scope::class)
+    val confidentialityImpact by metric("C", CvssV30.ConfidentialityImpact::class)
 
     val modifiedAttackVector by
         modifiedMetric(
@@ -267,15 +271,8 @@ class CVSS30Metrics(
         )
 
     override fun calculateBaseScore(): Double {
-        val impact =
-            calculateImpact(scope, confidentialityImpact, integrityImpact, availabilityImpact)
-        val exploit =
-            calculateExploitability(
-                attackVector,
-                attackComplexity,
-                privilegesRequired,
-                userInteraction
-            )
+        val impact = calculateImpact()
+        val exploit = calculateExploitability()
         return if (impact <= 0.0) {
             0.0
         } else if (scope == Scope.UNCHANGED) {
@@ -310,9 +307,10 @@ class CVSS30Metrics(
             }
 
             return CVSS30Metrics(
+                metrics,
                 // Base
                 scope = metrics.valueOf(CvssV30::scope),
-                confidentialityImpact = metrics.valueOf(CvssV30::confidentialityImpact),
+                // confidentialityImpact = metrics.valueOf(CvssV30::confidentialityImpact),
                 integrityImpact = metrics.valueOf(CvssV30::integrityImpact),
                 availabilityImpact = metrics.valueOf(CvssV30::availabilityImpact),
                 attackVector = metrics.valueOf(CvssV30::attackVector),
@@ -418,12 +416,7 @@ fun CVSS30Metrics.calculateEnvironmentalScore(): Double {
     }
 }
 
-fun calculateImpact(
-    scope: CvssV30.Scope,
-    confidentialityImpact: CvssV30.ConfidentialityImpact,
-    integrityImpact: CvssV30.ConfidentialityImpact,
-    availabilityImpact: CvssV30.ConfidentialityImpact
-): Double {
+fun CVSS30Metrics.calculateImpact(): Double {
     val iscBase =
         1.0 - ((1.0 - confidentialityImpact) * (1.0 - integrityImpact) * (1.0 - availabilityImpact))
     return if (scope == CvssV30.Scope.UNCHANGED) {
@@ -433,12 +426,7 @@ fun calculateImpact(
     }
 }
 
-fun calculateExploitability(
-    attackVector: CvssV30.AttackVector,
-    attackComplexity: CvssV30.AttackComplexity,
-    privilegesRequired: CvssV30.PrivilegesRequired,
-    userInteraction: CvssV30.UserInteraction
-): Double {
+fun CVSS30Metrics.calculateExploitability(): Double {
     return 8.22 *
         attackVector.numericalValue() *
         attackComplexity.numericalValue() *

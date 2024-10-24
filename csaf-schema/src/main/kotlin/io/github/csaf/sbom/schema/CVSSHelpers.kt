@@ -49,7 +49,8 @@ fun CvssV30.Companion.fromVectorString(vec: String): CvssV30? {
             environmentalSeverity = environmentalScore.toSeverity(),
             scope = metrics.scope,
             availabilityImpact = metrics.availabilityImpact,
-            confidentialityImpact = metrics.confidentialityImpact,
+            confidentialityImpact =
+                metrics.confidentialityImpact as? CvssV30.ConfidentialityImpact?,
             integrityImpact = metrics.integrityImpact,
             attackVector = metrics.attackVector,
             attackComplexity = metrics.attackComplexity,

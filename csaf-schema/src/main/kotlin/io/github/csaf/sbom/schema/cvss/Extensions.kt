@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.schema.cvss
 
+import io.github.csaf.sbom.schema.MetricShortName
 import io.github.csaf.sbom.schema.generated.CvssV30
 import io.github.csaf.sbom.schema.numericalValue
 
@@ -47,6 +48,8 @@ operator fun Enum<*>.times(value: Double): Double {
 }
 
 interface CVSSMetrics {
+
+    val metrics: Map<MetricShortName, String>
 
     fun calculateBaseScore(): Double
 }
