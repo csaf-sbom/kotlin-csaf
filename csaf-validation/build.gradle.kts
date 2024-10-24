@@ -16,6 +16,7 @@ mavenPublishing {
 
 dependencies {
     implementation(project(":csaf-schema"))
+    implementation(project(":csaf-cvss"))
     implementation(libs.ktor.client.core)
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.ktor.client.mock)
