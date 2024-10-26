@@ -21,6 +21,7 @@ import io.github.csaf.sbom.cvss.minus
 import io.github.csaf.sbom.cvss.optionalMetric
 import io.github.csaf.sbom.cvss.requiredMetric
 import io.github.csaf.sbom.cvss.times
+import io.github.csaf.sbom.cvss.toCvssMetrics
 import io.github.csaf.sbom.cvss.toSeverity
 import io.github.csaf.sbom.schema.generated.Csaf.*
 import kotlin.math.ceil
@@ -313,35 +314,7 @@ class CvssV3Calculation(
 
     companion object {
         fun fromVectorString(vec: String): CvssV3Calculation {
-            // Split the vector into parts
-            val parts = vec.split("/")
-
-            // A map of metrics and their values.
-            val metrics = mutableMapOf<String, String>()
-
-            for ((idx, part) in parts.withIndex()) {
-                val keyValue = part.split(":")
-                val key = keyValue.first()
-                val value = keyValue.getOrNull(1)
-
-                if (idx == 0 && (key != "CVSS" || (value != "3.0" && value != "3.1"))) {
-                    // First key must be CVSS:3.X
-                    throw IllegalArgumentException("Invalid CVSS format or version")
-                }
-
-                if (value == null) {
-                    throw IllegalArgumentException("Value for $key is missing")
-                }
-
-                if (key in metrics) {
-                    // Metric was already defined -> illegal
-                    throw IllegalArgumentException("Metric $key already defined")
-                } else {
-                    metrics[key] = value
-                }
-            }
-
-            return CvssV3Calculation(metrics)
+            return CvssV3Calculation(vec.toCvssMetrics(listOf("3.0", "3.1")))
         }
     }
 }

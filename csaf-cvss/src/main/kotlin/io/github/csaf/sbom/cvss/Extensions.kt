@@ -47,3 +47,37 @@ interface CvssCalculation {
 
     fun calculateBaseScore(): Double
 }
+
+fun String.toCvssMetrics(allowedVersions: List<String>?): MutableMap<String, String> {
+    // Split the vector into parts
+    val parts = this.split("/")
+
+    // A map of metrics and their values.
+    val metrics = mutableMapOf<String, String>()
+
+    for ((idx, part) in parts.withIndex()) {
+        val keyValue = part.split(":")
+        val key = keyValue.first()
+        val value = keyValue.getOrNull(1)
+
+        if (allowedVersions != null) {
+            if (idx == 0 && (key != "CVSS" || (value !in allowedVersions))) {
+                // First key must be CVSS:3.X
+                throw IllegalArgumentException("Invalid CVSS format or version")
+            }
+        }
+
+        if (value == null) {
+            throw IllegalArgumentException("Value for $key is missing")
+        }
+
+        if (key in metrics) {
+            // Metric was already defined -> illegal
+            throw IllegalArgumentException("Metric $key already defined")
+        } else {
+            metrics[key] = value
+        }
+    }
+
+    return metrics
+}
