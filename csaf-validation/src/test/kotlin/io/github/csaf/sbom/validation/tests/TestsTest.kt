@@ -189,6 +189,9 @@ class TestsTest {
             "The following properties are invalid: baseScore: 10.0 != 6.5, baseSeverity: LOW != MEDIUM",
             test.test(mandatoryTest("6-1-09-01"))
         )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
     }
 
     @Test
