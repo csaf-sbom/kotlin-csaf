@@ -18,6 +18,10 @@ package io.github.csaf.sbom.cvss
 
 import kotlin.reflect.KProperty
 
+/**
+ * Represents the value of a CVSS metric. This class should not be used directly, instead metrics
+ * should be defined by [requiredMetric] and [optionalMetric].
+ */
 open class MetricValue<PropertyEnum : Enum<PropertyEnum>>(
     /** The enum value of this metric, as defined in [PropertyEnum]. */
     val enumValue: PropertyEnum,
@@ -26,7 +30,7 @@ open class MetricValue<PropertyEnum : Enum<PropertyEnum>>(
     open val numericalValue: Double,
 )
 
-open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
+internal open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
     val shortName: String,
     val required: Boolean = false,
     val mapOf: Map<PropertyEnum, Pair<String, Double>>
@@ -47,7 +51,7 @@ open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
         // First, find out the short name
         var stringValue = thisRef.metrics[shortName]
         if (stringValue == null && required) {
-            throw IllegalArgumentException("required property not present: ${property.name}")
+            throw IllegalArgumentException("Required property not present: ${property.name}")
         } else if (stringValue == null) {
             stringValue = "X"
         }
@@ -55,19 +59,28 @@ open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
         // Find the entry with the matching string value
         val entry = mapOf.entries.firstOrNull { it.value.first == stringValue }
         if (entry == null) {
-            throw IllegalArgumentException("invalid value: $stringValue in ${property.name}")
+            throw IllegalArgumentException("Invalid value: $stringValue in ${property.name}")
         }
 
         return entry
     }
 }
 
-fun <PropertyEnum : Enum<PropertyEnum>> requiredMetric(
+/**
+ * Creates the definition for a new CVSS metric that is *required* by the respective standard
+ * version. Calculating a score when this metric is not present will result in a
+ * [IllegalArgumentException].
+ */
+internal fun <PropertyEnum : Enum<PropertyEnum>> requiredMetric(
     shortName: String,
     mapOf: Map<PropertyEnum, Pair<String, Double>>,
 ) = MetricDelegate<PropertyEnum>(shortName, true, mapOf)
 
-fun <PropertyEnum : Enum<PropertyEnum>> optionalMetric(
+/**
+ * Creates the definition for a new CVSS metric that is *optional* by the respective standard
+ * version.
+ */
+internal fun <PropertyEnum : Enum<PropertyEnum>> optionalMetric(
     shortName: String,
     mapOf: Map<PropertyEnum, Pair<String, Double>>,
 ) = MetricDelegate<PropertyEnum>(shortName, false, mapOf)

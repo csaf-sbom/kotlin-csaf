@@ -41,17 +41,6 @@ operator fun MetricValue<*>.times(value: MetricValue<*>): Double {
     return this.numericalValue * value.numericalValue
 }
 
-interface CvssCalculation {
-
-    val metrics: Map<String, String>
-
-    fun calculateBaseScore(): Double
-
-    fun calculateTemporalScore(): Double
-
-    fun calculateEnvironmentalScore(): Double
-}
-
 fun String.toCvssMetrics(allowedVersions: List<String>?): MutableMap<String, String> {
     // Split the vector into parts
     val parts = this.split("/")

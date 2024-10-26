@@ -54,6 +54,20 @@ class CalculationTest {
             }
         assertNotNull(ex)
         assertEquals("Metric AC already defined", ex.message)
+
+        ex =
+            assertFailsWith<IllegalArgumentException> {
+                CvssV3Calculation.fromVectorString("CVSS:3.0/AC:H")
+            }
+        assertNotNull(ex)
+        assertEquals("Required property not present: scope", ex.message)
+
+        ex =
+            assertFailsWith<IllegalArgumentException> {
+                CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:X/PR:L/UI:N/S:C/C:L/I:L/A:L")
+            }
+        assertNotNull(ex)
+        assertEquals("Invalid value: X in attackComplexity", ex.message)
     }
 
     @Test
