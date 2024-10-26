@@ -96,6 +96,15 @@ fun goodProductTree(): Csaf.ProductTree =
                                         name = "Linux 0.4",
                                         product_id = "linux-0.4",
                                     )
+                            ),
+                            Csaf.Branche(
+                                category = Csaf.Category3.vendor,
+                                name = "Linux Vendor",
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.5",
+                                        product_id = "linux-0.5",
+                                    )
                             )
                         )
                 )
@@ -235,13 +244,13 @@ fun goodVulnerabilities() =
             product_status =
                 Csaf.ProductStatus(
                     first_affected = setOf("linux-0.1"),
-                    first_fixed = setOf("linux-0.1", "linux-0.2"),
-                    known_affected = setOf("linux-0.1", "linux-0.3"),
-                    known_not_affected = setOf("linux-0.1", "linux-0.4"),
-                    last_affected = setOf("linux-0.1", "linux-0.2"),
-                    recommended = setOf("linux-0.1", "linux-0.3"),
-                    fixed = setOf("linux-0.1", "linux-0.4"),
-                    under_investigation = setOf("linux-0.1", "linux-0.3"),
+                    first_fixed = setOf("linux-0.5"),
+                    known_affected = setOf("linux-0.1"),
+                    known_not_affected = setOf("linux-0.3"),
+                    last_affected = setOf("linux-0.2"),
+                    recommended = setOf("linux-0.5"),
+                    fixed = setOf("linux-0.5"),
+                    under_investigation = setOf("linux-0.4"),
                 ),
             remediations =
                 listOf(
