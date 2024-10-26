@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":csaf-schema"))
     implementation(project(":csaf-cvss"))
     implementation(libs.ktor.client.core)
+    implementation("net.swiftzer.semver:semver:2.0.0")
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.ktor.client.mock)
 }

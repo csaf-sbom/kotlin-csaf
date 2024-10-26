@@ -333,13 +333,13 @@ fun goodCsaf(
                             listOf(
                                 Csaf.RevisionHistory(
                                     date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-                                    number = "1.0.0-alpha1",
+                                    number = "1.0.0",
                                     summary = "Initial and final release",
                                     legacy_version = "1.0"
                                 )
                             ),
-                        status = Csaf.Status.final,
-                        version = "1.0.0-alpha1",
+                        status = Csaf.Status.draft,
+                        version = "1.0.0",
                     ),
                 distribution =
                     Csaf.Distribution(

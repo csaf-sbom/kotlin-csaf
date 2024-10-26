@@ -25,6 +25,7 @@ import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
 import kotlin.reflect.KProperty1
+import net.swiftzer.semver.SemVer
 
 /**
  * Mandatory tests as defined in
@@ -41,7 +42,15 @@ var mandatoryTests =
         Test617MultipleScoresWithSameVersionPerProduct,
         Test618InvalidCVSS,
         Test619InvalidCVSSComputation,
-        Test6110InconsistentCVSS
+        Test6110InconsistentCVSS,
+        Test6114SortedRevisionHistory,
+        Test6116LatestDocumentVersion,
+        Test6117DocumentStatusDraft,
+        Test6118ReleasedRevisionHistory,
+        Test6119RevisionHistoryEntriesForPreReleaseVersions,
+        Test6120NonDraftDocumentVersion,
+        Test6121MissingItemInRevisionHistory,
+        Test6122MultipleDefinitionInRevisionHistory
     )
 
 /**
@@ -375,6 +384,213 @@ object Test6110InconsistentCVSS : Test {
             ValidationFailed(
                 listOf(
                     "The following properties are inconsistent: ${inconsistencies.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.14](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6114-sorted-revision-history).
+ */
+object Test6114SortedRevisionHistory : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        // First, sort items ascending by number
+        val sortedByNumber =
+            doc.document.tracking.revision_history.sortedWith { h1, h2 ->
+                h1.number.compareVersionTo(h2.number)
+            }
+
+        // Then, check if it is sorted by date
+        val isSorted =
+            sortedByNumber.asSequence().zipWithNext { a, b -> a.date <= b.date }.all { it }
+        return if (isSorted) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The revision history is not sorted by ascending date"))
+        }
+        println(isSorted)
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.16](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6116-latest-document-version).
+ */
+object Test6116LatestDocumentVersion : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        // First, sort items ascending by number
+        val sortedByNumber =
+            doc.document.tracking.revision_history.sortedWith { h1, h2 ->
+                h1.number.compareVersionTo(h2.number)
+            }
+        val latestVersion = sortedByNumber.last().number
+
+        return if (
+            latestVersion.equalsVersion(
+                doc.document.tracking.version,
+                ignoreMetadata = true,
+                ignorePreRelease = doc.document.tracking.status == Csaf.Status.draft
+            )
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The latest version should be $latestVersion but is ${doc.document.tracking.version}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.17](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6117-document-status-draft).
+ */
+object Test6117DocumentStatusDraft : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        return if (
+            !doc.document.tracking.version.isZeroVersionOrPreRelease ||
+                (doc.document.tracking.status == Csaf.Status.draft)
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The latest version is a pre-release or \"zero\" version (${doc.document.tracking.version}) but the document status is ${doc.document.tracking.status}"
+                )
+            )
+        }
+    }
+}
+
+object Test6118ReleasedRevisionHistory : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val finalStatues = listOf(Csaf.Status.final, Csaf.Status.interim)
+        // Only final or interim documents are applicable
+        if (doc.document.tracking.status !in finalStatues) {
+            return ValidationSuccessful
+        }
+
+        // Otherwise, we need to check for the revision history
+        val zeroVersions =
+            doc.document.tracking.revision_history.filter {
+                it.number == "0" || SemVer.parseOrNull(it.number)?.major == 0
+            }
+
+        return if (zeroVersions.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document is ${doc.document.tracking.status} but it contains the following revisions: ${zeroVersions.map { it.number }.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+object Test6119RevisionHistoryEntriesForPreReleaseVersions : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val preReleaseVersions =
+            doc.document.tracking.revision_history.filter {
+                SemVer.parseOrNull(it.number)?.preRelease != null
+            }
+
+        return if (preReleaseVersions.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document contains the following pre-release revisions: ${preReleaseVersions.map { it.number }.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.20](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6120-non-draft-document-version).
+ */
+object Test6120NonDraftDocumentVersion : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val finalStatues = listOf(Csaf.Status.final, Csaf.Status.interim)
+        return if (
+            (doc.document.tracking.status !in finalStatues) ||
+                !doc.document.tracking.version.isPreRelease
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The latest version is a pre-release (${doc.document.tracking.version}) but the document status is ${doc.document.tracking.status}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.21](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6121-missing-item-in-revision-history).
+ */
+object Test6121MissingItemInRevisionHistory : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val startVersions = listOf(0, 1)
+        val missing = mutableSetOf<String>()
+
+        // First, sort items ascending by date
+        val sortedByDate = doc.document.tracking.revision_history.sortedBy { it.date }
+
+        val first = sortedByDate.first()
+        if (first.number.versionOrMajorVersion !in startVersions) {
+            return ValidationFailed(
+                listOf(
+                    "Start version ${first.number} must be either 0 or 1 (or a major versio of it)"
+                )
+            )
+        }
+
+        // Check for missing items
+        sortedByDate.reduce { prev, current ->
+            var next = prev.number.versionOrMajorVersion + 1
+            if (
+                next != current.number.versionOrMajorVersion &&
+                    prev.number.versionOrMajorVersion != current.number.versionOrMajorVersion
+            ) {
+                missing += next.toString()
+            }
+            current
+        }
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following versions are missing: ${missing.joinToString(", ")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.22](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6122-multiple-definition-in-revision-history).
+ */
+object Test6122MultipleDefinitionInRevisionHistory : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val versions = doc.document.tracking.revision_history.map { it.number }
+        val duplicates = versions.duplicates()
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following versions in the revision history are duplicate: ${duplicates.keys.joinToString(", ")}"
                 )
             )
         }
