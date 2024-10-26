@@ -25,8 +25,6 @@ import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
 import kotlin.reflect.KProperty1
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Mandatory tests as defined in
@@ -400,13 +398,3 @@ object Test621UnusedDefinitionOfProductID : Test {
         }
     }
 }
-
-val JsonObject?.version: String?
-    get() {
-        val primitive = this?.get("version") as? JsonPrimitive
-        return if (primitive?.isString == true) {
-            primitive.content
-        } else {
-            null
-        }
-    }

@@ -23,9 +23,6 @@ import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.requirements.goodCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /** The path to the test folder for the CSAF 2.0 tests. */
 var testFolder: String = "../csaf/csaf_2.0/test/validator/data/"
@@ -236,14 +233,5 @@ class TestsTest {
                 "${it::class.simpleName} was not successful"
             )
         }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    @Test
-    fun testVersion() {
-        @Suppress("USELESS_CAST") assertEquals(null, (null as? JsonObject).version)
-        assertEquals(null, JsonObject(content = mapOf()).version)
-        assertEquals(null, JsonObject(content = mapOf("version" to JsonPrimitive(null))).version)
-        assertEquals("3.0", JsonObject(content = mapOf("version" to JsonPrimitive("3.0"))).version)
     }
 }
