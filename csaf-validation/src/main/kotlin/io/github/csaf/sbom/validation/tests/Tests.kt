@@ -16,12 +16,14 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlin.reflect.KProperty1
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -38,6 +40,8 @@ var mandatoryTests =
         Test615MultipleDefinitionOfProductGroupID,
         Test616ContradictingProductStatus,
         Test617MultipleScoresWithSameVersionPerProduct,
+        Test618InvalidCVSS,
+        Test619InvalidCVSSComputation,
     )
 
 /**
@@ -247,6 +251,68 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
         } else {
             ValidationFailed(
                 listOf("The following IDs have multiple scores: ${multiples.joinToString(",")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#618-invalid-cvss).
+ */
+object Test618InvalidCVSS : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        // This is already ensured by our JSON schema validation during the creation of the Csaf
+        // object.
+        return ValidationSuccessful
+    }
+}
+
+val propertyMap =
+    mapOf<KProperty1<Csaf.CvssV3, Any?>, KProperty1<CvssV3Calculation, Any>>(
+        Csaf.CvssV3::baseScore to CvssV3Calculation::baseScore,
+        Csaf.CvssV3::baseSeverity to CvssV3Calculation::baseSeverity,
+        Csaf.CvssV3::temporalScore to CvssV3Calculation::temporalScore,
+        Csaf.CvssV3::temporalSeverity to CvssV3Calculation::temporalSeverity,
+        Csaf.CvssV3::environmentalScore to CvssV3Calculation::environmentalScore,
+        Csaf.CvssV3::environmentalSeverity to CvssV3Calculation::environmentalSeverity,
+    )
+
+/**
+ * Implementation of
+ * [Test 6.1.9](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#619-invalid-cvss-computation).
+ */
+object Test619InvalidCVSSComputation : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val invalids = mutableSetOf<Pair<String, Pair<Any?, Any>>>()
+        for (score in doc.vulnerabilities?.flatMap { it.scores ?: listOf() } ?: listOf()) {
+            // TODO(oxisto): CVSS2
+
+            score.cvss_v3?.let {
+                // (Re)-Calculate the score
+                val calc = CvssV3Calculation.fromVectorString(it.vectorString)
+
+                // Check the following properties for consistency
+                for (entry in propertyMap) {
+                    val documentValue = entry.key.get(it)
+                    val calculatedValue = entry.value.get(calc)
+
+                    // Compare the values. Since it is allowed to skip values in the CSAF document,
+                    // we only compare non-null values
+                    if (documentValue != null && documentValue != calculatedValue) {
+                        invalids += Pair(entry.key.name, Pair(documentValue, calculatedValue))
+                    }
+                }
+            }
+        }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following properties are invalid: ${invalids.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
+                )
             )
         }
     }

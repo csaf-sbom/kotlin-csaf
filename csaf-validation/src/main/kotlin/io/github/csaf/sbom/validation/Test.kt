@@ -17,6 +17,10 @@
 package io.github.csaf.sbom.validation
 
 import io.github.csaf.sbom.schema.generated.Csaf
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 
 /**
  * Represents a test as described in
@@ -25,5 +29,28 @@ import io.github.csaf.sbom.schema.generated.Csaf
  */
 interface Test {
 
+    /**
+     * Validates a [Csaf] document object to the CSAF 2.0 standard.
+     *
+     * Note: This will NOT contain any validation errors that occur because of JSON schema
+     * validation, since these will already be checked by the constructor of the [Csaf] object, so
+     * it is impossible to create a [Csaf] document that violates the JSON schema (unless done by
+     * black reflection magic).
+     */
     fun test(doc: Csaf): ValidationResult
+
+    /**
+     * Validates a JSON file given in the [path] to the CSAF 2.0 standard.
+     *
+     * Note: This will also wrap any [SerializationException] that might occur because of JSON
+     * schema validations into the [ValidationResult].
+     */
+    fun test(path: String): ValidationResult {
+        try {
+            val doc = Json.decodeFromString<Csaf>(Path(path).readText())
+            return this.test(doc)
+        } catch (ex: SerializationException) {
+            return ValidationFailed(listOf(ex.message ?: "serialization failed"))
+        }
+    }
 }

@@ -21,6 +21,7 @@ import io.github.csaf.sbom.cvss.minus
 import io.github.csaf.sbom.cvss.optionalMetric
 import io.github.csaf.sbom.cvss.requiredMetric
 import io.github.csaf.sbom.cvss.times
+import io.github.csaf.sbom.cvss.toSeverity
 import io.github.csaf.sbom.schema.generated.Csaf.*
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -41,72 +42,61 @@ class CvssV3Calculation(
         requiredMetric(
             "S",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.Scope.CHANGED to Pair("C", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.Scope.UNCHANGED to Pair("U", 0.0),
+                Scope.CHANGED to Pair("C", 1.0),
+                Scope.UNCHANGED to Pair("U", 0.0),
             )
         )
     val confidentialityImpact by
         requiredMetric(
             "C",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.NONE to
-                    Pair("N", 0.00),
+                ConfidentialityImpact1.HIGH to Pair("H", 0.56),
+                ConfidentialityImpact1.LOW to Pair("L", 0.22),
+                ConfidentialityImpact1.NONE to Pair("N", 0.00),
             )
         )
     val integrityImpact by
         requiredMetric(
             "I",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.NONE to
-                    Pair("N", 0.00),
+                ConfidentialityImpact1.HIGH to Pair("H", 0.56),
+                ConfidentialityImpact1.LOW to Pair("L", 0.22),
+                ConfidentialityImpact1.NONE to Pair("N", 0.00),
             )
         )
     val availabilityImpact by
         requiredMetric(
             "A",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityImpact1.NONE to
-                    Pair("N", 0.00),
+                ConfidentialityImpact1.HIGH to Pair("H", 0.56),
+                ConfidentialityImpact1.LOW to Pair("L", 0.22),
+                ConfidentialityImpact1.NONE to Pair("N", 0.00),
             )
         )
     val attackVector by
         requiredMetric(
             "AV",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.AttackVector.NETWORK to Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.AttackVector.ADJACENT_NETWORK to
-                    Pair("A", 0.62),
-                io.github.csaf.sbom.schema.generated.Csaf.AttackVector.LOCAL to Pair("L", 0.55),
-                io.github.csaf.sbom.schema.generated.Csaf.AttackVector.PHYSICAL to Pair("P", 0.20),
+                AttackVector.NETWORK to Pair("N", 0.85),
+                AttackVector.ADJACENT_NETWORK to Pair("A", 0.62),
+                AttackVector.LOCAL to Pair("L", 0.55),
+                AttackVector.PHYSICAL to Pair("P", 0.20),
             )
         )
     val attackComplexity by
-        requiredMetric<io.github.csaf.sbom.schema.generated.Csaf.AttackComplexity>(
+        requiredMetric<AttackComplexity>(
             "AC",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.AttackComplexity.LOW to Pair("L", 0.77),
-                io.github.csaf.sbom.schema.generated.Csaf.AttackComplexity.HIGH to Pair("H", 0.44),
+                AttackComplexity.LOW to Pair("L", 0.77),
+                AttackComplexity.HIGH to Pair("H", 0.44),
             )
         )
     val privilegesRequired by
-        requiredMetric<io.github.csaf.sbom.schema.generated.Csaf.PrivilegesRequired>(
+        requiredMetric<PrivilegesRequired>(
             "PR",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.PrivilegesRequired.NONE to
-                    Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.PrivilegesRequired.LOW to
+                PrivilegesRequired.NONE to Pair("N", 0.85),
+                PrivilegesRequired.LOW to
                     Pair(
                         "L",
                         if (scope.numericalValue == 1.0) {
@@ -115,7 +105,7 @@ class CvssV3Calculation(
                             0.62
                         }
                     ),
-                io.github.csaf.sbom.schema.generated.Csaf.PrivilegesRequired.HIGH to
+                PrivilegesRequired.HIGH to
                     Pair(
                         "H",
                         if (scope.numericalValue == 1.0) {
@@ -127,12 +117,11 @@ class CvssV3Calculation(
             )
         )
     val userInteraction by
-        requiredMetric<io.github.csaf.sbom.schema.generated.Csaf.UserInteraction>(
+        requiredMetric<UserInteraction>(
             "UI",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.UserInteraction.NONE to Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.UserInteraction.REQUIRED to
-                    Pair("R", 0.62),
+                UserInteraction.NONE to Pair("N", 0.85),
+                UserInteraction.REQUIRED to Pair("R", 0.62),
             )
         )
 
@@ -141,46 +130,32 @@ class CvssV3Calculation(
         optionalMetric(
             "E",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ExploitCodeMaturity.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ExploitCodeMaturity.HIGH to
-                    Pair("H", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ExploitCodeMaturity.FUNCTIONAL to
-                    Pair("F", 0.97),
-                io.github.csaf.sbom.schema.generated.Csaf.ExploitCodeMaturity.PROOF_OF_CONCEPT to
-                    Pair("P", 0.94),
-                io.github.csaf.sbom.schema.generated.Csaf.ExploitCodeMaturity.UNPROVEN to
-                    Pair("U", 0.91),
+                ExploitCodeMaturity.NOT_DEFINED to Pair("X", 1.0),
+                ExploitCodeMaturity.HIGH to Pair("H", 1.0),
+                ExploitCodeMaturity.FUNCTIONAL to Pair("F", 0.97),
+                ExploitCodeMaturity.PROOF_OF_CONCEPT to Pair("P", 0.94),
+                ExploitCodeMaturity.UNPROVEN to Pair("U", 0.91),
             )
         )
     val remediationLevel by
-        optionalMetric<io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel>(
+        optionalMetric<RemediationLevel>(
             "RL",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel.UNAVAILABLE to
-                    Pair("U", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel.WORKAROUND to
-                    Pair("W", 0.97),
-                io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel.TEMPORARY_FIX to
-                    Pair("T", 0.96),
-                io.github.csaf.sbom.schema.generated.Csaf.RemediationLevel.OFFICIAL_FIX to
-                    Pair("O", 0.95),
+                RemediationLevel.NOT_DEFINED to Pair("X", 1.0),
+                RemediationLevel.UNAVAILABLE to Pair("U", 1.0),
+                RemediationLevel.WORKAROUND to Pair("W", 0.97),
+                RemediationLevel.TEMPORARY_FIX to Pair("T", 0.96),
+                RemediationLevel.OFFICIAL_FIX to Pair("O", 0.95),
             )
         )
     val reportConfidence by
         optionalMetric(
             "RC",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ReportConfidence1.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ReportConfidence1.CONFIRMED to
-                    Pair("C", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ReportConfidence1.REASONABLE to
-                    Pair("R", 0.96),
-                io.github.csaf.sbom.schema.generated.Csaf.ReportConfidence1.UNKNOWN to
-                    Pair("U", 0.92)
+                ReportConfidence1.NOT_DEFINED to Pair("X", 1.0),
+                ReportConfidence1.CONFIRMED to Pair("C", 1.0),
+                ReportConfidence1.REASONABLE to Pair("R", 0.96),
+                ReportConfidence1.UNKNOWN to Pair("U", 0.92)
             )
         )
 
@@ -189,42 +164,30 @@ class CvssV3Calculation(
         optionalMetric(
             "CR",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.HIGH to
-                    Pair("H", 1.5),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.MEDIUM to
-                    Pair("M", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.LOW to
-                    Pair("L", 0.5)
+                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement.LOW to Pair("L", 0.5)
             )
         )
     val integrityRequirement by
-        optionalMetric<io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement>(
+        optionalMetric<ConfidentialityRequirement>(
             "IR",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.HIGH to
-                    Pair("H", 1.5),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.MEDIUM to
-                    Pair("M", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.LOW to
-                    Pair("L", 0.5)
+                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement.LOW to Pair("L", 0.5)
             )
         )
     val availabilityRequirement by
-        optionalMetric<io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement>(
+        optionalMetric<ConfidentialityRequirement>(
             "AR",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.NOT_DEFINED to
-                    Pair("X", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.HIGH to
-                    Pair("H", 1.5),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.MEDIUM to
-                    Pair("M", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ConfidentialityRequirement.LOW to
-                    Pair("L", 0.5)
+                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement.LOW to Pair("L", 0.5)
             )
         )
 
@@ -233,49 +196,39 @@ class CvssV3Calculation(
         optionalMetric(
             "MS",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedScope.NOT_DEFINED to
-                    Pair("X", scope.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedScope.CHANGED to Pair("C", 1.0),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedScope.UNCHANGED to Pair("U", 0.0),
+                ModifiedScope.NOT_DEFINED to Pair("X", scope.numericalValue),
+                ModifiedScope.CHANGED to Pair("C", 1.0),
+                ModifiedScope.UNCHANGED to Pair("U", 0.0),
             )
         )
     val modifiedAttackVector by
         optionalMetric(
             "MAV",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackVector.NOT_DEFINED to
-                    Pair("X", attackVector.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackVector.NETWORK to
-                    Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackVector.ADJACENT_NETWORK to
-                    Pair("A", 0.62),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackVector.LOCAL to
-                    Pair("L", 0.55),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackVector.PHYSICAL to
-                    Pair("P", 0.20),
+                ModifiedAttackVector.NOT_DEFINED to Pair("X", attackVector.numericalValue),
+                ModifiedAttackVector.NETWORK to Pair("N", 0.85),
+                ModifiedAttackVector.ADJACENT_NETWORK to Pair("A", 0.62),
+                ModifiedAttackVector.LOCAL to Pair("L", 0.55),
+                ModifiedAttackVector.PHYSICAL to Pair("P", 0.20),
             )
         )
     val modifiedAttackComplexity by
         optionalMetric(
             "MAC",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackComplexity.NOT_DEFINED to
-                    Pair("X", attackComplexity.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackComplexity.LOW to
-                    Pair("L", 0.77),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedAttackComplexity.HIGH to
-                    Pair("H", 0.44),
+                ModifiedAttackComplexity.NOT_DEFINED to Pair("X", attackComplexity.numericalValue),
+                ModifiedAttackComplexity.LOW to Pair("L", 0.77),
+                ModifiedAttackComplexity.HIGH to Pair("H", 0.44),
             )
         )
     val modifiedPrivilegesRequired by
         optionalMetric(
             "MPR",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedPrivilegesRequired.NOT_DEFINED to
+                ModifiedPrivilegesRequired.NOT_DEFINED to
                     Pair("X", privilegesRequired.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedPrivilegesRequired.NONE to
-                    Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedPrivilegesRequired.LOW to
+                ModifiedPrivilegesRequired.NONE to Pair("N", 0.85),
+                ModifiedPrivilegesRequired.LOW to
                     Pair(
                         "L",
                         if (modifiedScope.numericalValue == 1.0) {
@@ -284,7 +237,7 @@ class CvssV3Calculation(
                             0.62
                         }
                     ),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedPrivilegesRequired.HIGH to
+                ModifiedPrivilegesRequired.HIGH to
                     Pair(
                         "H",
                         if (modifiedScope.numericalValue == 1.0) {
@@ -299,56 +252,52 @@ class CvssV3Calculation(
         optionalMetric(
             "MUI",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedUserInteraction.NOT_DEFINED to
-                    Pair("X", userInteraction.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedUserInteraction.NONE to
-                    Pair("N", 0.85),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedUserInteraction.REQUIRED to
-                    Pair("R", 0.62),
+                ModifiedUserInteraction.NOT_DEFINED to Pair("X", userInteraction.numericalValue),
+                ModifiedUserInteraction.NONE to Pair("N", 0.85),
+                ModifiedUserInteraction.REQUIRED to Pair("R", 0.62),
             )
         )
     val modifiedConfidentialityImpact by
         optionalMetric(
             "MC",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact
-                    .NOT_DEFINED to Pair("X", confidentialityImpact.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.NONE to
-                    Pair("N", 0.00),
+                ModifiedConfidentialityImpact.NOT_DEFINED to
+                    Pair("X", confidentialityImpact.numericalValue),
+                ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
+                ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
+                ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
             )
         )
     val modifiedIntegrityImpact by
         optionalMetric(
             "MI",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact
-                    .NOT_DEFINED to Pair("X", integrityImpact.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.NONE to
-                    Pair("N", 0.00),
+                ModifiedConfidentialityImpact.NOT_DEFINED to
+                    Pair("X", integrityImpact.numericalValue),
+                ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
+                ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
+                ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
             )
         )
     val modifiedAvailabilityImpact by
         optionalMetric(
             "MA",
             mapOf(
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact
-                    .NOT_DEFINED to Pair("X", availabilityImpact.numericalValue),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.HIGH to
-                    Pair("H", 0.56),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.LOW to
-                    Pair("L", 0.22),
-                io.github.csaf.sbom.schema.generated.Csaf.ModifiedConfidentialityImpact.NONE to
-                    Pair("N", 0.00),
+                ModifiedConfidentialityImpact.NOT_DEFINED to
+                    Pair("X", availabilityImpact.numericalValue),
+                ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
+                ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
+                ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
             )
         )
+
+    // Calculated scores
+    val baseScore by lazy { calculateBaseScore() }
+    val baseSeverity = baseScore.toSeverity()
+    val temporalScore by lazy { calculateTemporalScore() }
+    val temporalSeverity = temporalScore.toSeverity()
+    val environmentalScore by lazy { calculateEnvironmentalScore() }
+    val environmentalSeverity = environmentalScore.toSeverity()
 
     override fun calculateBaseScore(): Double {
         val impact = calculateImpact()

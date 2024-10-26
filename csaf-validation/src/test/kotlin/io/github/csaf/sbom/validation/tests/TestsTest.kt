@@ -17,17 +17,13 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.requirements.goodCsaf
-import kotlin.io.path.Path
-import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -48,12 +44,6 @@ fun mandatoryTest(id: String): String {
  */
 fun optionalTest(id: String): String {
     return "$testFolder/optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
-}
-
-/** Extension function to test a JSON file given in the [path]. */
-fun io.github.csaf.sbom.validation.Test.test(path: String): ValidationResult {
-    val doc = Json.decodeFromString<Csaf>(Path(path).readText())
-    return this.test(doc)
 }
 
 class TestsTest {
@@ -163,6 +153,42 @@ class TestsTest {
         )
         assertValidationSuccessful(test.test(mandatoryTest("6-1-07-11")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-07-12")))
+    }
+
+    @Test
+    fun test618() {
+        val test = Test618InvalidCVSS
+
+        // failing examples
+        assertValidationFailed(
+            "Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV3', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v3",
+            test.test(mandatoryTest("6-1-08-01"))
+        )
+        assertValidationFailed(
+            "Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV3', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v3",
+            test.test(mandatoryTest("6-1-08-02"))
+        )
+        assertValidationFailed(
+            "Field 'version' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV2', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v2",
+            test.test(mandatoryTest("6-1-08-03"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-08-14")))
+    }
+
+    @Test
+    fun test619() {
+        val test = Test619InvalidCVSSComputation
+
+        // failing examples
+        assertValidationFailed(
+            "The following properties are invalid: baseScore: 10.0 != 6.5, baseSeverity: LOW != MEDIUM",
+            test.test(mandatoryTest("6-1-09-01"))
+        )
     }
 
     @Test
