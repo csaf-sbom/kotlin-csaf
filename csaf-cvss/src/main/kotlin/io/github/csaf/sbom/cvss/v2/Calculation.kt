@@ -18,6 +18,7 @@ package io.github.csaf.sbom.cvss.v2
 
 import io.github.csaf.sbom.cvss.*
 import io.github.csaf.sbom.schema.generated.Csaf.*
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -167,6 +168,14 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
             )
         )
 
+    // Calculated scores
+    val baseScore by lazy { calculateBaseScore() }
+    val baseSeverity = baseScore.toSeverity()
+    val temporalScore by lazy { calculateTemporalScore() }
+    val temporalSeverity = temporalScore.toSeverity()
+    val environmentalScore by lazy { calculateEnvironmentalScore() }
+    val environmentalSeverity = environmentalScore.toSeverity()
+
     override fun calculateBaseScore(): Double {
         val impact =
             10.41 *
@@ -174,6 +183,10 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                     (1.0 - confidentialityImpact) *
                         (1.0 - integrityImpact) *
                         (1.0 - availabilityImpact))
+        return baseScoreForImpact(impact)
+    }
+
+    private fun baseScoreForImpact(impact: Double): Double {
         val exploitability = 20.0 * accessVector * accessComplexity * authentication
         val fImpact =
             if (impact == 0.0) {
@@ -182,6 +195,31 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 1.176
             }
         return roundTo1Decimal(((0.6 * impact) + (0.4 * exploitability) - 1.5) * fImpact)
+    }
+
+    override fun calculateTemporalScore(): Double {
+        return roundTo1Decimal(baseScore * exploitability * remediationLevel * reportConfidence)
+    }
+
+    override fun calculateEnvironmentalScore(): Double {
+        val adjustedImpact =
+            min(
+                10.0,
+                10.41 *
+                    (1.0 -
+                        (1.0 - confidentialityImpact * confidentialityRequirement) *
+                            (1.0 - integrityImpact * integrityRequirement) *
+                            (1.0 - availabilityImpact * availabilityRequirement))
+            )
+        val adjustedBaseScore = baseScoreForImpact(adjustedImpact)
+        val adjustedTemporal =
+            roundTo1Decimal(
+                adjustedBaseScore * exploitability * remediationLevel * reportConfidence
+            )
+        return roundTo1Decimal(
+            (adjustedTemporal + (10.0 - adjustedTemporal) * collateralDamagePotential) *
+                targetDistribution
+        )
     }
 
     fun roundTo1Decimal(x: Double): Double {

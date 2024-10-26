@@ -312,6 +312,33 @@ class CvssV3Calculation(
         }
     }
 
+    override fun calculateTemporalScore(): Double {
+        return roundUp(baseScore * exploitCodeMaturity * remediationLevel * reportConfidence)
+    }
+
+    override fun calculateEnvironmentalScore(): Double {
+        val impact = calculateModifiedImpact()
+        val exploitability = calculateModifiedExploitability()
+
+        return if (impact <= 0.0) {
+            0.0
+        } else if (modifiedScope.numericalValue == 0.0) {
+            roundUp(
+                roundUp(min((impact + exploitability), 10.0)) *
+                    exploitCodeMaturity *
+                    remediationLevel *
+                    reportConfidence
+            )
+        } else {
+            roundUp(
+                roundUp(min(1.08 * (impact + exploitability), 10.0)) *
+                    exploitCodeMaturity *
+                    remediationLevel *
+                    reportConfidence
+            )
+        }
+    }
+
     companion object {
         fun fromVectorString(vec: String): CvssV3Calculation {
             return CvssV3Calculation(vec.toCvssMetrics(listOf("3.0", "3.1")))
@@ -343,33 +370,6 @@ fun CvssV3Calculation.calculateModifiedExploitability(): Double {
         modifiedAttackComplexity *
         modifiedPrivilegesRequired *
         modifiedUserInteraction
-}
-
-fun CvssV3Calculation.calculateTemporalScore(): Double {
-    return roundUp(calculateBaseScore() * exploitCodeMaturity * remediationLevel * reportConfidence)
-}
-
-fun CvssV3Calculation.calculateEnvironmentalScore(): Double {
-    val impact = calculateModifiedImpact()
-    val exploitability = calculateModifiedExploitability()
-
-    return if (impact <= 0.0) {
-        0.0
-    } else if (modifiedScope.numericalValue == 0.0) {
-        roundUp(
-            roundUp(min((impact + exploitability), 10.0)) *
-                exploitCodeMaturity *
-                remediationLevel *
-                reportConfidence
-        )
-    } else {
-        roundUp(
-            roundUp(min(1.08 * (impact + exploitability), 10.0)) *
-                exploitCodeMaturity *
-                remediationLevel *
-                reportConfidence
-        )
-    }
 }
 
 fun CvssV3Calculation.calculateImpact(): Double {

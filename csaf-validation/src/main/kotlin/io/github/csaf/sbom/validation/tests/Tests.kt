@@ -270,7 +270,7 @@ object Test618InvalidCVSS : Test {
     }
 }
 
-val test619PropertiesMap =
+val test619V3PropertiesMap =
     mapOf<KProperty1<Csaf.CvssV3, Any?>, KProperty1<CvssV3Calculation, Any>>(
         Csaf.CvssV3::baseScore to CvssV3Calculation::baseScore,
         Csaf.CvssV3::baseSeverity to CvssV3Calculation::baseSeverity,
@@ -295,7 +295,7 @@ object Test619InvalidCVSSComputation : Test {
                 val calc = CvssV3Calculation.fromVectorString(it.vectorString)
 
                 // Check the following properties for validity
-                for (entry in test619PropertiesMap) {
+                for (entry in test619V3PropertiesMap) {
                     val documentValue = entry.key.get(it)
                     val calculatedValue = entry.value.get(calc)
 

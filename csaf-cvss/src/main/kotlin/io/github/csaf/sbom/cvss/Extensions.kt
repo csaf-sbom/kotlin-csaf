@@ -46,6 +46,10 @@ interface CvssCalculation {
     val metrics: Map<String, String>
 
     fun calculateBaseScore(): Double
+
+    fun calculateTemporalScore(): Double
+
+    fun calculateEnvironmentalScore(): Double
 }
 
 fun String.toCvssMetrics(allowedVersions: List<String>?): MutableMap<String, String> {
