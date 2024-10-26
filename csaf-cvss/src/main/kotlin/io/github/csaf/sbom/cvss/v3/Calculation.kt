@@ -139,14 +139,14 @@ class CvssV3Calculation(
             )
         )
     val remediationLevel by
-        optionalMetric<RemediationLevel>(
+        optionalMetric(
             "RL",
             mapOf(
-                RemediationLevel.NOT_DEFINED to Pair("X", 1.0),
-                RemediationLevel.UNAVAILABLE to Pair("U", 1.0),
-                RemediationLevel.WORKAROUND to Pair("W", 0.97),
-                RemediationLevel.TEMPORARY_FIX to Pair("T", 0.96),
-                RemediationLevel.OFFICIAL_FIX to Pair("O", 0.95),
+                RemediationLevel1.NOT_DEFINED to Pair("X", 1.0),
+                RemediationLevel1.UNAVAILABLE to Pair("U", 1.0),
+                RemediationLevel1.WORKAROUND to Pair("W", 0.97),
+                RemediationLevel1.TEMPORARY_FIX to Pair("T", 0.96),
+                RemediationLevel1.OFFICIAL_FIX to Pair("O", 0.95),
             )
         )
     val reportConfidence by
