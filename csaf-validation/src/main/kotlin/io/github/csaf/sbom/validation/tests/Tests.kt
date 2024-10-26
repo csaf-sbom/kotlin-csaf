@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import io.github.csaf.sbom.cvss.MetricValue
 import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.Test
@@ -42,6 +43,7 @@ var mandatoryTests =
         Test617MultipleScoresWithSameVersionPerProduct,
         Test618InvalidCVSS,
         Test619InvalidCVSSComputation,
+        Test6110InconsistentCVSS
     )
 
 /**
@@ -268,7 +270,7 @@ object Test618InvalidCVSS : Test {
     }
 }
 
-val propertyMap =
+val test619PropertiesMap =
     mapOf<KProperty1<Csaf.CvssV3, Any?>, KProperty1<CvssV3Calculation, Any>>(
         Csaf.CvssV3::baseScore to CvssV3Calculation::baseScore,
         Csaf.CvssV3::baseSeverity to CvssV3Calculation::baseSeverity,
@@ -292,8 +294,8 @@ object Test619InvalidCVSSComputation : Test {
                 // (Re)-Calculate the score
                 val calc = CvssV3Calculation.fromVectorString(it.vectorString)
 
-                // Check the following properties for consistency
-                for (entry in propertyMap) {
+                // Check the following properties for validity
+                for (entry in test619PropertiesMap) {
                     val documentValue = entry.key.get(it)
                     val calculatedValue = entry.value.get(calc)
 
@@ -312,6 +314,69 @@ object Test619InvalidCVSSComputation : Test {
             ValidationFailed(
                 listOf(
                     "The following properties are invalid: ${invalids.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+val test6110PropertiesMap =
+    mapOf<KProperty1<Csaf.CvssV3, Any?>, KProperty1<CvssV3Calculation, MetricValue<*>>>(
+        Csaf.CvssV3::attackVector to CvssV3Calculation::attackVector,
+        Csaf.CvssV3::attackComplexity to CvssV3Calculation::attackComplexity,
+        Csaf.CvssV3::privilegesRequired to CvssV3Calculation::privilegesRequired,
+        Csaf.CvssV3::userInteraction to CvssV3Calculation::userInteraction,
+        Csaf.CvssV3::scope to CvssV3Calculation::scope,
+        Csaf.CvssV3::confidentialityImpact to CvssV3Calculation::confidentialityImpact,
+        Csaf.CvssV3::integrityImpact to CvssV3Calculation::integrityImpact,
+        Csaf.CvssV3::availabilityImpact to CvssV3Calculation::availabilityImpact,
+        Csaf.CvssV3::exploitCodeMaturity to CvssV3Calculation::exploitCodeMaturity,
+        Csaf.CvssV3::remediationLevel to CvssV3Calculation::remediationLevel,
+        Csaf.CvssV3::confidentialityRequirement to CvssV3Calculation::confidentialityRequirement,
+        Csaf.CvssV3::integrityRequirement to CvssV3Calculation::integrityRequirement,
+        Csaf.CvssV3::availabilityRequirement to CvssV3Calculation::availabilityRequirement,
+        Csaf.CvssV3::modifiedAttackVector to CvssV3Calculation::modifiedAttackVector,
+        Csaf.CvssV3::modifiedAttackComplexity to CvssV3Calculation::modifiedAttackComplexity,
+        Csaf.CvssV3::modifiedPrivilegesRequired to CvssV3Calculation::modifiedPrivilegesRequired,
+        Csaf.CvssV3::modifiedUserInteraction to CvssV3Calculation::modifiedUserInteraction,
+        Csaf.CvssV3::modifiedScope to CvssV3Calculation::modifiedScope,
+        Csaf.CvssV3::modifiedConfidentialityImpact to
+            CvssV3Calculation::modifiedConfidentialityImpact,
+        Csaf.CvssV3::modifiedIntegrityImpact to CvssV3Calculation::modifiedIntegrityImpact,
+        Csaf.CvssV3::modifiedAvailabilityImpact to CvssV3Calculation::modifiedAvailabilityImpact
+    )
+
+object Test6110InconsistentCVSS : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val inconsistencies = mutableSetOf<Pair<String, Pair<Any?, Any>>>()
+        for (score in doc.vulnerabilities?.flatMap { it.scores ?: listOf() } ?: listOf()) {
+            // TODO(oxisto): CVSS2
+
+            score.cvss_v3?.let {
+                // Parse the vector string
+                val calc = CvssV3Calculation.fromVectorString(it.vectorString)
+
+                // Check the following properties for consistency
+                for (entry in test6110PropertiesMap) {
+                    val documentValue = entry.key.get(it)
+                    val calculatedValue = entry.value.get(calc).enumValue
+
+                    // Compare the values. Since it is allowed to skip values in the CSAF document,
+                    // we only compare non-null values
+                    if (documentValue != null && documentValue != calculatedValue) {
+                        inconsistencies +=
+                            Pair(entry.key.name, Pair(documentValue, calculatedValue))
+                    }
+                }
+            }
+        }
+
+        return if (inconsistencies.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following properties are inconsistent: ${inconsistencies.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
                 )
             )
         }

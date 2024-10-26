@@ -192,6 +192,26 @@ class TestsTest {
 
         // good examples
         assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(scores = null))))
+        )
+    }
+
+    @Test
+    fun test6110() {
+        val test = Test6110InconsistentCVSS
+
+        // failing examples
+        assertValidationFailed(
+            "The following properties are inconsistent: attackVector: LOCAL != NETWORK, scope: CHANGED != UNCHANGED, availabilityImpact: LOW != HIGH",
+            test.test(mandatoryTest("6-1-10-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(scores = null))))
+        )
     }
 
     @Test
