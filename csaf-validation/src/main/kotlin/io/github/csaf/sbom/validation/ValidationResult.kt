@@ -52,3 +52,7 @@ fun List<ValidationResult>.merge(): ValidationResult {
         ValidationSuccessful
     }
 }
+
+fun Exception.toValidationResult(): ValidationFailed {
+    return ValidationFailed(listOfNotNull(this.message))
+}

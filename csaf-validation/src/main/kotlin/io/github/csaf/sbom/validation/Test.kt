@@ -50,7 +50,7 @@ interface Test {
             val doc = Json.decodeFromString<Csaf>(Path(path).readText())
             return this.test(doc)
         } catch (ex: SerializationException) {
-            return ValidationFailed(listOf(ex.message ?: "serialization failed"))
+            return ex.toValidationResult()
         }
     }
 }
