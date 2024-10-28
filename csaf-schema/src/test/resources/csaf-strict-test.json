@@ -14,9 +14,9 @@
     },
     "lang": "en-US",
     "publisher": {
-      "category": "coordinator",
-      "name": "Bundesamt für Sicherheit in der Informationstechnik",
-      "namespace": "https://www.bsi.bund.de"
+      "category": "other",
+      "name": "csaf-sbom/kotlin-csaf Test files",
+      "namespace": "https://csaf-sbom.github.io/"
     },
     "title": "CVRF-CSAF-Converter: XML External Entities Vulnerability",
     "tracking": {
@@ -28,7 +28,7 @@
           "version": "1.12.1"
         }
       },
-      "id": "BSI-2022-0001",
+      "id": "CSAF-Strict-Test",
       "initial_release_date": "2022-03-17T13:03:42.105Z",
       "revision_history": [
         {
