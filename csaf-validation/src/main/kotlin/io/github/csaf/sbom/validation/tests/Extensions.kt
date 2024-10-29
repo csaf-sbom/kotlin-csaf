@@ -19,32 +19,16 @@ package io.github.csaf.sbom.validation.tests
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
 
-fun Csaf.Branche.gatherProductsTo(products: MutableCollection<Product>) {
+/**
+ * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
+ * recursively.
+ */
+fun Csaf.Branche.gatherProductDefinitionsTo(products: MutableCollection<String>) {
     // Add ID at this leaf
-    products += product
+    products += product?.product_id
 
     // Go down the branch
-    this.branches.gatherProductsTo(products)
-}
-
-fun List<*>?.gatherProductsTo(products: MutableCollection<Product>) {
-    if (this == null) return
-
-    for (e in this) {
-        when (e) {
-            is Product -> products += e
-            is Csaf.Relationship -> products += e.full_product_name
-            is Csaf.Branche -> e.gatherProductsTo(products)
-        }
-    }
-}
-
-fun Csaf.ProductTree?.gatherProductsTo(products: MutableCollection<Product>) {
-    if (this == null) return
-
-    this.full_product_names.gatherProductsTo(products)
-    this.branches.gatherProductsTo(products)
-    this.relationships.gatherProductsTo(products)
+    this.branches?.forEach { it.gatherProductDefinitionsTo(products) }
 }
 
 fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.ProductGroup>) {
@@ -53,18 +37,25 @@ fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.Produ
     groups += this.product_groups
 }
 
-/**
- * Gathers all [Product] definitions in the current document.
- *
- * Note: We could optimize this further by only retrieving the ID, but it might not hurt to have
- * access to the complete [Product].
- */
-fun Csaf.gatherProducts(): Set<Product> {
-    val products = mutableSetOf<Product>()
+/** Gathers all [Product.product_id] definitions in the current document. */
+fun Csaf.gatherProductDefinitions(): List<String> {
+    val ids = mutableListOf<String>()
 
-    this.product_tree.gatherProductsTo(products)
+    // /product_tree/branches[](/branches[])*/product/product_id
+    ids +=
+        this.product_tree?.branches?.flatMap {
+            var inner = mutableListOf<String>()
+            it.gatherProductDefinitionsTo(inner)
+            inner
+        }
 
-    return products
+    // /product_tree/full_product_names[]/product_id
+    ids += this.product_tree?.full_product_names?.map { it.product_id }
+
+    // /product_tree/relationships[]/full_product_name/product_id
+    ids += this.product_tree?.relationships?.map { it.full_product_name.product_id }
+
+    return ids
 }
 
 /**

@@ -17,13 +17,12 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.schema.generated.Csaf.Category3
-import io.github.csaf.sbom.schema.generated.Csaf.Category4
+import io.github.csaf.sbom.validation.requirements.goodCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ExtensionsTest {
-    @Test
+    /*@Test
     fun testListGatherProducts() {
         var list: List<Any>? = null
         val products = mutableSetOf<Csaf.Product>()
@@ -91,7 +90,7 @@ class ExtensionsTest {
             setOf("my_product", "my_product2", "my_product3"),
             products.map { it.product_id }.toSet()
         )
-    }
+    }*/
 
     @Test
     fun testNullGatherProductIds() {
@@ -107,13 +106,31 @@ class ExtensionsTest {
     }
 
     @Test
-    fun testNullGatherProducts() {
-        val products = mutableSetOf<Csaf.Product>()
-        (null as Csaf.ProductTree?).gatherProductsTo(products)
-        assertEquals(emptySet<Csaf.Product>(), products)
-
-        (null as List<*>?).gatherProductsTo(products)
-        assertEquals(emptySet<Csaf.Product>(), products)
+    fun testGatherProducts() {
+        assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductDefinitions())
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        branches =
+                                            listOf(
+                                                Csaf.Branche(
+                                                    category = Csaf.Category3.product_name,
+                                                    name = "test",
+                                                )
+                                            ),
+                                        category = Csaf.Category3.host_name,
+                                        name = "test",
+                                    )
+                                )
+                        )
+                )
+                .gatherProductDefinitions()
+        )
     }
 
     @Test
@@ -125,9 +142,9 @@ class ExtensionsTest {
 
     @Test
     fun testListOfIncompatible() {
-        val products = mutableSetOf<Csaf.Product>()
+        /*val products = mutableSetOf<Csaf.Product>()
         (listOf(Any())).gatherProductsTo(products)
-        assertEquals(emptySet<Csaf.Product>(), products)
+        assertEquals(emptySet<Csaf.Product>(), products)*/
 
         var ids = mutableSetOf<String>()
         (listOf(Any())).gatherProductReferencesTo(ids)

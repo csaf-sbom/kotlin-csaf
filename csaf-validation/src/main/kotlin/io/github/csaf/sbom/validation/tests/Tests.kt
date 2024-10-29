@@ -66,7 +66,7 @@ fun List<Test>.test(doc: Csaf): ValidationResult {
  */
 object Test611MissingDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.gatherProducts().map { it.product_id }
+        val definitions = doc.gatherProductDefinitions()
         val references = doc.gatherProductReferences()
 
         val notDefined = references.subtract(definitions.toSet())
@@ -87,7 +87,7 @@ object Test611MissingDefinitionOfProductID : Test {
  */
 object Test612MultipleDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.gatherProducts().map { it.product_id }
+        val definitions = doc.gatherProductDefinitions()
 
         val duplicates = definitions.duplicates()
 
@@ -266,7 +266,7 @@ object Test617MultipleScoresWithSameVersionPerProduct : Test {
  */
 object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.gatherProducts().map { it.product_id }
+        val definitions = doc.gatherProductDefinitions()
         val references = doc.gatherProductReferences()
 
         val notUsed = definitions.subtract(references.toSet())
