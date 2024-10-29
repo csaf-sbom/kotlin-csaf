@@ -58,6 +58,51 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     return ids
 }
 
+/** Gathers all product IDs in the current document. */
+fun Csaf.gatherProductReferences(): Set<String> {
+    val ids = mutableSetOf<String>()
+
+    // /product_tree/product_groups[]/product_ids[]
+    ids += product_tree?.product_groups?.flatMap { it.product_ids }
+
+    // /product_tree/relationships[]/product_reference
+    // /product_tree/relationships[]/relates_to_product_reference
+    ids +=
+        product_tree?.relationships?.flatMap {
+            listOf(it.product_reference, it.relates_to_product_reference)
+        }
+
+    // /vulnerabilities[]/product_status/first_affected[]
+    // /vulnerabilities[]/product_status/first_fixed[]
+    // /vulnerabilities[]/product_status/fixed[]
+    // /vulnerabilities[]/product_status/known_affected[]
+    // /vulnerabilities[]/product_status/known_not_affected[]
+    // /vulnerabilities[]/product_status/last_affected[]
+    // /vulnerabilities[]/product_status/recommended[]
+    // /vulnerabilities[]/product_status/under_investigation[]
+    // /vulnerabilities[]/remediations[]/product_ids[]
+    // /vulnerabilities[]/scores[]/products[]
+    // /vulnerabilities[]/threats[]/product_ids[]
+    ids +=
+        vulnerabilities?.flatMap {
+            var inner = mutableSetOf<String>()
+            inner += it.product_status?.first_affected
+            inner += it.product_status?.first_fixed
+            inner += it.product_status?.fixed
+            inner += it.product_status?.known_affected
+            inner += it.product_status?.known_not_affected
+            inner += it.product_status?.last_affected
+            inner += it.product_status?.recommended
+            inner += it.product_status?.under_investigation
+            inner += it.remediations?.flatMap { it.product_ids ?: emptySet() }
+            inner += it.scores?.flatMap { it.products }
+            inner += it.threats?.flatMap { it.product_ids ?: emptySet() }
+            inner
+        }
+
+    return ids
+}
+
 /**
  * Gathers all [Product] definitions in the current document.
  *
@@ -72,15 +117,6 @@ fun Csaf.gatherProductGroups(): Set<Csaf.ProductGroup> {
     return groups
 }
 
-fun Csaf.gatherProductReferences(): MutableCollection<String> {
-    val ids = mutableSetOf<String>()
-
-    product_tree.gatherProductReferencesTo(ids)
-    vulnerabilities.gatherProductReferencesTo(ids)
-
-    return ids
-}
-
 fun Csaf.gatherProductGroupReferences(): MutableCollection<String> {
     val ids = mutableSetOf<String>()
 
@@ -89,32 +125,9 @@ fun Csaf.gatherProductGroupReferences(): MutableCollection<String> {
     return ids
 }
 
-fun Csaf.ProductTree?.gatherProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    product_groups.gatherProductReferencesTo(ids)
-    relationships.gatherProductReferencesTo(ids)
-    relationships.gatherProductReferencesTo(ids)
-}
-
-fun Csaf.Vulnerability.gatherProductReferencesTo(ids: MutableCollection<String>) {
-    product_status.gatherProductReferencesTo(ids)
-    remediations.gatherProductReferencesTo(ids)
-    scores.gatherProductReferencesTo(ids)
-    threats.gatherProductReferencesTo(ids)
-}
-
 fun Csaf.Vulnerability.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
     remediations.gatherProductGroupReferencesTo(ids)
     threats.gatherProductGroupReferencesTo(ids)
-}
-
-fun Csaf.ProductStatus?.gatherProductReferencesTo(ids: MutableCollection<String>) {
-    gatherAffectedProductReferencesTo(ids)
-    gatherNotAffectedProductReferencesTo(ids)
-    gatherFixedProductReferencesTo(ids)
-    gatherUnderInvestigationProductReferencesTo(ids)
-    gatherRecommendedProductReferencesTo(ids)
 }
 
 fun Csaf.ProductStatus?.gatherAffectedProductReferencesTo(ids: MutableCollection<String>) {
@@ -150,24 +163,6 @@ fun Csaf.ProductStatus?.gatherRecommendedProductReferencesTo(ids: MutableCollect
     if (this == null) return
 
     ids += recommended
-}
-
-fun List<*>?.gatherProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    for (e in this) {
-        when (e) {
-            is Csaf.Vulnerability -> e.gatherProductReferencesTo(ids)
-            is Csaf.ProductGroup -> ids += e.product_ids
-            is Csaf.Relationship -> {
-                ids += e.product_reference
-                ids += e.relates_to_product_reference
-            }
-            is Csaf.Remediation -> ids += e.product_ids
-            is Csaf.Score -> ids += e.products
-            is Csaf.Threat -> ids += e.product_ids
-        }
-    }
 }
 
 fun List<*>?.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {

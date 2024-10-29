@@ -93,19 +93,6 @@ class ExtensionsTest {
     }*/
 
     @Test
-    fun testNullGatherProductIds() {
-        val ids = mutableSetOf<String>()
-        (null as Csaf.ProductStatus?).gatherProductReferencesTo(ids)
-        assertEquals(emptySet<String>(), ids)
-
-        (null as List<*>?).gatherProductReferencesTo(ids)
-        assertEquals(emptySet<String>(), ids)
-
-        (null as Csaf.ProductTree?).gatherProductReferencesTo(ids)
-        assertEquals(emptySet<String>(), ids)
-    }
-
-    @Test
     fun testGatherProducts() {
         assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductDefinitions())
         assertEquals(
@@ -134,6 +121,71 @@ class ExtensionsTest {
     }
 
     @Test
+    fun testGatherProductReferences() {
+        assertEquals(
+            setOf(
+                "linux-0.1",
+                "linux-0.5",
+                "linux-0.3",
+                "linux-0.2",
+                "linux-0.4",
+                "linux-all",
+                "linux-product",
+                "test-product-name",
+            ),
+            goodCsaf().gatherProductReferences()
+        )
+        assertEquals(
+            setOf(
+                "linux-0.1",
+                "linux-0.5",
+                "linux-0.3",
+                "linux-0.2",
+                "linux-0.4",
+                "test-product-name"
+            ),
+            goodCsaf(productTree = null).gatherProductReferences()
+        )
+        assertEquals(
+            setOf(),
+            goodCsaf(
+                    productTree = null,
+                    vulnerabilities = listOf(Csaf.Vulnerability(product_status = null))
+                )
+                .gatherProductReferences()
+        )
+        assertEquals(
+            setOf(),
+            goodCsaf(
+                    productTree = null,
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status = null,
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            product_ids = null,
+                                            category = Csaf.Category5.no_fix_planned,
+                                            details = "deal with it"
+                                        )
+                                    ),
+                                threats =
+                                    listOf(
+                                        Csaf.Threat(
+                                            product_ids = null,
+                                            category = Csaf.Category7.exploit_status,
+                                            details = "will be exploited"
+                                        )
+                                    )
+                            )
+                        )
+                )
+                .gatherProductReferences()
+        )
+    }
+
+    @Test
     fun testNullGatherProductGroups() {
         val groups = mutableSetOf<Csaf.ProductGroup>()
         (null as Csaf.ProductTree?).gatherProductGroupsTo(groups)
@@ -146,11 +198,7 @@ class ExtensionsTest {
         (listOf(Any())).gatherProductsTo(products)
         assertEquals(emptySet<Csaf.Product>(), products)*/
 
-        var ids = mutableSetOf<String>()
-        (listOf(Any())).gatherProductReferencesTo(ids)
-        assertEquals(emptySet<String>(), ids)
-
-        ids = mutableSetOf<String>()
+        val ids = mutableSetOf<String>()
         (listOf(Any())).gatherProductGroupReferencesTo(ids)
         assertEquals(emptySet<String>(), ids)
     }
