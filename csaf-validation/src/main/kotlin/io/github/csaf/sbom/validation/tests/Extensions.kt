@@ -31,12 +31,6 @@ fun Csaf.Branche.gatherProductDefinitionsTo(products: MutableCollection<String>)
     this.branches?.forEach { it.gatherProductDefinitionsTo(products) }
 }
 
-fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.ProductGroup>) {
-    if (this == null) return
-
-    groups += this.product_groups
-}
-
 /** Gathers all [Product.product_id] definitions in the current document. */
 fun Csaf.gatherProductDefinitions(): List<String> {
     val ids = mutableListOf<String>()
@@ -117,6 +111,12 @@ fun Csaf.gatherProductGroups(): Set<Csaf.ProductGroup> {
     return groups
 }
 
+fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.ProductGroup>) {
+    if (this == null) return
+
+    groups += this.product_groups
+}
+
 fun Csaf.gatherProductGroupReferences(): MutableCollection<String> {
     val ids = mutableSetOf<String>()
 
@@ -128,41 +128,6 @@ fun Csaf.gatherProductGroupReferences(): MutableCollection<String> {
 fun Csaf.Vulnerability.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
     remediations.gatherProductGroupReferencesTo(ids)
     threats.gatherProductGroupReferencesTo(ids)
-}
-
-fun Csaf.ProductStatus?.gatherAffectedProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    ids += first_affected
-    ids += known_affected
-    ids += last_affected
-}
-
-fun Csaf.ProductStatus?.gatherNotAffectedProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    ids += known_not_affected
-}
-
-fun Csaf.ProductStatus?.gatherFixedProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    ids += first_fixed
-    ids += fixed
-}
-
-fun Csaf.ProductStatus?.gatherUnderInvestigationProductReferencesTo(
-    ids: MutableCollection<String>
-) {
-    if (this == null) return
-
-    ids += under_investigation
-}
-
-fun Csaf.ProductStatus?.gatherRecommendedProductReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    ids += recommended
 }
 
 fun List<*>?.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
@@ -186,5 +151,17 @@ internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
 internal operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
     if (item != null) {
         this.add(item)
+    }
+}
+
+internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection<E> {
+    return if (other != null && this != null) {
+        this.union(other)
+    } else if (other != null) {
+        other
+    } else if (this != null) {
+        this
+    } else {
+        listOf()
     }
 }

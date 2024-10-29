@@ -179,25 +179,17 @@ object Test615MultipleDefinitionOfProductGroupID : Test {
  */
 object Test616ContradictingProductStatus : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val affected = mutableSetOf<String>()
-        val notAffected = mutableSetOf<String>()
-        val fixed = mutableSetOf<String>()
-        val underInvestigation = mutableSetOf<String>()
-
         val contradicted = mutableSetOf<String>()
 
         for (vulnerability in doc.vulnerabilities ?: listOf()) {
-            affected.clear()
-            notAffected.clear()
-            fixed.clear()
-            underInvestigation.clear()
-
-            vulnerability.product_status.gatherAffectedProductReferencesTo(affected)
-            vulnerability.product_status.gatherNotAffectedProductReferencesTo(notAffected)
-            vulnerability.product_status.gatherFixedProductReferencesTo(fixed)
-            vulnerability.product_status.gatherUnderInvestigationProductReferencesTo(
-                underInvestigation
-            )
+            val affected =
+                vulnerability.product_status?.first_affected +
+                    vulnerability.product_status?.known_affected +
+                    vulnerability.product_status?.last_affected
+            val notAffected = vulnerability.product_status?.known_not_affected ?: setOf()
+            val fixed =
+                vulnerability.product_status?.first_fixed + vulnerability.product_status?.fixed
+            val underInvestigation = vulnerability.product_status?.under_investigation ?: setOf()
 
             contradicted += affected.intersect(notAffected)
             contradicted += affected.intersect(fixed)

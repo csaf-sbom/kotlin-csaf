@@ -137,6 +137,9 @@ class TestsTest {
 
         // good examples
         assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(product_status = null))))
+        )
         assertValidationSuccessful(test.test(mandatoryTest("6-1-06-11")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-06-12")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-06-13")))

@@ -120,6 +120,7 @@ class ExtensionsTest {
         )
     }
 
+    @Suppress("USELESS_CAST")
     @Test
     fun testGatherProductReferences() {
         assertEquals(
@@ -194,10 +195,6 @@ class ExtensionsTest {
 
     @Test
     fun testListOfIncompatible() {
-        /*val products = mutableSetOf<Csaf.Product>()
-        (listOf(Any())).gatherProductsTo(products)
-        assertEquals(emptySet<Csaf.Product>(), products)*/
-
         val ids = mutableSetOf<String>()
         (listOf(Any())).gatherProductGroupReferencesTo(ids)
         assertEquals(emptySet<String>(), ids)
