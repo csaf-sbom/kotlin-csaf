@@ -18,6 +18,7 @@ package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
+import io.github.csaf.sbom.validation.tests.plusAssign
 
 /**
  * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
@@ -97,49 +98,31 @@ fun Csaf.gatherProductReferences(): Set<String> {
     return ids
 }
 
-/**
- * Gathers all [Product] definitions in the current document.
- *
- * Note: We could optimize this further by only retrieving the ID, but it might not hurt to have
- * access to the complete [Product].
- */
-fun Csaf.gatherProductGroups(): Set<Csaf.ProductGroup> {
-    val groups = mutableSetOf<Csaf.ProductGroup>()
+/** Gathers all [Csaf.ProductGroup.group_id] definitions in the current document. */
+fun Csaf.gatherProductGroups(): List<String> {
+    val groups = mutableListOf<String>()
 
-    this.product_tree.gatherProductGroupsTo(groups)
+    // /product_tree/product_groups[]/group_id
+    groups += product_tree?.product_groups?.map { it.group_id }
 
     return groups
 }
 
-fun Csaf.ProductTree?.gatherProductGroupsTo(groups: MutableCollection<Csaf.ProductGroup>) {
-    if (this == null) return
-
-    groups += this.product_groups
-}
-
-fun Csaf.gatherProductGroupReferences(): MutableCollection<String> {
+/** Gather all group ID references in the current document. */
+fun Csaf.gatherProductGroupReferences(): Set<String> {
     val ids = mutableSetOf<String>()
 
-    vulnerabilities.gatherProductGroupReferencesTo(ids)
+    // /vulnerabilities[]/remediations[]/group_ids
+    // /vulnerabilities[]/threats[]/group_ids
+    ids +=
+        vulnerabilities?.flatMap {
+            var inner = mutableSetOf<String>()
+            inner += it.remediations?.flatMap { it.group_ids ?: setOf() }
+            inner += it.threats?.flatMap { it.group_ids ?: setOf() }
+            inner
+        }
 
     return ids
-}
-
-fun Csaf.Vulnerability.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
-    remediations.gatherProductGroupReferencesTo(ids)
-    threats.gatherProductGroupReferencesTo(ids)
-}
-
-fun List<*>?.gatherProductGroupReferencesTo(ids: MutableCollection<String>) {
-    if (this == null) return
-
-    for (e in this) {
-        when (e) {
-            is Csaf.Vulnerability -> e.gatherProductGroupReferencesTo(ids)
-            is Csaf.Threat -> ids += e.group_ids
-            is Csaf.Remediation -> ids += e.group_ids
-        }
-    }
 }
 
 internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {

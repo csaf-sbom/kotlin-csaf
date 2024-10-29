@@ -22,76 +22,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ExtensionsTest {
-    /*@Test
-    fun testListGatherProducts() {
-        var list: List<Any>? = null
-        val products = mutableSetOf<Csaf.Product>()
-
-        list =
-            listOf<Any>(
-                Csaf.Product(product_id = "my_product", name = "my_product"),
-                Csaf.Relationship(
-                    category = Category4.installed_on,
-                    full_product_name =
-                        Csaf.Product(product_id = "my_product2", name = "my_product2"),
-                    product_reference = "my_product",
-                    relates_to_product_reference = "my_product2",
-                ),
-                Csaf.Branche(
-                    name = "my_branch",
-                    category = Category3.product_family,
-                    product = Csaf.Product(product_id = "my_product3", name = "my_product3"),
-                ),
-                Any(),
-            )
-        products.clear()
-        list.gatherProductsTo(products)
-        assertEquals(3, products.size)
-        assertEquals(
-            setOf("my_product", "my_product2", "my_product3"),
-            products.map { it.product_id }.toSet()
-        )
-    }
-
-    @Test
-    fun testProductTreeGatherProducts() {
-        var tree: Csaf.ProductTree? = null
-        val products = mutableSetOf<Csaf.Product>()
-
-        tree =
-            Csaf.ProductTree(
-                full_product_names =
-                    listOf(Csaf.Product(product_id = "my_product", name = "my_product")),
-                relationships =
-                    listOf(
-                        Csaf.Relationship(
-                            category = Category4.installed_on,
-                            full_product_name =
-                                Csaf.Product(product_id = "my_product2", name = "my_product2"),
-                            product_reference = "my_product",
-                            relates_to_product_reference = "my_product2",
-                        )
-                    ),
-                branches =
-                    listOf(
-                        Csaf.Branche(
-                            name = "my_branch",
-                            category = Category3.product_family,
-                            product =
-                                Csaf.Product(product_id = "my_product3", name = "my_product3"),
-                        )
-                    ),
-            )
-
-        products.clear()
-        tree.gatherProductsTo(products)
-        assertEquals(3, products.size)
-        assertEquals(
-            setOf("my_product", "my_product2", "my_product3"),
-            products.map { it.product_id }.toSet()
-        )
-    }*/
-
     @Test
     fun testGatherProducts() {
         assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductDefinitions())
@@ -187,16 +117,45 @@ class ExtensionsTest {
     }
 
     @Test
-    fun testNullGatherProductGroups() {
-        val groups = mutableSetOf<Csaf.ProductGroup>()
-        (null as Csaf.ProductTree?).gatherProductGroupsTo(groups)
-        assertEquals(emptySet<Csaf.ProductGroup>(), groups)
+    fun testGatherProductGroups() {
+        assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductGroups())
     }
 
     @Test
-    fun testListOfIncompatible() {
-        val ids = mutableSetOf<String>()
-        (listOf(Any())).gatherProductGroupReferencesTo(ids)
-        assertEquals(emptySet<String>(), ids)
+    fun testGatherProductGroupReferences() {
+        assertEquals(emptySet(), goodCsaf(vulnerabilities = null).gatherProductGroupReferences())
+        assertEquals(
+            emptySet(),
+            goodCsaf(
+                    vulnerabilities =
+                        listOf(Csaf.Vulnerability(remediations = null, threats = null))
+                )
+                .gatherProductGroupReferences()
+        )
+        assertEquals(
+            emptySet(),
+            goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            category = Csaf.Category5.no_fix_planned,
+                                            details = "deal with it"
+                                        )
+                                    ),
+                                threats =
+                                    listOf(
+                                        Csaf.Threat(
+                                            category = Csaf.Category7.exploit_status,
+                                            details = "will be exploited"
+                                        )
+                                    )
+                            )
+                        )
+                )
+                .gatherProductGroupReferences()
+        )
     }
 }

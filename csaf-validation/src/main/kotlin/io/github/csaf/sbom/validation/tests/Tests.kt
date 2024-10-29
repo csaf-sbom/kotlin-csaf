@@ -138,7 +138,7 @@ object Test613CircularDefinitionOfProductID : Test {
  */
 object Test614MissingDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.gatherProductGroups().map { it.group_id }
+        val definitions = doc.gatherProductGroups()
         val references = doc.gatherProductGroupReferences()
 
         val notDefined = references.subtract(definitions.toSet())
@@ -159,7 +159,7 @@ object Test614MissingDefinitionOfProductGroupID : Test {
  */
 object Test615MultipleDefinitionOfProductGroupID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val definitions = doc.gatherProductGroups().map { it.group_id }
+        val definitions = doc.gatherProductGroups()
 
         val duplicates = definitions.duplicates()
 
