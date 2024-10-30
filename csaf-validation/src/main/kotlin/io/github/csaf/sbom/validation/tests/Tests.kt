@@ -420,11 +420,12 @@ object Test6114SortedRevisionHistory : Test {
  */
 object Test6116LatestDocumentVersion : Test {
     override fun test(doc: Csaf): ValidationResult {
-        // First, sort items ascending by number
+        // First, sort items ascending by date (then by number)
         val sortedByNumber =
-            doc.document.tracking.revision_history.sortedWith { h1, h2 ->
-                h1.number.compareVersionTo(h2.number)
-            }
+            doc.document.tracking.revision_history.sortedWith(
+                compareBy<Csaf.RevisionHistory> { it.date }
+                    .then { a, b -> a.number.compareVersionTo(b.number) }
+            )
         val latestVersion = sortedByNumber.last().number
 
         return if (

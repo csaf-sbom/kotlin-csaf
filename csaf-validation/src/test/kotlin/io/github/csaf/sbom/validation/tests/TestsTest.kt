@@ -565,7 +565,7 @@ class TestsTest {
             test.test(mandatoryTest("6-1-21-01"))
         )
         assertValidationFailed(
-            "Start version 2 must be either 0 or 1 (or a major versio of it)",
+            "Start version 2 must be either 0 or 1 (or a major version of it)",
             test.test(mandatoryTest("6-1-21-02"))
         )
 
