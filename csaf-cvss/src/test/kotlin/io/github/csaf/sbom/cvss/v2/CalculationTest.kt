@@ -38,21 +38,24 @@ class CalculationTest {
 
     @Test
     fun testCalculateBaseScore() {
+        // Helper function to reduce redundancy
+        fun assertBaseScore(vector: String, expectedScore: Double) {
+            val calculation = CvssV2Calculation.fromVectorString(vector)
+            val score = calculation.calculateBaseScore()
+            assertEquals(expectedScore, score)
+        }
+
         // https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector=(AV:N/AC:M/Au:N/C:C/I:C/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND)
-        var calc =
-            CvssV2Calculation.fromVectorString(
-                "AV:N/AC:M/Au:N/C:C/I:C/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND"
-            )
-        var score = calc.calculateBaseScore()
-        assertEquals(8.8, score)
+        assertBaseScore(
+            "AV:N/AC:M/Au:N/C:C/I:C/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND",
+            8.8
+        )
 
         // https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector=(AV:N/AC:M/Au:N/C:N/I:N/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND)
-        calc =
-            CvssV2Calculation.fromVectorString(
-                "AV:N/AC:M/Au:N/C:N/I:N/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND"
-            )
-        score = calc.calculateBaseScore()
-        assertEquals(0.0, score)
+        assertBaseScore(
+            "AV:N/AC:M/Au:N/C:N/I:N/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND",
+            0.0
+        )
     }
 
     @Test
