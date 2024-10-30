@@ -183,6 +183,13 @@ class CalculationTest {
             Csaf.BaseSeverity.MEDIUM
         )
 
+        // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:U/MC:H/MI:H/MA:H
+        verifyEnvironmentalScore(
+            "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:U/MC:H/MI:H/MA:H",
+            4.9,
+            Csaf.BaseSeverity.MEDIUM
+        )
+
         // Almost identical vector compared to the one above, but with "MS:X" to check the scope
         // "fallback" to "S:C" and "S:U".
         verifyEnvironmentalScore(
@@ -190,6 +197,7 @@ class CalculationTest {
             5.6,
             Csaf.BaseSeverity.MEDIUM
         )
+
         // Almost identical vector compared to the one above, but also with "S:U" to cover the last
         // execution path.
         verifyEnvironmentalScore(

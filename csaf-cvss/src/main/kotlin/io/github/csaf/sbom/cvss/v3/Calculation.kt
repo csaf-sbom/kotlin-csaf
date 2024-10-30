@@ -205,10 +205,14 @@ class CvssV3Calculation(
                 ModifiedScope.UNCHANGED to Pair("U", 0.0),
             )
         )
-    val modifiedScopeChanged
-        get() =
-            modifiedScope.enumValue == ModifiedScope.CHANGED ||
-                (modifiedScope.enumValue == ModifiedScope.NOT_DEFINED && scopeChanged)
+    val modifiedScopeChanged: Boolean
+        get() {
+            return when (modifiedScope.enumValue) {
+                ModifiedScope.CHANGED -> true
+                ModifiedScope.UNCHANGED -> false
+                ModifiedScope.NOT_DEFINED -> scopeChanged
+            }
+        }
 
     val modifiedAttackVector by
         optionalMetric(
