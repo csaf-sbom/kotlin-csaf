@@ -40,7 +40,7 @@ kover {
     reports {
         filters {
             excludes {
-                annotatedBy("io.github.csaf.sbom.retrieval.KoverIgnore")
+                annotatedBy("io.github.csaf.sbom.schema.KoverIgnore")
                 packages("io.github.csaf.sbom.schema.generated")
             }
         }
