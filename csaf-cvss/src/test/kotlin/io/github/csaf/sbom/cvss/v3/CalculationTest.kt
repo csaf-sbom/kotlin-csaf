@@ -184,10 +184,17 @@ class CalculationTest {
         )
 
         // Almost identical vector compared to the one above, but with "MS:X" to check the scope
-        // "fallback" to "S:C".
+        // "fallback" to "S:C" and "S:U".
         verifyEnvironmentalScore(
             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:X/MC:H/MI:H/MA:H",
             5.6,
+            Csaf.BaseSeverity.MEDIUM
+        )
+        // Almost identical vector compared to the one above, but also with "S:U" to cover the last
+        // execution path.
+        verifyEnvironmentalScore(
+            "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:X/MC:H/MI:H/MA:H",
+            4.9,
             Csaf.BaseSeverity.MEDIUM
         )
     }
