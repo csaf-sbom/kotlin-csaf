@@ -22,7 +22,7 @@ import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
-import io.github.csaf.sbom.validation.requirements.goodCsaf
+import io.github.csaf.sbom.validation.goodCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

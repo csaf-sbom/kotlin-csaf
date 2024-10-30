@@ -17,7 +17,7 @@
 package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.requirements.goodCsaf
+import io.github.csaf.sbom.validation.goodCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
