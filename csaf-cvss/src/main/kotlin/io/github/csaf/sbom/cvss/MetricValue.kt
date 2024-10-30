@@ -22,12 +22,12 @@ import kotlin.reflect.KProperty
  * Represents the value of a CVSS metric. This class should not be used directly, instead metrics
  * should be defined by [requiredMetric] and [optionalMetric].
  */
-open class MetricValue<PropertyEnum : Enum<PropertyEnum>>(
+class MetricValue<PropertyEnum : Enum<PropertyEnum>>(
     /** The enum value of this metric, as defined in [PropertyEnum]. */
     val enumValue: PropertyEnum,
 
     /** The numeric value of this metric. */
-    open val numericalValue: Double,
+    val numericalValue: Double,
 )
 
 internal open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(

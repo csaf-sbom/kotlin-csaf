@@ -47,6 +47,9 @@ class CvssV3Calculation(
                 Scope.UNCHANGED to Pair("U", 0.0),
             )
         )
+    val scopeChanged
+        get() = scope.enumValue == Scope.CHANGED
+
     val confidentialityImpact by
         requiredMetric(
             "C",
@@ -100,7 +103,7 @@ class CvssV3Calculation(
                 PrivilegesRequired.LOW to
                     Pair(
                         "L",
-                        if (scope.numericalValue == 1.0) {
+                        if (scopeChanged) {
                             0.68
                         } else {
                             0.62
@@ -109,7 +112,7 @@ class CvssV3Calculation(
                 PrivilegesRequired.HIGH to
                     Pair(
                         "H",
-                        if (scope.numericalValue == 1.0) {
+                        if (scopeChanged) {
                             0.50
                         } else {
                             0.27
@@ -202,6 +205,11 @@ class CvssV3Calculation(
                 ModifiedScope.UNCHANGED to Pair("U", 0.0),
             )
         )
+    val modifiedScopeChanged
+        get() =
+            modifiedScope.enumValue == ModifiedScope.CHANGED ||
+                (modifiedScope.enumValue == ModifiedScope.NOT_DEFINED && scopeChanged)
+
     val modifiedAttackVector by
         optionalMetric(
             "MAV",
@@ -232,7 +240,7 @@ class CvssV3Calculation(
                 ModifiedPrivilegesRequired.LOW to
                     Pair(
                         "L",
-                        if (modifiedScope.numericalValue == 1.0) {
+                        if (modifiedScopeChanged) {
                             0.68
                         } else {
                             0.62
@@ -241,7 +249,7 @@ class CvssV3Calculation(
                 ModifiedPrivilegesRequired.HIGH to
                     Pair(
                         "H",
-                        if (modifiedScope.numericalValue == 1.0) {
+                        if (modifiedScopeChanged) {
                             0.50
                         } else {
                             0.27
@@ -310,7 +318,7 @@ class CvssV3Calculation(
         val exploit = calculateExploitability()
         return if (impact <= 0.0) {
             0.0
-        } else if (scope.numericalValue == 0.0) {
+        } else if (!scopeChanged) {
             roundUp(min(impact + exploit, 10.0))
         } else {
             roundUp(min(1.08 * (impact + exploit), 10.0))
@@ -327,7 +335,7 @@ class CvssV3Calculation(
 
         return if (impact <= 0.0) {
             0.0
-        } else if (modifiedScope.numericalValue == 0.0) {
+        } else if (!modifiedScopeChanged) {
             roundUp(
                 roundUp(min((impact + exploitability), 10.0)) *
                     exploitCodeMaturity *
@@ -360,7 +368,7 @@ fun CvssV3Calculation.calculateModifiedImpact(): Double {
                     (1 - modifiedAvailabilityImpact * availabilityRequirement)),
             0.915
         )
-    return if (modifiedScope.numericalValue == 0.0) {
+    return if (!modifiedScopeChanged) {
         6.42 * iscModified
     } else if (version == "3.1") {
         7.52 * (iscModified - 0.029) - 3.25 * (iscModified * 0.9731 - 0.02).pow(13)
@@ -380,7 +388,7 @@ fun CvssV3Calculation.calculateModifiedExploitability(): Double {
 fun CvssV3Calculation.calculateImpact(): Double {
     val iscBase =
         1.0 - ((1.0 - confidentialityImpact) * (1.0 - integrityImpact) * (1.0 - availabilityImpact))
-    return if (scope.numericalValue == 0.0) {
+    return if (!scopeChanged) {
         6.42 * iscBase
     } else {
         7.52 * (iscBase - 0.029) - 3.25 * (iscBase - 0.02).pow(15)
