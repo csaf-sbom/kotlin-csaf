@@ -148,7 +148,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
         )
     val integrityRequirement by
         optionalMetric(
-            "CR",
+            "IR",
             mapOf(
                 ConfidentialityRequirement.LOW to Pair("L", 0.5),
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
@@ -158,7 +158,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
         )
     val availabilityRequirement by
         optionalMetric(
-            "CR",
+            "AR",
             mapOf(
                 ConfidentialityRequirement.LOW to Pair("L", 0.5),
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
