@@ -41,6 +41,10 @@ operator fun MetricValue<*>.times(value: MetricValue<*>): Double {
     return this.numericalValue * value.numericalValue
 }
 
+/**
+ * Converts this vector string into a map of CVSS metrics. The [allowedVersions] list must be
+ * specified if the standard is 3.X.
+ */
 fun String.toCvssMetrics(allowedVersions: List<String>?): MutableMap<String, String> {
     // Split the vector into parts
     val parts = this.split("/")
@@ -53,6 +57,7 @@ fun String.toCvssMetrics(allowedVersions: List<String>?): MutableMap<String, Str
         val key = keyValue.first()
         val value = keyValue.getOrNull(1)
 
+        // Allowed versions are only applicable for CVSS 3.X
         if (allowedVersions != null) {
             if (idx == 0 && (key != "CVSS" || (value !in allowedVersions))) {
                 // First key must be CVSS:3.X
