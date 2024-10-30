@@ -1351,11 +1351,10 @@
               "minProperties": 2,
               "properties": {
                 "cvss_v2": {
-                  "$ref": "https://www.first.org/cvss/cvss-v2.0.json"
+                  "$ref": "https://csrc.nist.gov/schema/nvd/feed/1.1/cvss-v2.0.json"
                 },
                 "cvss_v3": {
-                  "format": "generic",
-                  "type": "object"
+                  "$ref": "https://csrc.nist.gov/schema/nvd/feed/1.1/cvss-v3.x.json"
                 },
                 "products": {
                   "$ref": "#/$defs/products_t"
