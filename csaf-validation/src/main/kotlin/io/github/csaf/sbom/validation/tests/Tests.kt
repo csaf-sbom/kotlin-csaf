@@ -396,21 +396,25 @@ object Test6110InconsistentCVSS : Test {
  */
 object Test6114SortedRevisionHistory : Test {
     override fun test(doc: Csaf): ValidationResult {
-        // First, sort items ascending by number
-        val sortedByNumber =
-            doc.document.tracking.revision_history.sortedWith { h1, h2 ->
-                h1.number.compareVersionTo(h2.number)
-            }
+        // First, sort items ascending by date (then by number in case the date is the same)
+        val sorted =
+            doc.document.tracking.revision_history.sortedWith(
+                compareBy<Csaf.RevisionHistory> { it.date }
+                    .then { a, b -> a.number.compareVersionTo(b.number) }
+            )
 
-        // Then, check if it is sorted by date
-        val isSorted =
-            sortedByNumber.asSequence().zipWithNext { a, b -> a.date <= b.date }.all { it }
-        return if (isSorted) {
+        // Then, check if it is sorted by number
+        val isSortedByNumber =
+            sorted
+                .asSequence()
+                .zipWithNext { a, b -> a.number.compareVersionTo(b.number) < 0 }
+                .all { it }
+        return if (isSortedByNumber) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("The revision history is not sorted by ascending date"))
         }
-        println(isSorted)
+        println(isSortedByNumber)
     }
 }
 
@@ -420,13 +424,13 @@ object Test6114SortedRevisionHistory : Test {
  */
 object Test6116LatestDocumentVersion : Test {
     override fun test(doc: Csaf): ValidationResult {
-        // First, sort items ascending by date (then by number)
-        val sortedByNumber =
+        // First, sort items ascending by date (then by number in case the date is the same)
+        val sorted =
             doc.document.tracking.revision_history.sortedWith(
                 compareBy<Csaf.RevisionHistory> { it.date }
                     .then { a, b -> a.number.compareVersionTo(b.number) }
             )
-        val latestVersion = sortedByNumber.last().number
+        val latestVersion = sorted.last().number
 
         return if (
             latestVersion.equalsVersion(
