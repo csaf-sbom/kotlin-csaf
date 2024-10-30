@@ -293,12 +293,17 @@ class CvssV3Calculation(
         )
 
     // Calculated scores
-    val baseScore by lazy { calculateBaseScore() }
-    val baseSeverity = baseScore.toSeverity()
+    val baseScore = calculateBaseScore()
+    val baseSeverity
+        get() = baseScore.toSeverity()
+
     val temporalScore by lazy { calculateTemporalScore() }
-    val temporalSeverity = temporalScore.toSeverity()
+    val temporalSeverity
+        get() = temporalScore.toSeverity()
+
     val environmentalScore by lazy { calculateEnvironmentalScore() }
-    val environmentalSeverity = environmentalScore.toSeverity()
+    val environmentalSeverity
+        get() = environmentalScore.toSeverity()
 
     override fun calculateBaseScore(): Double {
         val impact = calculateImpact()
@@ -378,7 +383,7 @@ fun CvssV3Calculation.calculateImpact(): Double {
     return if (scope.numericalValue == 0.0) {
         6.42 * iscBase
     } else {
-        7.52 * (iscBase - 0.029) - 3.52 * (iscBase - 0.02).pow(15)
+        7.52 * (iscBase - 0.029) - 3.25 * (iscBase - 0.02).pow(15)
     }
 }
 
@@ -400,10 +405,9 @@ fun CvssV3Calculation.roundUp(x: Double): Double {
         if ((intInput % 10000) == 0) {
             intInput / 100000.0
         } else {
-            return (floor(intInput / 10000.0) + 1) / 10.0
+            (floor(intInput / 10000.0) + 1) / 10.0
         }
     } else {
-        val factor = 10.0.pow(1)
-        ceil(x * factor) / factor
+        ceil(x * 10.0) / 10.0
     }
 }

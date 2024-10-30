@@ -19,7 +19,6 @@ package io.github.csaf.sbom.cvss.v2
 import io.github.csaf.sbom.cvss.*
 import io.github.csaf.sbom.schema.generated.Csaf.*
 import kotlin.math.min
-import kotlin.math.pow
 import kotlin.math.round
 
 class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalculation {
@@ -169,12 +168,17 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
         )
 
     // Calculated scores
-    val baseScore by lazy { calculateBaseScore() }
-    val baseSeverity = baseScore.toSeverity()
+    val baseScore = calculateBaseScore()
+    val baseSeverity
+        get() = baseScore.toSeverity()
+
     val temporalScore by lazy { calculateTemporalScore() }
-    val temporalSeverity = temporalScore.toSeverity()
+    val temporalSeverity
+        get() = temporalScore.toSeverity()
+
     val environmentalScore by lazy { calculateEnvironmentalScore() }
-    val environmentalSeverity = environmentalScore.toSeverity()
+    val environmentalSeverity
+        get() = environmentalScore.toSeverity()
 
     override fun calculateBaseScore(): Double {
         val impact =
@@ -222,10 +226,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
         )
     }
 
-    fun roundTo1Decimal(x: Double): Double {
-        val factor = 10.0.pow(1)
-        return round(x * factor) / factor
-    }
+    fun roundTo1Decimal(x: Double): Double = round(x * 10.0) / 10.0
 
     companion object {
         fun fromVectorString(vec: String): CvssV2Calculation {
