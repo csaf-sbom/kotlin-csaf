@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.cvss.v3
 
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -86,7 +87,8 @@ class CalculationTest {
                         "UI" to "R",
                     )
             )
-        var score = metrics.calculateBaseScore()
+        var score = metrics.baseScore
+        assertEquals(Csaf.BaseSeverity.HIGH, metrics.baseSeverity)
         assertEquals(6.1, score)
 
         metrics =
@@ -103,24 +105,24 @@ class CalculationTest {
                         "UI" to "R",
                     )
             )
-        score = metrics.calculateBaseScore()
-        assertEquals(3.1, score)
+        assertEquals(3.1, metrics.baseScore)
+        assertEquals(Csaf.BaseSeverity.LOW, metrics.baseSeverity)
 
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L
         metrics = CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L")
-        score = metrics.calculateBaseScore()
-        assertEquals(7.4, score)
+        assertEquals(7.4, metrics.baseScore)
+        assertEquals(Csaf.BaseSeverity.HIGH, metrics.baseSeverity)
 
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
         metrics = CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N")
-        score = metrics.calculateBaseScore()
-        assertEquals(0.0, score)
+        assertEquals(0.0, metrics.baseScore)
+        assertEquals(Csaf.BaseSeverity.LOW, metrics.baseSeverity)
 
         // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N/RL:W
         metrics =
             CvssV3Calculation.fromVectorString("CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N/RL:W")
-        score = metrics.calculateBaseScore()
-        assertEquals(6.1, score)
+        assertEquals(6.1, metrics.baseScore)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.baseSeverity)
     }
 
     @Test
@@ -132,14 +134,15 @@ class CalculationTest {
             )
         var score = metrics.calculateTemporalScore()
         assertEquals(4.7, score)
+        assertEquals(Csaf.BaseSeverity.LOW, metrics.temporalSeverity)
 
         // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:P/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:H/E:H/RL:U/RC:U
         metrics =
             CvssV3Calculation.fromVectorString(
                 "CVSS:3.1/AV:P/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:H/E:H/RL:U/RC:U"
             )
-        score = metrics.calculateTemporalScore()
-        assertEquals(4.6, score)
+        assertEquals(4.6, metrics.temporalScore)
+        assertEquals(Csaf.BaseSeverity.LOW, metrics.temporalSeverity)
     }
 
     @Test
@@ -147,28 +150,28 @@ class CalculationTest {
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
         var metrics =
             CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N")
-        var score = metrics.calculateEnvironmentalScore()
-        assertEquals(0.0, score)
+        assertEquals(0.0, metrics.environmentalScore)
+        assertEquals(Csaf.BaseSeverity.LOW, metrics.environmentalSeverity)
 
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
         metrics = CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N")
-        score = metrics.calculateEnvironmentalScore()
-        assertEquals(7.5, score)
+        assertEquals(7.5, metrics.environmentalScore)
+        assertEquals(Csaf.BaseSeverity.HIGH, metrics.environmentalSeverity)
 
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:C/MC:H/MI:H/MA:H
         metrics =
             CvssV3Calculation.fromVectorString(
                 "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:C/MC:H/MI:H/MA:H"
             )
-        score = metrics.calculateEnvironmentalScore()
-        assertEquals(5.5, score)
+        assertEquals(5.5, metrics.environmentalScore)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.environmentalSeverity)
 
         // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:C/MC:H/MI:H/MA:H
         metrics =
             CvssV3Calculation.fromVectorString(
                 "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H/E:U/RL:T/RC:U/CR:L/IR:L/AR:H/MAV:P/MAC:H/MPR:H/MUI:R/MS:C/MC:H/MI:H/MA:H"
             )
-        score = metrics.calculateEnvironmentalScore()
-        assertEquals(5.6, score)
+        assertEquals(5.6, metrics.environmentalScore)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.environmentalSeverity)
     }
 }

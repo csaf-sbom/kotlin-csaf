@@ -169,16 +169,13 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
 
     // Calculated scores
     val baseScore = calculateBaseScore()
-    val baseSeverity
-        get() = baseScore.toSeverity()
+    val baseSeverity = baseScore.toSeverity()
 
-    val temporalScore by lazy { calculateTemporalScore() }
-    val temporalSeverity
-        get() = temporalScore.toSeverity()
+    val temporalScore = calculateTemporalScore()
+    val temporalSeverity = temporalScore.toSeverity()
 
-    val environmentalScore by lazy { calculateEnvironmentalScore() }
-    val environmentalSeverity
-        get() = environmentalScore.toSeverity()
+    val environmentalScore = calculateEnvironmentalScore()
+    val environmentalSeverity = environmentalScore.toSeverity()
 
     override fun calculateBaseScore(): Double {
         val impact =
