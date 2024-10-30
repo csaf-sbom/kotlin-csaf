@@ -88,7 +88,7 @@ class CalculationTest {
                     )
             )
         var score = metrics.baseScore
-        assertEquals(Csaf.BaseSeverity.HIGH, metrics.baseSeverity)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.baseSeverity)
         assertEquals(6.1, score)
 
         metrics =
@@ -116,7 +116,7 @@ class CalculationTest {
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
         metrics = CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N")
         assertEquals(0.0, metrics.baseScore)
-        assertEquals(Csaf.BaseSeverity.LOW, metrics.baseSeverity)
+        assertEquals(Csaf.BaseSeverity.NONE, metrics.baseSeverity)
 
         // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N/RL:W
         metrics =
@@ -134,7 +134,7 @@ class CalculationTest {
             )
         var score = metrics.calculateTemporalScore()
         assertEquals(4.7, score)
-        assertEquals(Csaf.BaseSeverity.LOW, metrics.temporalSeverity)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.temporalSeverity)
 
         // https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:P/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:H/E:H/RL:U/RC:U
         metrics =
@@ -142,7 +142,7 @@ class CalculationTest {
                 "CVSS:3.1/AV:P/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:H/E:H/RL:U/RC:U"
             )
         assertEquals(4.6, metrics.temporalScore)
-        assertEquals(Csaf.BaseSeverity.LOW, metrics.temporalSeverity)
+        assertEquals(Csaf.BaseSeverity.MEDIUM, metrics.temporalSeverity)
     }
 
     @Test
@@ -151,7 +151,7 @@ class CalculationTest {
         var metrics =
             CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N")
         assertEquals(0.0, metrics.environmentalScore)
-        assertEquals(Csaf.BaseSeverity.LOW, metrics.environmentalSeverity)
+        assertEquals(Csaf.BaseSeverity.NONE, metrics.environmentalSeverity)
 
         // https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
         metrics = CvssV3Calculation.fromVectorString("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N")
