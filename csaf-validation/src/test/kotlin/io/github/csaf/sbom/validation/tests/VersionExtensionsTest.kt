@@ -32,11 +32,11 @@ class VersionExtensionsTest {
 
     @Test
     fun testIsZeroVersionOrPreRelease() {
-        assertFalse("1".isZeroVersionOrPreRelease)
-        assertFalse("1.0.0".isZeroVersionOrPreRelease)
-        assertTrue("0".isZeroVersionOrPreRelease)
-        assertTrue("0.9.5".isZeroVersionOrPreRelease)
-        assertTrue("1.0.0-alpha1".isZeroVersionOrPreRelease)
+        assertFalse("1".isVersionZeroOrPreRelease)
+        assertFalse("1.0.0".isVersionZeroOrPreRelease)
+        assertTrue("0".isVersionZeroOrPreRelease)
+        assertTrue("0.9.5".isVersionZeroOrPreRelease)
+        assertTrue("1.0.0-alpha1".isVersionZeroOrPreRelease)
     }
 
     @Test

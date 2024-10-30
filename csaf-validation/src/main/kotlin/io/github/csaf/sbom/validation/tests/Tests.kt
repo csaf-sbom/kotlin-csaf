@@ -452,7 +452,7 @@ object Test6116LatestDocumentVersion : Test {
 object Test6117DocumentStatusDraft : Test {
     override fun test(doc: Csaf): ValidationResult {
         return if (
-            !doc.document.tracking.version.isZeroVersionOrPreRelease ||
+            !doc.document.tracking.version.isVersionZeroOrPreRelease ||
                 (doc.document.tracking.status == Csaf.Status.draft)
         ) {
             ValidationSuccessful
@@ -466,11 +466,15 @@ object Test6117DocumentStatusDraft : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.18](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6118-released-revision-history).
+ */
 object Test6118ReleasedRevisionHistory : Test {
     override fun test(doc: Csaf): ValidationResult {
-        val finalStatues = listOf(Csaf.Status.final, Csaf.Status.interim)
+        val nonDraftStatuses = listOf(Csaf.Status.final, Csaf.Status.interim)
         // Only final or interim documents are applicable
-        if (doc.document.tracking.status !in finalStatues) {
+        if (doc.document.tracking.status !in nonDraftStatuses) {
             return ValidationSuccessful
         }
 
@@ -492,6 +496,10 @@ object Test6118ReleasedRevisionHistory : Test {
     }
 }
 
+/**
+ * Implementation of
+ * [Test 6.1.19](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6119-revision-history-entries-for-pre-release-versions).
+ */
 object Test6119RevisionHistoryEntriesForPreReleaseVersions : Test {
     override fun test(doc: Csaf): ValidationResult {
         val preReleaseVersions =
@@ -549,7 +557,7 @@ object Test6121MissingItemInRevisionHistory : Test {
         if (first.number.versionOrMajorVersion !in startVersions) {
             return ValidationFailed(
                 listOf(
-                    "Start version ${first.number} must be either 0 or 1 (or a major versio of it)"
+                    "Start version ${first.number} must be either 0 or 1 (or a major version of it)"
                 )
             )
         }

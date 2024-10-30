@@ -18,28 +18,36 @@ package io.github.csaf.sbom.validation.tests
 
 import net.swiftzer.semver.SemVer
 
-val String.isZeroVersionOrPreRelease: Boolean
-    get() {
-        val semver = SemVer.parseOrNull(this)
-        return this.versionOrMajorVersion == 0 || semver?.preRelease != null
-    }
+/**
+ * Checks, if this string represents either a "zero" version, e.g. "0", "0.x.y" or has a pre-release
+ * part such as "1.2.3-alpha1".
+ */
+val String.isVersionZeroOrPreRelease: Boolean
+    get() = versionOrMajorVersion == 0 || isPreRelease
 
+/**
+ * Retrieves the version as an [Int] in case it is a simple version, such as "0" or "1" or the major
+ * version, in case it is a semantic version. In this case, the version "0.x.y" will return "0".
+ */
 val String.versionOrMajorVersion: Int
-    get() {
-        val semver = SemVer.parseOrNull(this)
-        return if (semver != null) {
-            semver.major
-        } else {
-            this.toInt()
-        }
-    }
+    get() = toSemVer()?.major ?: toInt()
 
+/**
+ * Checks, if this string represents a semantic version containing a pre-release part, e.g.
+ * "1.2.3-alpha".
+ */
 val String.isPreRelease: Boolean
-    get() {
-        val semver = SemVer.parseOrNull(this)
-        return semver?.preRelease != null
-    }
+    get() = toSemVer()?.preRelease != null
 
+/** Tries to convert this string into a semantic version, represented by a [SemVer] object. */
+fun String.toSemVer(): SemVer? {
+    return SemVer.parseOrNull(this)
+}
+
+/**
+ * Compares two version strings. Returns the difference by either [SemVer.compareTo] or
+ * [Int.compareTo].
+ */
 fun String.compareVersionTo(version2: String): Int {
     var semver1 = SemVer.parseOrNull(this)
     var semver2 = SemVer.parseOrNull(version2)
@@ -50,6 +58,13 @@ fun String.compareVersionTo(version2: String): Int {
     }
 }
 
+/**
+ * Equality check between two versions with extra options.
+ *
+ * @param ignoreMetadata When specified, it ignores the [SemVer.buildMetadata] part.
+ * @param ignorePreRelease When specified, it ignores the [SemVer.preRelease] part.
+ * @return true, if the versions are the same.
+ */
 fun String.equalsVersion(
     version2: String,
     ignoreMetadata: Boolean = true,
