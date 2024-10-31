@@ -750,6 +750,10 @@ object Test6128Translation : Test {
  */
 object Test621UnusedDefinitionOfProductID : Test {
     override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category == "csaf_informational_advisory") {
+            return ValidationNotApplicable
+        }
+
         val definitions = doc.gatherProductDefinitions()
         val references = doc.gatherProductReferences()
 
