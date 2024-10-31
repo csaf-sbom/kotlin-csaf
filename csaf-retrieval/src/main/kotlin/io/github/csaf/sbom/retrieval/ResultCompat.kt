@@ -19,11 +19,11 @@
 package io.github.csaf.sbom.retrieval
 
 /**
- * ResultCompat.
+ * This class is a compatibility wrapper around [Result] for Java.
  *
- * It is intended to solve the problem of being unable to obtain [kotlin.Result] in java.
+ * It is intended to solve the problem of being unable to obtain [Result] in java.
  */
-class ResultCompat<T>(private val result: Result<T>) {
+data class ResultCompat<T>(private val result: Result<T>) {
 
     companion object {
         /** Returns a [Result] that encapsulates the given value as successful value. */
@@ -52,12 +52,4 @@ class ResultCompat<T>(private val result: Result<T>) {
     override fun toString(): String =
         if (isSuccess) "ResultCompat(value = ${getOrNull()})"
         else "ResultCompat(error = ${exceptionOrNull().toString()})"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ResultCompat<*>) return false
-        return result == other.result
-    }
-
-    override fun hashCode() = result.hashCode()
 }
