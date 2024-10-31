@@ -29,6 +29,8 @@ import kotlin.io.path.readText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.serialization.json.Json
 
 /** The path to the test folder for the CSAF 2.0 tests. */
@@ -46,8 +48,26 @@ class TestsTest {
 
     @AfterTest
     fun checkAllTestCases() {
-        // Try to find the test 
-        println(executedTests)
+        val firstExecuted = executedTests.firstOrNull()
+        // Nothing to do, special case for testAllGood
+        if (firstExecuted == null) {
+            return
+        }
+
+        // Try to find the test
+        val test =
+            testCases.tests.firstOrNull {
+                (it.valid + it.failures).any { it.name == firstExecuted }
+            }
+        assertNotNull(test)
+
+        val allTestPaths = (test.valid + test.failures).map { it.name }
+        val missing = allTestPaths - allTestPaths.intersect(executedTests)
+
+        assertTrue(
+            missing.isEmpty(),
+            "The following test cases were not included in the unit test: ${missing.joinToString(", ")}"
+        )
     }
 
     @Test
@@ -714,6 +734,9 @@ class TestsTest {
             "The following IDs are not used: CSAFPID-9080700",
             test.test(optionalTest("6-2-01-01"))
         )
+
+        // good examples
+        assertValidationSuccessful(test.test(optionalTest("6-2-01-11")))
     }
 
     @Test
