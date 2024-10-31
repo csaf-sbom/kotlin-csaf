@@ -21,6 +21,7 @@ import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
+import io.github.csaf.sbom.validation.ValidationNotApplicable
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
@@ -44,7 +45,9 @@ var mandatoryTests =
         Test619InvalidCVSSComputation,
         Test6110InconsistentCVSS,
         Test6111CWE,
+        Test6112Language,
         Test6114SortedRevisionHistory,
+        Test6115Translator,
         Test6116LatestDocumentVersion,
         Test6117DocumentStatusDraft,
         Test6118ReleasedRevisionHistory,
@@ -52,7 +55,8 @@ var mandatoryTests =
         Test6120NonDraftDocumentVersion,
         Test6121MissingItemInRevisionHistory,
         Test6122MultipleDefinitionInRevisionHistory,
-        Test6123MultipleUseOfSameCVE
+        Test6123MultipleUseOfSameCVE,
+        Test6128Translation
     )
 
 /**
@@ -355,6 +359,10 @@ val test6110PropertiesMap =
         Csaf.CvssV3::modifiedAvailabilityImpact to CvssV3Calculation::modifiedAvailabilityImpact
     )
 
+/**
+ * Implementation of
+ * [Test 6.1.10](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6110-inconsistent-cvss).
+ */
 object Test6110InconsistentCVSS : Test {
     override fun test(doc: Csaf): ValidationResult {
         val inconsistencies = mutableSetOf<Pair<String, Pair<Any?, Any>>>()
@@ -429,6 +437,30 @@ object Test6111CWE : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.12](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6112-language).
+ */
+object Test6112Language : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val invalids = mutableListOf<String>()
+
+        if (doc.document.lang?.isLanguage == false) {
+            invalids += doc.document.lang
+        } else if (doc.document.source_lang?.isLanguage == false) {
+            invalids += doc.document.source_lang
+        }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The following languages are not valid: ${invalids.joinToString(", ")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.1.14](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6114-sorted-revision-history).
  */
 object Test6114SortedRevisionHistory : Test {
@@ -452,6 +484,26 @@ object Test6114SortedRevisionHistory : Test {
             ValidationFailed(listOf("The revision history is not sorted by ascending date"))
         }
         println(isSortedByNumber)
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.15](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6115-translator).
+ */
+object Test6115Translator : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.publisher.category != Csaf.Category1.translator) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.document.source_lang != null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The publisher is a translator, but the source language is not present")
+            )
+        }
     }
 }
 
@@ -662,6 +714,24 @@ object Test6123MultipleUseOfSameCVE : Test {
             return ValidationFailed(
                 listOf(
                     "The following CVE identifiers are duplicate: ${duplicates.keys.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.28](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6128-translation).
+ */
+object Test6128Translation : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        return if (doc.document.source_lang != doc.document.lang) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document language and the source language have the same value: ${doc.document.source_lang}"
                 )
             )
         }

@@ -270,6 +270,8 @@ fun goodCsaf(
     distribution: Csaf.Distribution? = goodDistribution(Csaf.Label.WHITE),
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
+    lang: String = "en",
+    sourceLang: String = "en"
 ): Csaf =
     Csaf(
         document =
@@ -285,8 +287,8 @@ fun goodCsaf(
                             urls = listOf(URI("example.com/ack")),
                         )
                     ),
-                lang = "en",
-                source_lang = "en",
+                lang = lang,
+                source_lang = sourceLang,
                 publisher =
                     Csaf.Publisher(
                         category = Csaf.Category1.vendor,
