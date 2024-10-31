@@ -48,4 +48,54 @@ public class ResultCompatTest {
         assertEquals("Some error", Objects.requireNonNull(result.exceptionOrNull()).getMessage());
         assertNull(result.getOrNull());
     }
+
+    @Test
+    public void shouldEqualsSuccessCases() {
+        final var result1 = ResultCompat.success("Same value");
+        final var result2 = ResultCompat.success("Same value");
+
+        assertEquals(result1.hashCode(), result2.hashCode());
+        assertEquals(result1, result2);
+        //noinspection EqualsWithItself
+        assertEquals(result1, result1);
+    }
+
+    @Test
+    public void shouldNotEqualDifferentSuccessCases() {
+        final var result1 = ResultCompat.success("Value 1");
+        final var result2 = ResultCompat.success("Value 2");
+
+        assertNotEquals(result1, result2);
+        assertNotEquals(result1.hashCode(), result2.hashCode());
+        assertNotEquals(result1, new Object());
+    }
+
+    @Test
+    public void shouldEqualFailureCases() {
+        // Exceptions are virtually never equal unless they are exactly the same instance!
+        final var exception = new Exception("Same error");
+        final var result1 = ResultCompat.failure(exception);
+        final var result2 = ResultCompat.failure(exception);
+
+        assertEquals(result1.exceptionOrNull(), result2.exceptionOrNull());
+        assertEquals(result1.hashCode(), result2.hashCode());
+    }
+
+    @Test
+    public void shouldNotEqualDifferentFailureCases() {
+        final var result1 = ResultCompat.failure(new Exception("Error 1"));
+        final var result2 = ResultCompat.failure(new Exception("Error 2"));
+
+        assertNotEquals(result1, result2);
+        assertNotEquals(result1.hashCode(), result2.hashCode());
+    }
+
+    @Test
+    public void shouldNotEqualSuccessAndFailureCases() {
+        final var result1 = ResultCompat.success("Value");
+        final var result2 = ResultCompat.failure(new Exception("Error"));
+
+        assertNotEquals(result1, result2);
+        assertNotEquals(result1.hashCode(), result2.hashCode());
+    }
 }

@@ -25,7 +25,7 @@ import io.github.csaf.sbom.validation.ValidationFailed
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
  * fetching a document from a location, including validation according to the specification.
  */
-class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: String) {
+data class RetrievedDocument(val json: Csaf, @Suppress("unused") val sourceUrl: String) {
 
     companion object {
         /**

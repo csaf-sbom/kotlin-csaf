@@ -16,7 +16,10 @@
  */
 package io.github.csaf.sbom.retrieval.requirements
 
+import io.github.csaf.sbom.retrieval.DNSPath
 import io.github.csaf.sbom.retrieval.RetrievalContext
+import io.github.csaf.sbom.retrieval.SecurityTxt
+import io.github.csaf.sbom.retrieval.WellKnownPath
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationNotApplicable
@@ -173,9 +176,7 @@ class RequirementsTest {
         val (rule, ctx) = testRule(Requirement8SecurityTxt)
 
         // Data source is not security.txt -> fail
-        assertIs<ValidationFailed>(
-            rule.check(ctx.also { ctx.dataSource = RetrievalContext.DataSource.WELL_KNOWN })
-        )
+        assertIs<ValidationFailed>(rule.check(ctx.also { ctx.dataSource = WellKnownPath }))
     }
 
     @Test
@@ -183,9 +184,7 @@ class RequirementsTest {
         val (rule, ctx) = testRule(Requirement9WellKnownURL)
 
         // Data source is not well_known -> fail
-        assertIs<ValidationFailed>(
-            rule.check(ctx.also { ctx.dataSource = RetrievalContext.DataSource.DNS })
-        )
+        assertIs<ValidationFailed>(rule.check(ctx.also { ctx.dataSource = DNSPath }))
     }
 
     @Test
@@ -193,9 +192,10 @@ class RequirementsTest {
         val (rule, ctx) = testRule(Requirement10DNSPath)
 
         // Data source is not DNS -> fail
-        assertIs<ValidationFailed>(
-            rule.check(ctx.also { ctx.dataSource = RetrievalContext.DataSource.SECURITY_TXT })
-        )
+        assertIs<ValidationFailed>(rule.check(ctx.also { ctx.dataSource = SecurityTxt }))
+
+        // Data source is DNS -> success
+        assertIs<ValidationSuccessful>(rule.check(ctx.also { ctx.dataSource = DNSPath }))
     }
 }
 

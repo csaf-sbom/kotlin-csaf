@@ -16,7 +16,10 @@
  */
 package io.github.csaf.sbom.retrieval.requirements
 
+import io.github.csaf.sbom.retrieval.DNSPath
 import io.github.csaf.sbom.retrieval.RetrievalContext
+import io.github.csaf.sbom.retrieval.SecurityTxt
+import io.github.csaf.sbom.retrieval.WellKnownPath
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label
 import io.github.csaf.sbom.validation.*
@@ -148,7 +151,7 @@ object Requirement7 : Requirement {
  */
 object Requirement8SecurityTxt : Requirement {
     override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == RetrievalContext.DataSource.SECURITY_TXT) {
+        if (ctx.dataSource == SecurityTxt) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("Not resolved via security.txt"))
@@ -164,7 +167,7 @@ object Requirement8SecurityTxt : Requirement {
  */
 object Requirement9WellKnownURL : Requirement {
     override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == RetrievalContext.DataSource.WELL_KNOWN) {
+        if (ctx.dataSource == WellKnownPath) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("Not resolved via .well-known"))
@@ -180,7 +183,7 @@ object Requirement9WellKnownURL : Requirement {
  */
 object Requirement10DNSPath : Requirement {
     override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == RetrievalContext.DataSource.DNS) {
+        if (ctx.dataSource == DNSPath) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("Not resolved via CSAF domain (csaf.data.security.domain.tld)"))

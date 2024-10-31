@@ -85,5 +85,7 @@ object CSAFAggregatorRole : Role {
             Requirement3UsageOfTls,
             Requirement4TlpWhiteAccessible,
             Requirement5,
+            Requirement18,
+            Requirement19
         )
 }

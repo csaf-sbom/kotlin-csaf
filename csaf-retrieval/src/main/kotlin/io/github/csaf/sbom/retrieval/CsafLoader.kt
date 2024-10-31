@@ -135,13 +135,12 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
                 securityTxt
                     .lineSequence()
                     .mapNotNull { line ->
-                        securityTxtCsaf.matchEntire(line)?.let { it.groupValues[1] }
+                        SecurityTxt.csafEntry.matchEntire(line)?.let { it.groupValues[1] }
                     }
                     .toList()
             }
 
     companion object {
-        val securityTxtCsaf = Regex("CSAF: (https://.*)")
         val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
         internal var defaultLoaderFactory: (() -> CsafLoader) = { CsafLoader() }
     }
