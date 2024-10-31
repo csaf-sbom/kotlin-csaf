@@ -23,29 +23,33 @@ import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.goodCsaf
+import io.github.csaf.sbom.validation.generated.Testcases
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.serialization.json.Json
 
 /** The path to the test folder for the CSAF 2.0 tests. */
 var testFolder: String = "../csaf/csaf_2.0/test/validator/data/"
 
-/**
- * Short utility function to construct the path to the test file based on the test file ID for
- * mandatory tests.
- */
-fun mandatoryTest(id: String): String {
-    return "$testFolder/mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
-}
-
-/**
- * Short utility function to construct the path to the test file based on the test file ID for
- * optional tests.
- */
-fun optionalTest(id: String): String {
-    return "$testFolder/optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
-}
-
 class TestsTest {
+
+    val executedTests = mutableSetOf<String>()
+
+    companion object {
+        val testCases =
+            Json { ignoreUnknownKeys = true }
+                .decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
+    }
+
+    @AfterTest
+    fun checkAllTestCases() {
+        // Try to find the test 
+        println(executedTests)
+    }
+
     @Test
     fun test611() {
         val test = Test611MissingDefinitionOfProductID
@@ -724,5 +728,27 @@ class TestsTest {
                 "${it::class.simpleName} was not successful",
             )
         }
+    }
+
+    /**
+     * Short utility function to construct the path to the test file based on the test file ID for
+     * mandatory tests.
+     */
+    fun mandatoryTest(id: String): String {
+        var test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+        executedTests += test
+
+        return "$testFolder/$test"
+    }
+
+    /**
+     * Short utility function to construct the path to the test file based on the test file ID for
+     * optional tests.
+     */
+    fun optionalTest(id: String): String {
+        var test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+        executedTests += test
+
+        return "$testFolder/$test"
     }
 }
