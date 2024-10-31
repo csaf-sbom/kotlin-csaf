@@ -25,6 +25,7 @@ import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationNotApplicable
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.goodCsaf
+import io.github.csaf.sbom.validation.goodDistribution
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
 import io.ktor.client.request.HttpRequestData
@@ -76,6 +77,9 @@ class RequirementsTest {
             )
         )
 
+        // No http response -> fail
+        assertIs<ValidationFailed>(rule.check(ctx.also { ctx.httpResponse = null }))
+
         // Valid filename
         assertIs<ValidationSuccessful>(
             rule.check(
@@ -103,6 +107,9 @@ class RequirementsTest {
             )
         )
 
+        // No http response -> not applicable
+        assertIs<ValidationSuccessful>(rule.check(ctx.also { ctx.httpResponse = null }))
+
         // TLS -> success
         assertIs<ValidationSuccessful>(
             rule.check(
@@ -121,10 +128,30 @@ class RequirementsTest {
         // Validatable is something else -> not applicable
         assertEquals(ValidationNotApplicable, rule.check(ctx.also { ctx.json = null }))
 
-        // Document is not TlpWhite -> not applicable
+        // Document is not TlpWhite or does not have tlp -> not applicable
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { ctx.json = goodCsaf(Csaf.Label.RED) })
+            rule.check(
+                ctx.also { ctx.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED)) }
+            )
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { ctx.json = goodCsaf(distribution = null) })
+        )
+        assertEquals(
+            ValidationNotApplicable,
+            rule.check(ctx.also { ctx.json = goodCsaf(distribution = goodDistribution(null)) })
+        )
+
+        // No http response -> fail
+        assertIs<ValidationFailed>(
+            rule.check(
+                ctx.also {
+                    ctx.json = goodCsaf(distribution = goodDistribution())
+                    ctx.httpResponse = null
+                }
+            )
         )
 
         // URL was retrieved with authorization headers -> fail

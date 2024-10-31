@@ -164,7 +164,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     }
 
     /**
-     * This method provides the [Result]s of `fetchDocuments()` as a Java [Stream] for usage in
+     * This method provides the [Result]s of [fetchDocuments] as a Java [Stream] for usage in
      * non-Kotlin environments.
      *
      * @param loader The instance of [CsafLoader] used for fetching of online resources.
@@ -173,7 +173,6 @@ class RetrievedProvider(val json: Provider) : Validatable {
      * @return The fetched [Result]s, representing [RetrievedDocument]s or fetch/validation errors,
      *   wrapped into [ResultCompat] for Java compatibility.
      */
-    @Suppress("unused")
     @JvmOverloads
     fun streamDocuments(
         loader: CsafLoader = lazyLoader,
@@ -196,14 +195,13 @@ class RetrievedProvider(val json: Provider) : Validatable {
 
     /**
      * This function sums up the expected number of [RetrievedDocument]s that will be fetched from
-     * this Provider, blocking the calling Thread for Java compatiblity.
+     * this Provider, blocking the calling Thread for Java compatibility.
      *
      * @param loader The instance of [CsafLoader] used for fetching of online resources.
      * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
      *   to [DEFAULT_CHANNEL_CAPACITY].
      * @return The expected number of [RetrievedDocument]s provided.
      */
-    @Suppress("unused")
     @JvmOverloads
     fun countExpectedDocumentsBlocking(
         loader: CsafLoader = lazyLoader,
@@ -214,7 +212,6 @@ class RetrievedProvider(val json: Provider) : Validatable {
         const val DEFAULT_CHANNEL_CAPACITY = 256
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-        @Suppress("unused")
         @JvmStatic
         @JvmOverloads
         fun fromAsync(

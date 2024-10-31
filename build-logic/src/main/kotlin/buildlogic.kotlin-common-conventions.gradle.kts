@@ -4,9 +4,6 @@ plugins {
 
     // Apply formatting conventions
     id("buildlogic.kotlin-formatting-conventions")
-
-    // Apply code coverage plugin
-    id("org.jetbrains.kotlinx.kover")
 }
 
 group = "io.github.csaf-sbom"
@@ -33,16 +30,5 @@ testing {
 kotlin {
     compilerOptions {
         jvmToolchain(21)
-    }
-}
-
-kover {
-    reports {
-        filters {
-            excludes {
-                annotatedBy("io.github.csaf.sbom.schema.KoverIgnore")
-                packages("io.github.csaf.sbom.schema.generated")
-            }
-        }
     }
 }

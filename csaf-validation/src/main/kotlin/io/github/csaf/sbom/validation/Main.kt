@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.validation
 
-import io.github.csaf.sbom.schema.KoverIgnore
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.informativeTests
 import io.github.csaf.sbom.validation.tests.mandatoryTests
@@ -27,7 +26,6 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlinx.serialization.json.Json
 
-@KoverIgnore("Entry point for demo purposes only")
 fun main(args: Array<String>) {
     val path = Path(args[0])
     val doc = Json.decodeFromString<Csaf>(path.readText())
