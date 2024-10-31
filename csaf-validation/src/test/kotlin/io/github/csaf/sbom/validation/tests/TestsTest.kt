@@ -16,6 +16,8 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import io.github.csaf.sbom.schema.JsonOffsetDateTime
+import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
@@ -212,6 +214,379 @@ class TestsTest {
     }
 
     @Test
+    fun test6114() {
+        val test = Test6114SortedRevisionHistory
+
+        // failing examples
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-01"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-02"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-03"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-04"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-05"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-06"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-07"))
+        )
+        assertValidationFailed(
+            "The revision history is not sorted by ascending date",
+            test.test(mandatoryTest("6-1-14-08"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-14")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-15")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-16")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-17")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-18")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-14-19")))
+    }
+
+    @Test
+    fun test6116() {
+        val test = Test6116LatestDocumentVersion
+
+        // failing examples
+        assertValidationFailed(
+            "The latest version should be 2 but is 1",
+            test.test(mandatoryTest("6-1-16-01"))
+        )
+        assertValidationFailed(
+            "The latest version should be 2 but is 1",
+            test.test(mandatoryTest("6-1-16-02"))
+        )
+        assertValidationFailed(
+            "The latest version should be 2 but is 1",
+            test.test(mandatoryTest("6-1-16-03"))
+        )
+        assertValidationFailed(
+            "The latest version should be 2.0.0 but is 1.0.0",
+            test.test(mandatoryTest("6-1-16-04"))
+        )
+        assertValidationFailed(
+            "The latest version should be 2.0.0 but is 1.0.0",
+            test.test(mandatoryTest("6-1-16-05"))
+        )
+        assertValidationFailed(
+            "The latest version should be 10 but is 9",
+            test.test(mandatoryTest("6-1-16-06"))
+        )
+        assertValidationFailed(
+            "The latest version should be 1.10.0 but is 1.9.0",
+            test.test(mandatoryTest("6-1-16-07"))
+        )
+        assertValidationFailed(
+            "The latest version should be 2 but is 1",
+            test.test(mandatoryTest("6-1-16-08"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-14")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-15")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-16")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-17")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-18")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-19")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-16-31")))
+    }
+
+    @Test
+    fun test6117() {
+        val test = Test6117DocumentStatusDraft
+
+        // failing examples
+        assertValidationFailed(
+            "The latest version is a pre-release or \"zero\" version (0.9.5) but the document status is final",
+            test.test(mandatoryTest("6-1-17-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf()))
+        assertValidationSuccessful(
+            test.test(
+                Csaf(
+                    document =
+                        Csaf.Document(
+                            tracking =
+                                Csaf.Tracking(
+                                    current_release_date = JsonOffsetDateTime.now(),
+                                    version = "1.2.0-alpha1",
+                                    id = "test",
+                                    initial_release_date = JsonOffsetDateTime.now(),
+                                    revision_history =
+                                        listOf(
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1.2.0-alpha1",
+                                                summary = "test",
+                                            ),
+                                        ),
+                                    status = Csaf.Status.draft
+                                ),
+                            category = "csaf_base",
+                            csaf_version = "2.0",
+                            publisher =
+                                Csaf.Publisher(
+                                    category = Csaf.Category1.vendor,
+                                    name = "My Publisher",
+                                    namespace = JsonUri("https://example.com"),
+                                ),
+                            title = "My Title",
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                Csaf(
+                    document =
+                        Csaf.Document(
+                            tracking =
+                                Csaf.Tracking(
+                                    current_release_date = JsonOffsetDateTime.now(),
+                                    version = "0",
+                                    id = "test",
+                                    initial_release_date = JsonOffsetDateTime.now(),
+                                    revision_history =
+                                        listOf(
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "0",
+                                                summary = "test",
+                                            ),
+                                        ),
+                                    status = Csaf.Status.draft
+                                ),
+                            category = "csaf_base",
+                            csaf_version = "2.0",
+                            publisher =
+                                Csaf.Publisher(
+                                    category = Csaf.Category1.vendor,
+                                    name = "My Publisher",
+                                    namespace = JsonUri("https://example.com"),
+                                ),
+                            title = "My Title",
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test6118() {
+        val test = Test6118ReleasedRevisionHistory
+
+        // failing examples
+        assertValidationFailed(
+            "The document is final but it contains the following revisions: 0",
+            test.test(mandatoryTest("6-1-18-01"))
+        )
+        assertValidationFailed(
+            "The document is final but it contains the following revisions: 0.9.0",
+            test.test(
+                Csaf(
+                    document =
+                        Csaf.Document(
+                            tracking =
+                                Csaf.Tracking(
+                                    current_release_date = JsonOffsetDateTime.now(),
+                                    version = "1.0.0",
+                                    id = "test",
+                                    initial_release_date = JsonOffsetDateTime.now(),
+                                    revision_history =
+                                        listOf(
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "0.9.0",
+                                                summary = "test",
+                                            ),
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1.0.0",
+                                                summary = "test",
+                                            ),
+                                        ),
+                                    status = Csaf.Status.final
+                                ),
+                            category = "csaf_base",
+                            csaf_version = "2.0",
+                            publisher =
+                                Csaf.Publisher(
+                                    category = Csaf.Category1.vendor,
+                                    name = "My Publisher",
+                                    namespace = JsonUri("https://example.com"),
+                                ),
+                            title = "My Title",
+                        )
+                )
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(
+            test.test(
+                Csaf(
+                    document =
+                        Csaf.Document(
+                            tracking =
+                                Csaf.Tracking(
+                                    current_release_date = JsonOffsetDateTime.now(),
+                                    version = "1",
+                                    id = "test",
+                                    initial_release_date = JsonOffsetDateTime.now(),
+                                    revision_history =
+                                        listOf(
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1",
+                                                summary = "test",
+                                            ),
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1.0.0",
+                                                summary = "test",
+                                            ),
+                                        ),
+                                    status = Csaf.Status.final
+                                ),
+                            category = "csaf_base",
+                            csaf_version = "2.0",
+                            publisher =
+                                Csaf.Publisher(
+                                    category = Csaf.Category1.vendor,
+                                    name = "My Publisher",
+                                    namespace = JsonUri("https://example.com"),
+                                ),
+                            title = "My Title",
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test6119() {
+        val test = Test6119RevisionHistoryEntriesForPreReleaseVersions
+
+        // failing examples
+        assertValidationFailed(
+            "The document contains the following pre-release revisions: 1.0.0-rc",
+            test.test(mandatoryTest("6-1-19-01"))
+        )
+        assertValidationFailed(
+            "The document contains the following pre-release revisions: 1.0.0-rc",
+            test.test(mandatoryTest("6-1-19-02"))
+        )
+
+        // good examples
+        assertValidationSuccessful(
+            test.test(
+                Csaf(
+                    document =
+                        Csaf.Document(
+                            tracking =
+                                Csaf.Tracking(
+                                    current_release_date = JsonOffsetDateTime.now(),
+                                    version = "1",
+                                    id = "test",
+                                    initial_release_date = JsonOffsetDateTime.now(),
+                                    revision_history =
+                                        listOf(
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1",
+                                                summary = "test",
+                                            ),
+                                            Csaf.RevisionHistory(
+                                                date = JsonOffsetDateTime.now(),
+                                                number = "1.0.0",
+                                                summary = "test",
+                                            ),
+                                        ),
+                                    status = Csaf.Status.final
+                                ),
+                            category = "csaf_base",
+                            csaf_version = "2.0",
+                            publisher =
+                                Csaf.Publisher(
+                                    category = Csaf.Category1.vendor,
+                                    name = "My Publisher",
+                                    namespace = JsonUri("https://example.com"),
+                                ),
+                            title = "My Title",
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test6120() {
+        val test = Test6120NonDraftDocumentVersion
+
+        // failing examples
+        assertValidationFailed(
+            "The latest version is a pre-release (1.0.0-alpha) but the document status is interim",
+            test.test(mandatoryTest("6-1-20-01"))
+        )
+    }
+
+    @Test
+    fun test6121() {
+        val test = Test6121MissingItemInRevisionHistory
+
+        // failing examples
+        assertValidationFailed(
+            "The following versions are missing: 2",
+            test.test(mandatoryTest("6-1-21-01"))
+        )
+        assertValidationFailed(
+            "Start version 2 must be either 0 or 1 (or a major version of it)",
+            test.test(mandatoryTest("6-1-21-02"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-21-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-21-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-21-13")))
+    }
+
+    @Test
+    fun test6122() {
+        val test = Test6122MultipleDefinitionInRevisionHistory
+
+        // failing examples
+        assertValidationFailed(
+            "The following versions in the revision history are duplicate: 1",
+            test.test(mandatoryTest("6-1-22-01"))
+        )
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
@@ -230,7 +605,7 @@ class TestsTest {
             assertEquals(
                 ValidationSuccessful,
                 it.test(good),
-                "${it::class.simpleName} was not successful"
+                "${it::class.simpleName} was not successful",
             )
         }
     }
