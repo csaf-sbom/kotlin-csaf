@@ -28,15 +28,19 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the functionality of <code>RetrievedProvider</code> in Java.
  */
 public class RetrievedProviderJavaTest {
+    private static CsafLoader loader;
+
     @BeforeAll
     public static void setup() {
+        loader = new CsafLoader(TestUtilsKt.mockEngine());
         //noinspection KotlinInternalInJava
-        CsafLoader.Companion.setDefaultLoaderFactory$csaf_retrieval(() -> new CsafLoader(TestUtilsKt.mockEngine()));
+        CsafLoader.Companion.setDefaultLoaderFactory$csaf_retrieval(() -> loader);
     }
 
     @Test
     public void testRetrievedProviderJava() throws InterruptedException, ExecutionException {
         final var provider = RetrievedProvider.fromAsync("example.com").get();
+        final var providerExplicit = RetrievedProvider.fromAsync("example.com", loader).get();
         final var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
         assertEquals(
                 3,
@@ -44,10 +48,22 @@ public class RetrievedProviderJavaTest {
                 "Expected 3 documents"
         );
         final var documentResults = provider.streamDocuments().toList();
+        final var documentResultsExplicit = providerExplicit.streamDocuments(loader).toList();
+        final var documentResultsExplicitSlow = providerExplicit.streamDocuments(loader, 1).toList();
         assertEquals(
                 4,
                 documentResults.size(),
                 "Expected exactly 4 results: One document, two document errors, one index error"
+        );
+        assertEquals(
+                documentResults,
+                documentResultsExplicit,
+                "Expected same List from all overloads"
+        );
+        assertEquals(
+                documentResults,
+                documentResultsExplicitSlow,
+                "Expected same List from all overloads"
         );
         // Check some random property on successful document
         final var document = documentResults.getFirst().getOrNull();
