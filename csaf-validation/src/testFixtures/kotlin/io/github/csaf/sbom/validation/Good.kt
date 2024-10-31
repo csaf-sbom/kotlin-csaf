@@ -271,7 +271,7 @@ fun goodCsaf(
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
     lang: String = "en",
-    sourceLang: String = "en"
+    sourceLang: String? = null
 ): Csaf =
     Csaf(
         document =
