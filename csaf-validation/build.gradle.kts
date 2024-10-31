@@ -2,12 +2,14 @@ import de.undercouch.gradle.tasks.download.Download
 import groovy.json.JsonOutput
 import groovy.xml.XmlParser
 import org.gradle.kotlin.dsl.invoke
+import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
+import kotlin.text.set
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
+    id("net.pwall.json.json-kotlin")
     id("de.undercouch.download") version "5.6.0"
     kotlin("plugin.serialization")
-
     `java-test-fixtures`
     application
 }
@@ -57,6 +59,14 @@ open class IncrementalReverseTask : DefaultTask() {
 
         outputFile.asFile.get().writeText(JsonOutput.toJson(map))
     }
+}
+
+configure<JSONSchemaCodegen> {
+    //configFile.set(file("src/main/resources/codegen-config.json"))
+    inputs {
+        inputFile(file("../csaf/csaf2.0/test/validator/testcases_json_schema.json"))
+    }
+    outputDir.set(file("build/generated-sources/kotlin"))
 }
 
 tasks {
