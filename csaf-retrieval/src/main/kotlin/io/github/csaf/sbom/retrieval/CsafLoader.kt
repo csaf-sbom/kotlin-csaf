@@ -29,6 +29,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.*
 
+val securityTxtCsaf = Regex("CSAF: (https://.*)")
+
 /**
  * A helper class with async functions to retrieve certain kinds of CSAF-related data.
  *
@@ -141,7 +143,6 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
             }
 
     companion object {
-        val securityTxtCsaf = Regex("CSAF: (https://.*)")
         val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
         internal var defaultLoaderFactory: (() -> CsafLoader) = { CsafLoader() }
     }

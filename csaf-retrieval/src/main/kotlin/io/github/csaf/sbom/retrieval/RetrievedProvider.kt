@@ -254,7 +254,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return loader
                 .fetchProvider(wellKnownPath, ctx)
-                .onSuccess { ctx.dataSource = RetrievalContext.DataSource.WELL_KNOWN }
+                .onSuccess { ctx.dataSource = WellKnownPath }
                 .mapCatching(mapAndValidateProvider)
                 .recoverCatching {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
@@ -262,7 +262,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
                         loader
                             .fetchProvider(entry, ctx)
-                            .onSuccess { ctx.dataSource = RetrievalContext.DataSource.SECURITY_TXT }
+                            .onSuccess { ctx.dataSource = SecurityTxt }
                             .mapCatching(mapAndValidateProvider)
                             .getOrNull()
                     }
@@ -273,7 +273,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
                     loader
                         .fetchProvider("https://csaf.data.security.$domain", ctx)
-                        .onSuccess { ctx.dataSource = RetrievalContext.DataSource.DNS }
+                        .onSuccess { ctx.dataSource = DNSPath }
                         .mapCatching(mapAndValidateProvider)
                         .getOrThrow()
                 }

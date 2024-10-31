@@ -17,6 +17,7 @@
 package io.github.csaf.sbom.retrieval.requirements
 
 import io.github.csaf.sbom.retrieval.RetrievalContext
+import io.github.csaf.sbom.retrieval.WellKnownPath
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
@@ -25,7 +26,7 @@ import kotlin.test.assertIs
 
 class TestRetrievalContext() : RetrievalContext() {
     init {
-        this.dataSource = DataSource.WELL_KNOWN
+        this.dataSource = WellKnownPath
         this.json = json
     }
 }
