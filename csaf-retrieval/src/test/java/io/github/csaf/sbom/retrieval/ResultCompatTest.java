@@ -59,6 +59,8 @@ public class ResultCompatTest {
 
         assertEquals(result1.hashCode(), result2.hashCode());
         assertEquals(result1, result2);
+        //noinspection EqualsWithItself
+        assertEquals(result1, result1);
     }
 
     @Test
@@ -68,6 +70,7 @@ public class ResultCompatTest {
 
         assertNotEquals(result1, result2);
         assertNotEquals(result1.hashCode(), result2.hashCode());
+        assertNotEquals(result1, new Object());
     }
 
     @Test
