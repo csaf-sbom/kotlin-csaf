@@ -16,7 +16,7 @@
  */
 package io.github.csaf.sbom.validation
 
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 /**
  * Asserts that the [result] is a [ValidationFailed] result and that the [ValidationFailed.errors]

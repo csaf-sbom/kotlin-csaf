@@ -16,9 +16,17 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.retrieval.requirements.TestRetrievalContext
+import io.github.csaf.sbom.retrieval.requirements.mockRequest
+import io.github.csaf.sbom.retrieval.requirements.mockResponse
+import io.github.csaf.sbom.retrieval.roles.CSAFAggregatorRole
+import io.github.csaf.sbom.validation.assertValidationSuccessful
+import io.github.csaf.sbom.validation.goodCsaf
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
 
 class RetrievedAggregatorTest {
     init {
@@ -34,5 +42,23 @@ class RetrievedAggregatorTest {
         val nonExistingLister =
             RetrievedAggregator.from("https://does-not-exist.com/example-01-lister.json")
         assertTrue(nonExistingLister.isFailure)
+    }
+
+    @Test
+    fun testDocumentRequirements() {
+        // We do not support fetching documents from an aggregator yet, so we simulate this
+        val role = CSAFAggregatorRole
+        assertValidationSuccessful(
+            role.checkDocument(
+                TestRetrievalContext().also {
+                    it.json = goodCsaf()
+                    it.httpResponse =
+                        mockResponse(
+                            mockRequest(Url("https://example.com/test-title.json")),
+                            HttpStatusCode.OK
+                        )
+                }
+            )
+        )
     }
 }

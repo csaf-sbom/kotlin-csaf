@@ -23,10 +23,10 @@ import io.github.csaf.sbom.validation.ValidationSuccessful
 import kotlin.test.Test
 import kotlin.test.assertIs
 
-class TestRetrievalContext : RetrievalContext() {
+class TestRetrievalContext() : RetrievalContext() {
     init {
-        dataSource = DataSource.WELL_KNOWN
-        json = Any()
+        this.dataSource = DataSource.WELL_KNOWN
+        this.json = json
     }
 }
 

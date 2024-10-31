@@ -196,6 +196,11 @@ class RequirementsTest {
         assertIs<ValidationFailed>(
             rule.check(ctx.also { ctx.dataSource = RetrievalContext.DataSource.SECURITY_TXT })
         )
+
+        // Data source is DNS -> success
+        assertIs<ValidationSuccessful>(
+            rule.check(ctx.also { ctx.dataSource = RetrievalContext.DataSource.DNS })
+        )
     }
 }
 
