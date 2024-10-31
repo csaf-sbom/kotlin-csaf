@@ -25,7 +25,9 @@ sealed class ProviderMetaDataSource
 object WellKnownPath : ProviderMetaDataSource()
 
 /** provider-metadata.json was fetched from a location specified in a security.txt. */
-object SecurityTxt : ProviderMetaDataSource()
+data object SecurityTxt : ProviderMetaDataSource() {
+    val csafEntry = Regex("CSAF: (https://.*)")
+}
 
 /** provider-metadata.json was fetched from a special DNS path. */
 object DNSPath : ProviderMetaDataSource()

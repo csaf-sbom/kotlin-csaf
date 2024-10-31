@@ -29,8 +29,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.*
 
-val securityTxtCsaf = Regex("CSAF: (https://.*)")
-
 /**
  * A helper class with async functions to retrieve certain kinds of CSAF-related data.
  *
@@ -137,7 +135,7 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
                 securityTxt
                     .lineSequence()
                     .mapNotNull { line ->
-                        securityTxtCsaf.matchEntire(line)?.let { it.groupValues[1] }
+                        SecurityTxt.csafEntry.matchEntire(line)?.let { it.groupValues[1] }
                     }
                     .toList()
             }
