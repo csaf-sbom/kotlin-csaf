@@ -52,4 +52,12 @@ class ResultCompat<T>(private val result: Result<T>) {
     override fun toString(): String =
         if (isSuccess) "ResultCompat(value = ${getOrNull()})"
         else "ResultCompat(error = ${exceptionOrNull().toString()})"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ResultCompat<*>) return false
+        return result == other.result
+    }
+
+    override fun hashCode() = result.hashCode()
 }

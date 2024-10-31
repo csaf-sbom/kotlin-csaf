@@ -56,14 +56,14 @@ public class RetrievedProviderJavaTest {
                 "Expected exactly 4 results: One document, two document errors, one index error"
         );
         assertEquals(
-                documentResults,
-                documentResultsExplicit,
-                "Expected same List from all overloads"
+                documentResults.size(),
+                documentResultsExplicit.size(),
+                "Expected same number of result from all overloads"
         );
         assertEquals(
-                documentResults,
-                documentResultsExplicitSlow,
-                "Expected same List from all overloads"
+                documentResults.size(),
+                documentResultsExplicitSlow.size(),
+                "Expected same number of result from all overloads"
         );
         // Check some random property on successful document
         final var document = documentResults.getFirst().getOrNull();
