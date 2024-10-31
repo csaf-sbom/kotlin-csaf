@@ -22,8 +22,8 @@ import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
-import io.github.csaf.sbom.validation.goodCsaf
 import io.github.csaf.sbom.validation.generated.Testcases
+import io.github.csaf.sbom.validation.goodCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
