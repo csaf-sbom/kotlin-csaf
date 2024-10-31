@@ -14,10 +14,24 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.validation
+package io.github.csaf.sbom.retrieval
 
-/** This exception will be thrown, if the result of a validation is [ValidationFailed]. */
-data class ValidationException(val errors: List<String>) : Exception() {
-    override val message: String
-        get() = "Validation failed with this errors: $errors"
+import io.github.csaf.sbom.retrieval.roles.Role
+import io.github.csaf.sbom.validation.ValidationFailed
+
+interface Validatable {
+    val role: Role
+
+    /**
+     * Validates this [Validatable] according to the CSAF standard.
+     *
+     * @param retrievalContext The validation context used for validation.
+     */
+    fun validate(retrievalContext: RetrievalContext) {
+        role.checkRole(retrievalContext).let { vr ->
+            if (vr is ValidationFailed) {
+                throw vr.toException()
+            }
+        }
+    }
 }
