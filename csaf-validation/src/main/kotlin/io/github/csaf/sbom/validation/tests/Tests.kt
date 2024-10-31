@@ -443,10 +443,16 @@ object Test6112Language : Test {
     override fun test(doc: Csaf): ValidationResult {
         val invalids = mutableListOf<String>()
 
-        if (doc.document.lang?.isLanguage == false) {
-            invalids += doc.document.lang
-        } else if (doc.document.source_lang?.isLanguage == false) {
-            invalids += doc.document.source_lang
+        doc.document.lang?.let {
+            if (!it.isLanguage) {
+                invalids += it
+            }
+        }
+
+        doc.document.source_lang?.let {
+            if (!it.isLanguage) {
+                invalids += it
+            }
         }
 
         return if (invalids.isEmpty()) {

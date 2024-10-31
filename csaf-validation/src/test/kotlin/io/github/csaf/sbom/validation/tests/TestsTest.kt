@@ -277,6 +277,7 @@ class TestsTest {
         )
 
         // good examples
+        assertValidationSuccessful(test.test(goodCsaf(lang = null)))
         assertValidationSuccessful(test.test(goodCsaf(sourceLang = "en")))
         assertValidationSuccessful(test.test(goodCsaf(sourceLang = "en-US")))
     }

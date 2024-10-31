@@ -270,7 +270,7 @@ fun goodCsaf(
     distribution: Csaf.Distribution? = goodDistribution(Csaf.Label.WHITE),
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
-    lang: String = "en",
+    lang: String? = "en",
     sourceLang: String? = null
 ): Csaf =
     Csaf(
