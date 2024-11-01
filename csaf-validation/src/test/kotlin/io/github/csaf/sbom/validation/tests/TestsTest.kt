@@ -713,6 +713,94 @@ class TestsTest {
     }
 
     @Test
+    fun test61271() {
+        val test = Test61271DocumentNotes
+
+        // failing examples
+        assertValidationFailed(
+            "The document notes do not contain an item which has a category of description, details, general or summary",
+            test.test(mandatoryTest("6-1-27-01-01"))
+        )
+    }
+
+    @Test
+    fun test61272() {
+        val test = Test61272DocumentReferences
+
+        // failing examples
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(mandatoryTest("6-1-27-02-01"))
+        )
+    }
+
+    @Test
+    fun test61273() {
+        val test = Test61273Vulnerabilities
+
+        // failing examples
+        assertValidationFailed(
+            "The element /vulnerabilities exists",
+            test.test(mandatoryTest("6-1-27-03-01"))
+        )
+    }
+
+    @Test
+    fun test61274() {
+        val test = Test61274ProductTree
+
+        // failing examples
+        assertValidationFailed(
+            "The element /product_tree does not exist",
+            test.test(mandatoryTest("6-1-27-04-01"))
+        )
+    }
+
+    @Test
+    fun test61275() {
+        val test = Test61275VulnerabilityNotes
+
+        // failing examples
+        assertValidationFailed(
+            "The vulnerability item has no notes element",
+            test.test(mandatoryTest("6-1-27-05-01"))
+        )
+    }
+
+    @Test
+    fun test61276() {
+        val test = Test61276ProductStatus
+
+        // failing examples
+        assertValidationFailed(
+            "The vulnerability item has no product_status element",
+            test.test(mandatoryTest("6-1-27-06-01"))
+        )
+    }
+
+    @Test
+    fun test61277() {
+        val test = Test61277VEXProductStatus
+
+        // failing examples
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(mandatoryTest("6-1-27-07-01"))
+        )
+    }
+
+    @Test
+    fun test61278() {
+        val test = Test61278VulnerabilityID
+
+        // failing examples
+        assertValidationFailed(
+            "None of the elements cve or ids is present",
+            test.test(mandatoryTest("6-1-27-08-01"))
+        )
+    }
+
+    @Test
     fun test61128() {
         val test = Test6128Translation
 

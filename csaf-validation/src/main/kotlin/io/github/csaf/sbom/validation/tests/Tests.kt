@@ -56,7 +56,15 @@ var mandatoryTests =
         Test6121MissingItemInRevisionHistory,
         Test6122MultipleDefinitionInRevisionHistory,
         Test6123MultipleUseOfSameCVE,
-        Test6128Translation
+        Test61271DocumentNotes,
+        Test61272DocumentReferences,
+        Test61273Vulnerabilities,
+        Test61274ProductTree,
+        Test61275VulnerabilityNotes,
+        Test61276ProductStatus,
+        Test61277VEXProductStatus,
+        Test61278VulnerabilityID,
+        Test6128Translation,
     )
 
 /**
@@ -725,6 +733,216 @@ object Test6123MultipleUseOfSameCVE : Test {
         }
     }
 }
+
+/**
+ * Implementation of
+ * [Test 6.1.27.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61271-document-notes).
+ */
+object Test61271DocumentNotes : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (
+            doc.document.category !in
+                listOf("csaf_informational_advisory", "csaf_security_incident_response")
+        ) {
+            return ValidationNotApplicable
+        }
+
+        return if (
+            doc.document.notes?.any {
+                it.category in
+                    listOf(
+                        Csaf.Category.description,
+                        Csaf.Category.description,
+                        Csaf.Category.details,
+                        Csaf.Category.general,
+                        Csaf.Category.summary,
+                    )
+            } == true
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document notes do not contain an item which has a category of description, details, general or summary"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61272-document-references).
+ */
+object Test61272DocumentReferences : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (
+            doc.document.category !in
+                listOf("csaf_informational_advisory", "csaf_security_incident_response")
+        ) {
+            return ValidationNotApplicable
+        }
+
+        return if (
+            doc.document.references?.any { it.category == Csaf.Category2.external } == true
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document references do not contain any item which has the category external"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61273-vulnerabilities).
+ */
+object Test61273Vulnerabilities : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_informational_advisory")) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.vulnerabilities == null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /vulnerabilities exists"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61274-product-tree).
+ */
+object Test61274ProductTree : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.product_tree != null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /product_tree does not exist"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.5](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61275-vulnerability-notes).
+ */
+object Test61275VulnerabilityNotes : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.notes == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The vulnerability item has no notes element"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61276-product-status).
+ */
+object Test61276ProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_security_advisory")) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.product_status == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The vulnerability item has no product_status element"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.7](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61277-vex-product-status).
+ */
+object Test61277VEXProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        val missing =
+            doc.vulnerabilities?.filter {
+                it.product_status?.fixed == null &&
+                    it.product_status?.known_affected == null &&
+                    it.product_status?.known_not_affected == null &&
+                    it.product_status?.under_investigation == null
+            } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61278-vulnerability-id).
+ */
+object Test61278VulnerabilityID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.cve == null && it.cwe == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("None of the elements cve or ids is present"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.9](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61279-impact-statement).
+ */
+/*object Test61279ImpactStatement : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        val impactStatements = doc.vulnerabilities.flatMap {  }
+
+        val missing = doc.vulnerabilities?.flatMap { it.product_status?.known_not_affected ?: setOf() }.filter {
+
+        }
+
+        return ValidationSuccessful
+    }
+
+}*/
 
 /**
  * Implementation of
