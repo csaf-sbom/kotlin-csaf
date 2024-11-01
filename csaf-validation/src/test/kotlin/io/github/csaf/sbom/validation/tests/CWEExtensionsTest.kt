@@ -16,20 +16,26 @@
  */
 package io.github.csaf.sbom.validation.tests
 
-import kotlinx.serialization.Serializable
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlinx.serialization.json.Json
 
-@Serializable data class CWE(var id: String, var name: String)
+class CWEExtensionsTest {
+    @Test
+    fun testLoadCWEData() {
+        val empty = loadCWEData("does-not-exist.json")
+        assertEquals(emptyMap(), empty)
+    }
 
-@Serializable data class CWEList(var weaknesses: List<CWE>)
+    @Test
+    fun testSerialize() {
+        var cwe = CWE("CWE-123", "test")
+        assertNotNull(cwe)
 
-var weaknesses = loadCWEData()
+        val json = "{\"id\":\"CWE-123\",\"name\":\"test\"}"
+        assertEquals(json, Json.encodeToString(CWE.serializer(), cwe))
 
-internal fun loadCWEData(path: String = "/cwe.json"): Map<String, CWE> {
-    val json = object {}.javaClass.getResourceAsStream(path)?.bufferedReader()?.readText()
-    return if (json != null) {
-        Json.decodeFromString<CWEList>(json).weaknesses.associateBy { it.id }
-    } else {
-        mapOf()
+        assertEquals(cwe, Json.decodeFromString<CWE>(json))
     }
 }
