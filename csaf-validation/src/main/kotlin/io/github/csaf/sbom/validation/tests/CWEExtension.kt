@@ -16,8 +16,10 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 
 @Serializable data class CWE(var id: String, var name: String)
 
@@ -25,10 +27,11 @@ import kotlinx.serialization.json.Json
 
 var weaknesses = loadCWEData()
 
+@OptIn(ExperimentalSerializationApi::class)
 internal fun loadCWEData(path: String = "/cwe.json"): Map<String, CWE> {
-    val json = object {}.javaClass.getResourceAsStream(path)?.bufferedReader()?.readText()
-    return if (json != null) {
-        Json.decodeFromString<CWEList>(json).weaknesses.associateBy { it.id }
+    val stream = object {}.javaClass.getResourceAsStream(path)
+    return if (stream != null) {
+        Json.decodeFromStream<CWEList>(stream).weaknesses.associateBy { it.id }
     } else {
         mapOf()
     }
