@@ -162,11 +162,7 @@ fun goodVulnerabilities() =
                         summary = "very nice work"
                     )
                 ),
-            cwe =
-                Csaf.Cwe(
-                    id = "CWE-123",
-                    name = "Test Cwe",
-                ),
+            cwe = null,
             notes =
                 listOf(
                     Csaf.Note(

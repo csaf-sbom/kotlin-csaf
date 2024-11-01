@@ -43,6 +43,7 @@ var mandatoryTests =
         Test618InvalidCVSS,
         Test619InvalidCVSSComputation,
         Test6110InconsistentCVSS,
+        Test6111CWE,
         Test6114SortedRevisionHistory,
         Test6116LatestDocumentVersion,
         Test6117DocumentStatusDraft,
@@ -392,6 +393,41 @@ object Test6110InconsistentCVSS : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.11](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6111-cwe).
+ */
+object Test6111CWE : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val invalids = mutableSetOf<String>()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val csafCwe = vuln.cwe
+            if (csafCwe == null) {
+                continue
+            }
+
+            // Look for the ID
+            val cwe = weaknesses[csafCwe.id]
+            if (cwe == null) {
+                invalids += "${csafCwe.id} is invalid"
+                continue
+            }
+
+            if (cwe.name != csafCwe.name) {
+                invalids += "${csafCwe.name} is not the correct name for ${csafCwe.id}"
+                continue
+            }
+        }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid CWE entries: ${invalids.joinToString(", ")}"))
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.1.14](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6114-sorted-revision-history).
  */
 object Test6114SortedRevisionHistory : Test {
@@ -597,6 +633,8 @@ object Test6122MultipleDefinitionInRevisionHistory : Test {
     override fun test(doc: Csaf): ValidationResult {
         val versions = doc.document.tracking.revision_history.map { it.number }
         val duplicates = versions.duplicates()
+
+        println(weaknesses.toString())
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
