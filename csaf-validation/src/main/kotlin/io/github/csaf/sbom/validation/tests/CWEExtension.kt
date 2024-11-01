@@ -23,9 +23,13 @@ import kotlinx.serialization.json.Json
 
 @Serializable data class CWEList(var weaknesses: List<CWE>)
 
-var weaknesses =
-    {
-        var json =
-            object {}.javaClass.getResourceAsStream("/cwe.json")!!.bufferedReader().readText()
+var weaknesses = loadCWEData()
+
+private fun loadCWEData(path: String = "/cwe.json"): Map<String, CWE> {
+    var json = object {}.javaClass.getResourceAsStream(path)?.bufferedReader()?.readText()
+    return if (json != null) {
         Json.decodeFromString<CWEList>(json).weaknesses.associateBy { it.id }
-    }()
+    } else {
+        mapOf()
+    }
+}
