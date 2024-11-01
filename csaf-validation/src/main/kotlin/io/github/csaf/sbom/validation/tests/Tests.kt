@@ -51,7 +51,8 @@ var mandatoryTests =
         Test6119RevisionHistoryEntriesForPreReleaseVersions,
         Test6120NonDraftDocumentVersion,
         Test6121MissingItemInRevisionHistory,
-        Test6122MultipleDefinitionInRevisionHistory
+        Test6122MultipleDefinitionInRevisionHistory,
+        Test6123MultipleUseOfSameCVE
     )
 
 /**
@@ -634,14 +635,33 @@ object Test6122MultipleDefinitionInRevisionHistory : Test {
         val versions = doc.document.tracking.revision_history.map { it.number }
         val duplicates = versions.duplicates()
 
-        println(weaknesses.toString())
-
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
         } else {
             return ValidationFailed(
                 listOf(
                     "The following versions in the revision history are duplicate: ${duplicates.keys.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.23](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6123-multiple-use-of-same-cve).
+ */
+object Test6123MultipleUseOfSameCVE : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val cves = doc.vulnerabilities?.mapNotNull { it.cve } ?: listOf()
+        val duplicates = cves.duplicates()
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following CVE identifiers are duplicate: ${duplicates.keys.joinToString(", ")}"
                 )
             )
         }

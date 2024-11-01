@@ -632,6 +632,20 @@ class TestsTest {
     }
 
     @Test
+    fun test6123() {
+        val test = Test6123MultipleUseOfSameCVE
+
+        // failing examples
+        assertValidationFailed(
+            "The following CVE identifiers are duplicate: CVE-2017-0145",
+            test.test(mandatoryTest("6-1-23-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
