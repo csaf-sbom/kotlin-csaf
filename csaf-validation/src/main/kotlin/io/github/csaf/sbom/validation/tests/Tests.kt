@@ -25,6 +25,7 @@ import io.github.csaf.sbom.validation.ValidationNotApplicable
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
 import net.swiftzer.semver.SemVer
 
@@ -64,6 +65,9 @@ var mandatoryTests =
         Test61276ProductStatus,
         Test61277VEXProductStatus,
         Test61278VulnerabilityID,
+        Test61279ImpactStatement,
+        Test612710ActionStatement,
+        Test612711Vulnerabilities,
         Test6128Translation,
     )
 
@@ -927,22 +931,89 @@ object Test61278VulnerabilityID : Test {
  * Implementation of
  * [Test 6.1.27.9](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61279-impact-statement).
  */
-/*object Test61279ImpactStatement : Test {
+object Test61279ImpactStatement : Test {
     override fun test(doc: Csaf): ValidationResult {
         if (doc.document.category !in listOf("csaf_vex")) {
             return ValidationNotApplicable
         }
 
-        val impactStatements = doc.vulnerabilities.flatMap {  }
+        // First, make a map all product groups and their product IDs, so we can resolve them later
+        var map = doc.gatherProductIdsPerGroup()
+        val missing = mutableSetOf<String>()
 
-        val missing = doc.vulnerabilities?.flatMap { it.product_status?.known_not_affected ?: setOf() }.filter {
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            var impactStatementsForProductIDs =
+                (vuln.threats
+                        ?.filter { it.category == Csaf.Category7.impact }
+                        ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) } +
+                        vuln.flags?.flatMap {
+                            it.product_ids + it.group_ids.resolveProductIDs(map)
+                        })
+                    .toSet()
 
+            missing += vuln.product_status?.known_not_affected - impactStatementsForProductIDs
         }
 
-        return ValidationSuccessful
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("Missing impact statement for product IDs: ${missing.joinToString(", ")}")
+            )
+        }
     }
+}
 
-}*/
+/**
+ * Implementation of
+ * [Test 6.1.27.10](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612710-action-statement).
+ */
+object Test612710ActionStatement : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        // First, make a map all product groups and their product IDs, so we can resolve them later
+        var map = doc.gatherProductIdsPerGroup()
+        val missing = mutableSetOf<String>()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            var actionStatementsForProductIDs =
+                vuln.remediations
+                    ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) }
+                    ?.toSet()
+
+            missing += vuln.product_status?.known_affected - actionStatementsForProductIDs
+        }
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("Missing action statement for product IDs: ${missing.joinToString(", ")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.11](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612711-vulnerabilities).
+ */
+object Test612711Vulnerabilities : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.vulnerabilities != null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /vulnerabilities does not exist"))
+        }
+    }
+}
 
 /**
  * Implementation of

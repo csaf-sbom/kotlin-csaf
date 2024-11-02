@@ -158,4 +158,21 @@ class ExtensionsTest {
                 .gatherProductGroupReferences()
         )
     }
+
+    @Test
+    fun testPlus() {
+        assertEquals(setOf("a", "b"), setOf("a") + setOf("b"))
+        assertEquals(setOf("a"), setOf("a") + null)
+        assertEquals(setOf("a"), null + setOf("a"))
+        assertEquals(emptySet<String>(), null + null)
+    }
+
+    @Test
+    fun testMinus() {
+        assertEquals(setOf("a"), setOf("a") - setOf("b"))
+        assertEquals(setOf("b"), setOf("a", "b") - setOf("a"))
+        assertEquals(setOf("a"), setOf("a") - null)
+        assertEquals(emptySet<String>(), null - setOf("a"))
+        assertEquals(emptySet<String>(), null - null)
+    }
 }

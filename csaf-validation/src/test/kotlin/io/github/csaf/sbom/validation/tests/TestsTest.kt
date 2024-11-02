@@ -800,6 +800,38 @@ class TestsTest {
         )
     }
 
+    fun test61279() {
+        val test = Test61279ImpactStatement
+
+        // failing examples
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-09-01"))
+        )
+    }
+
+    @Test
+    fun test612710() {
+        val test = Test612710ActionStatement
+
+        // failing examples
+        assertValidationFailed(
+            "Missing action statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-10-01"))
+        )
+    }
+
+    @Test
+    fun test612711() {
+        val test = Test612711Vulnerabilities
+
+        // failing examples
+        assertValidationFailed(
+            "The element /vulnerabilities does not exist",
+            test.test(mandatoryTest("6-1-27-11-01"))
+        )
+    }
+
     @Test
     fun test61128() {
         val test = Test6128Translation

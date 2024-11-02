@@ -98,6 +98,17 @@ fun Csaf.gatherProductReferences(): Set<String> {
     return ids
 }
 
+/**
+ * Gathers all [Csaf.ProductGroup.product_ids] definitions in the current document and groups them
+ * into a map with their [Csaf.ProductGroup.group_id]. This is needed because sometimes references
+ * such as [Csaf.Remediation] target a group instead of individual products, and we need to
+ * "resolve" the group ID to their product IDs.
+ */
+fun Csaf.gatherProductIdsPerGroup(): Map<String, Set<String>> {
+    return this.product_tree?.product_groups?.associateBy({ it.group_id }, { it.product_ids })
+        ?: mapOf()
+}
+
 /** Gathers all [Csaf.ProductGroup.group_id] definitions in the current document. */
 fun Csaf.gatherProductGroups(): List<String> {
     val groups = mutableListOf<String>()
@@ -125,6 +136,10 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     return ids
 }
 
+internal fun Set<String>?.resolveProductIDs(map: Map<String, Set<String>>): List<String>? {
+    return this?.flatMap { map[it] ?: setOf() }
+}
+
 internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
     if (set != null) {
         this.addAll(set)
@@ -145,6 +160,18 @@ internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection
     } else if (this != null) {
         this
     } else {
-        listOf()
+        setOf()
+    }
+}
+
+internal operator fun <E> Collection<E>?.minus(other: Collection<E>?): Collection<E> {
+    return if (other != null && this != null) {
+        this.subtract(other)
+    } else if (other != null) {
+        setOf()
+    } else if (this != null) {
+        this
+    } else {
+        setOf()
     }
 }
