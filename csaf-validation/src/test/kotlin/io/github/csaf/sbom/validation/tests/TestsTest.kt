@@ -24,6 +24,7 @@ import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.generated.Testcases
 import io.github.csaf.sbom.validation.goodCsaf
+import io.github.csaf.sbom.validation.goodInformationalCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
@@ -721,6 +722,10 @@ class TestsTest {
             "The document notes do not contain an item which has a category of description, details, general or summary",
             test.test(mandatoryTest("6-1-27-01-01"))
         )
+        assertValidationFailed(
+            "The document notes do not contain an item which has a category of description, details, general or summary",
+            test.test(goodInformationalCsaf(notes = null))
+        )
     }
 
     @Test
@@ -731,6 +736,10 @@ class TestsTest {
         assertValidationFailed(
             "The document references do not contain any item which has the category external",
             test.test(mandatoryTest("6-1-27-02-01"))
+        )
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(goodInformationalCsaf(references = null))
         )
     }
 
@@ -861,15 +870,17 @@ class TestsTest {
 
     @Test
     fun testAllGood() {
-        val good = goodCsaf()
+        val goods = listOf(goodCsaf(), goodInformationalCsaf())
         val tests = mandatoryTests + optionalTests + informativeTests
 
-        tests.forEach {
-            assertEquals(
-                ValidationSuccessful,
-                it.test(good),
-                "${it::class.simpleName} was not successful",
-            )
+        goods.forEach { good ->
+            tests.forEach {
+                assertEquals(
+                    ValidationSuccessful,
+                    it.test(good),
+                    "${it::class.simpleName} was not successful",
+                )
+            }
         }
     }
 
