@@ -28,6 +28,7 @@ import io.github.csaf.sbom.validation.goodInformationalCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
+import io.github.csaf.sbom.validation.goodVexCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -774,6 +775,9 @@ class TestsTest {
             "The vulnerability item has no notes element",
             test.test(mandatoryTest("6-1-27-05-01"))
         )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
     }
 
     @Test
@@ -870,7 +874,7 @@ class TestsTest {
 
     @Test
     fun testAllGood() {
-        val goods = listOf(goodCsaf(), goodInformationalCsaf())
+        val goods = listOf(goodCsaf(), goodInformationalCsaf(), goodVexCsaf())
         val tests = mandatoryTests + optionalTests + informativeTests
 
         goods.forEach { good ->

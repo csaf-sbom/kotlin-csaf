@@ -223,7 +223,7 @@ fun goodVulnerabilities() =
                     Csaf.Flag(
                         date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                         label = Csaf.Label1.vulnerable_code_not_in_execute_path,
-                        product_ids = setOf("test-product-name"),
+                        product_ids = setOf("linux-0.3"),
                         group_ids = setOf("test-group-name"),
                     )
                 ),
@@ -289,7 +289,7 @@ fun goodVulnerabilities() =
                                 details = "just restart your machine"
                             ),
                         group_ids = setOf("some-group"),
-                        product_ids = setOf("test-product-name"),
+                        product_ids = setOf("linux-0.1"),
                         entitlements = listOf("not-sure-what-this-is"),
                     )
                 ),
@@ -380,5 +380,23 @@ fun goodInformationalCsaf(
                 notes = notes,
                 references = references,
             )
+    )
+}
+
+fun goodVexCsaf(
+    productTree: Csaf.ProductTree? = goodProductTree(),
+    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities()
+): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = "csaf_vex",
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+            ),
+        product_tree = productTree,
+        vulnerabilities = vulnerabilities,
     )
 }
