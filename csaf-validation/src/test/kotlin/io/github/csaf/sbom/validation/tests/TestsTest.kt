@@ -28,6 +28,7 @@ import io.github.csaf.sbom.validation.goodInformationalCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
+import io.github.csaf.sbom.validation.goodSecurityAdvisoryCsaf
 import io.github.csaf.sbom.validation.goodVexCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -789,6 +790,7 @@ class TestsTest {
             "The vulnerability item has no product_status element",
             test.test(mandatoryTest("6-1-27-06-01"))
         )
+        assertValidationSuccessful(test.test(goodSecurityAdvisoryCsaf(vulnerabilities = null)))
     }
 
     @Test
@@ -799,6 +801,106 @@ class TestsTest {
         assertValidationFailed(
             "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
             test.test(mandatoryTest("6-1-27-07-01"))
+        )
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(
+                goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(product_status = null)))
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = setOf("fixed"),
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = setOf("fixed"),
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = setOf("fixed"),
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = setOf("fixed")
+                                    )
+                            )
+                        )
+                )
+            )
         )
     }
 
@@ -811,6 +913,9 @@ class TestsTest {
             "None of the elements cve or ids is present",
             test.test(mandatoryTest("6-1-27-08-01"))
         )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
     }
 
     fun test61279() {
@@ -874,7 +979,13 @@ class TestsTest {
 
     @Test
     fun testAllGood() {
-        val goods = listOf(goodCsaf(), goodInformationalCsaf(), goodVexCsaf())
+        val goods =
+            listOf(
+                goodCsaf(),
+                goodInformationalCsaf(),
+                goodVexCsaf(),
+                goodSecurityAdvisoryCsaf(),
+            )
         val tests = mandatoryTests + optionalTests + informativeTests
 
         goods.forEach { good ->

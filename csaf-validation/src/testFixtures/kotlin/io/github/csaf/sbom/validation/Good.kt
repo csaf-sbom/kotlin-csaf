@@ -400,3 +400,21 @@ fun goodVexCsaf(
         vulnerabilities = vulnerabilities,
     )
 }
+
+fun goodSecurityAdvisoryCsaf(
+    productTree: Csaf.ProductTree = goodProductTree(),
+    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
+): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = "csaf_security_advisory",
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+            ),
+        product_tree = productTree,
+        vulnerabilities = vulnerabilities,
+    )
+}
