@@ -23,6 +23,13 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+fun goodDistribution(label: Csaf.Label? = Csaf.Label.WHITE): Csaf.Distribution {
+    return Csaf.Distribution(
+        tlp = label?.let { Csaf.Tlp(label = it) },
+        text = "can be distributed freely",
+    )
+}
+
 fun goodProductTree(): Csaf.ProductTree =
     Csaf.ProductTree(
         branches =
@@ -264,7 +271,7 @@ fun goodVulnerabilities() =
     )
 
 fun goodCsaf(
-    label: Csaf.Label = Csaf.Label.WHITE,
+    distribution: Csaf.Distribution? = goodDistribution(Csaf.Label.WHITE),
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
 ): Csaf =
@@ -317,11 +324,7 @@ fun goodCsaf(
                         status = Csaf.Status.draft,
                         version = "1.0.0",
                     ),
-                distribution =
-                    Csaf.Distribution(
-                        tlp = Csaf.Tlp(label = label),
-                        text = "can be distributed freely",
-                    ),
+                distribution = distribution,
                 notes =
                     listOf(
                         Csaf.Note(

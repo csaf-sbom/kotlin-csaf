@@ -79,9 +79,12 @@ object Requirement2ValidFilename : Requirement {
  */
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: RetrievalContext): ValidationResult {
-        return if (
-            ctx.httpResponse?.let { it.request.url.protocol == URLProtocol.HTTPS } != false
-        ) {
+        var response = ctx.httpResponse
+        if (response == null) {
+            return ValidationNotApplicable
+        }
+
+        return if (response.request.url.protocol == URLProtocol.HTTPS) {
             ValidationSuccessful
         } else {
             ValidationFailed(listOf("JSON was not retrieved via HTTPS"))

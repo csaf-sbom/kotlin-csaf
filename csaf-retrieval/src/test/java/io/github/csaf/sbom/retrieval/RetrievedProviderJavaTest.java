@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.*;
 
+import static io.github.csaf.sbom.retrieval.RetrievedProvider.DEFAULT_CHANNEL_CAPACITY;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -48,7 +49,7 @@ public class RetrievedProviderJavaTest {
                 "Expected 3 documents"
         );
         final var documentResults = provider.streamDocuments().toList();
-        final var documentResultsExplicit = providerExplicit.streamDocuments(loader).toList();
+        final var documentResultsExplicit = providerExplicit.streamDocuments(loader, DEFAULT_CHANNEL_CAPACITY).toList();
         final var documentResultsExplicitSlow = providerExplicit.streamDocuments(loader, 1).toList();
         assertEquals(
                 4,
