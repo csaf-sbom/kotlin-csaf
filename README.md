@@ -75,7 +75,7 @@ git submodule update --init
 
 ### Updating the CWE List
 
-We use the canonical source of CWEs from https://cwe.mitre.org/data/downloads.html and store a minified version of it in the [cwe.json](./csaf-validation/src/main/resources/cwe.json) file. This file needs to be updated, whenever a new version of the CWE database comes out. There is a special gradle task to do so:
+We use the canonical source of CWEs from https://cwe.mitre.org/data/downloads.html and store a minified version of it in the [cwe.json](./csaf-validation/src/main/resources/cwe.json) file. This file needs to be updated whenever a new version of the CWE database comes out. There is a special gradle task to do so:
 
 ```bash
 ./gradlew createJWEJson
