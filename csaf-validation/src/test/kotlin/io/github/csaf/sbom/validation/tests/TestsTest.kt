@@ -259,6 +259,30 @@ class TestsTest {
     }
 
     @Test
+    fun test6112() {
+        val test = Test6112Language
+
+        // failing examples
+        assertValidationFailed(
+            "The following languages are not valid: EZ",
+            test.test(mandatoryTest("6-1-12-01"))
+        )
+        assertValidationFailed(
+            "The following languages are not valid: EZ",
+            (test.test(goodCsaf(sourceLang = "EZ")))
+        )
+        assertValidationFailed(
+            "The following languages are not valid: EN-ezzz",
+            (test.test(goodCsaf(sourceLang = "EN-ezzz")))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(lang = null)))
+        assertValidationSuccessful(test.test(goodCsaf(sourceLang = "en")))
+        assertValidationSuccessful(test.test(goodCsaf(sourceLang = "en-US")))
+    }
+
+    @Test
     fun test6114() {
         val test = Test6114SortedRevisionHistory
 
@@ -306,6 +330,25 @@ class TestsTest {
         assertValidationSuccessful(test.test(mandatoryTest("6-1-14-17")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-14-18")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-14-19")))
+    }
+
+    @Test
+    fun test6115() {
+        val test = Test6115Translator
+
+        // failing examples
+        assertValidationFailed(
+            "The publisher is a translator, but the source language is not present",
+            test.test(mandatoryTest("6-1-15-01"))
+        )
+        assertValidationFailed(
+            "The publisher is a translator, but the source language is not present",
+            test.test(mandatoryTest("6-1-15-02"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-15-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-15-12")))
     }
 
     @Test
@@ -643,6 +686,20 @@ class TestsTest {
 
         // good examples
         assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+    }
+
+    @Test
+    fun test61128() {
+        val test = Test6128Translation
+
+        // failing examples
+        assertValidationFailed(
+            "The document language and the source language have the same value: en-US",
+            test.test(mandatoryTest("6-1-28-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-28-11")))
     }
 
     @Test
