@@ -43,6 +43,7 @@ var mandatoryTests =
         Test618InvalidCVSS,
         Test619InvalidCVSSComputation,
         Test6110InconsistentCVSS,
+        Test6111CWE,
         Test6114SortedRevisionHistory,
         Test6116LatestDocumentVersion,
         Test6117DocumentStatusDraft,
@@ -50,7 +51,8 @@ var mandatoryTests =
         Test6119RevisionHistoryEntriesForPreReleaseVersions,
         Test6120NonDraftDocumentVersion,
         Test6121MissingItemInRevisionHistory,
-        Test6122MultipleDefinitionInRevisionHistory
+        Test6122MultipleDefinitionInRevisionHistory,
+        Test6123MultipleUseOfSameCVE
     )
 
 /**
@@ -392,6 +394,41 @@ object Test6110InconsistentCVSS : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.11](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6111-cwe).
+ */
+object Test6111CWE : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val invalids = mutableSetOf<String>()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val csafCwe = vuln.cwe
+            if (csafCwe == null) {
+                continue
+            }
+
+            // Look for the ID
+            val cwe = weaknesses[csafCwe.id]
+            if (cwe == null) {
+                invalids += "${csafCwe.id} is invalid"
+                continue
+            }
+
+            if (cwe.name != csafCwe.name) {
+                invalids += "${csafCwe.name} is not the correct name for ${csafCwe.id}"
+                continue
+            }
+        }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid CWE entries: ${invalids.joinToString(", ")}"))
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.1.14](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6114-sorted-revision-history).
  */
 object Test6114SortedRevisionHistory : Test {
@@ -604,6 +641,27 @@ object Test6122MultipleDefinitionInRevisionHistory : Test {
             return ValidationFailed(
                 listOf(
                     "The following versions in the revision history are duplicate: ${duplicates.keys.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.23](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6123-multiple-use-of-same-cve).
+ */
+object Test6123MultipleUseOfSameCVE : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val cves = doc.vulnerabilities?.mapNotNull { it.cve } ?: listOf()
+        val duplicates = cves.duplicates()
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following CVE identifiers are duplicate: ${duplicates.keys.joinToString(", ")}"
                 )
             )
         }

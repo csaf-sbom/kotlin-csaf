@@ -214,6 +214,51 @@ class TestsTest {
     }
 
     @Test
+    fun test6111() {
+        val test = Test6111CWE
+
+        // failing examples
+        assertValidationFailed(
+            "Invalid CWE entries: Improper Input Validation is not the correct name for CWE-79",
+            test.test(mandatoryTest("6-1-11-01"))
+        )
+        assertValidationFailed(
+            "Invalid CWE entries: CWE-12345 is invalid",
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(cwe = Csaf.Cwe(id = "CWE-12345", name = "Some name"))
+                        )
+                )
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(cwe = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                cwe =
+                                    Csaf.Cwe(
+                                        id = "CWE-79",
+                                        name =
+                                            "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
     fun test6114() {
         val test = Test6114SortedRevisionHistory
 
@@ -584,6 +629,20 @@ class TestsTest {
             "The following versions in the revision history are duplicate: 1",
             test.test(mandatoryTest("6-1-22-01"))
         )
+    }
+
+    @Test
+    fun test6123() {
+        val test = Test6123MultipleUseOfSameCVE
+
+        // failing examples
+        assertValidationFailed(
+            "The following CVE identifiers are duplicate: CVE-2017-0145",
+            test.test(mandatoryTest("6-1-23-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
     }
 
     @Test

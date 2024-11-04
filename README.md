@@ -62,9 +62,28 @@ Once the dependency has been imported, one of the first things to try out would 
 }
 ```
 
-## Contributing
+## Development
 
 We welcome all kinds of contributions, just be aware that we are still in the early stage of development and things might move or change very quickly. Especially the API design will be very fluid until we reach a stable 1.0 version.
+
+### Initial Steps
+
+We make heavy use of the CSAF TC repo for test cases and other files. So before starting the development you need to initialize the git submodules
+```bash
+git submodule update --init
+```
+
+### Updating the CWE List
+
+We use the canonical source of CWEs from https://cwe.mitre.org/data/downloads.html and store a minified version of it in the [cwe.json](./csaf-validation/src/main/resources/cwe.json) file. This file needs to be updated whenever a new version of the CWE database comes out. There is a special gradle task to do so:
+
+```bash
+./gradlew createJWEJson
+git add ./csaf-validation/src/main/resources/cwe.json
+git commit -m "Updated CWE database" 
+```
+
+Feel free to create a Pull Request based on this new commit.
 
 ## Dependencies
 

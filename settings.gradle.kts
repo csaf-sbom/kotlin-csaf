@@ -19,6 +19,7 @@ kover {
     reports {
         // Ignore generated code
         excludedClasses.add("io.github.csaf.sbom.schema.generated.*")
+        excludedClasses.add("io.github.csaf.sbom.validation.tests.CWE*")
 
         // Ignore main classes, since they are for demo only - might be removed in the future
         excludedClasses.add("io.github.csaf.sbom.retrieval.Main*")
