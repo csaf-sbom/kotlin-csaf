@@ -343,7 +343,7 @@ class TestsTest {
         )
         assertValidationFailed(
             "The publisher is a translator, but the source language is not present",
-            test.test(mandatoryTest("6-1-15-01"))
+            test.test(mandatoryTest("6-1-15-02"))
         )
 
         // good examples
