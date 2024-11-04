@@ -1,6 +1,6 @@
 [versions]
 codegen = "0.108.2"
-ktor = "3.0.0"
+ktor = "3.0.1"
 kotlin = "2.0.21"
 dokka = "1.9.20"
 # for dependency CVE fix
