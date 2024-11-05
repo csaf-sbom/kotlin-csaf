@@ -311,6 +311,42 @@ class TestsTest {
     }
 
     @Test
+    fun test6113() {
+        val test = Test6113PURL
+
+        // failing examples
+        assertValidationFailed(
+            "Invalid PURLs: The PackageURL name specified is invalid",
+            test.test(mandatoryTest("6-1-13-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My Product",
+                                        product_id = "product1",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(
+                                                purl =
+                                                    JsonUri(
+                                                        "pkg:github/package-url/purl-spec@244fd47e07d1004f0aed9c"
+                                                    )
+                                            )
+                                    )
+                                )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
     fun test6114() {
         val test = Test6114SortedRevisionHistory
 

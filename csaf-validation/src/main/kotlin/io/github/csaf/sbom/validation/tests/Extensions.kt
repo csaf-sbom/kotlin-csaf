@@ -55,6 +55,44 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     return ids
 }
 
+/**
+ * Gathers product URLs at a [Csaf.Branche]. This is needed because we need to do it recursively.
+ */
+fun Csaf.Branche.gatherProductURLs(products: MutableCollection<String>) {
+    // Add ID at this leaf
+    products += product?.product_identification_helper?.purl.toString()
+
+    // Go down the branch
+    this.branches?.forEach { it.gatherProductURLs(products) }
+}
+
+/** Gathers all [Csaf.ProductIdentificationHelper.purl] definitions in the current document. */
+fun Csaf.gatherProductURLs(): MutableList<String> {
+    val purls = mutableListOf<String>()
+
+    // /product_tree/branches[](/branches[])*/product/product_identification_helper/purl
+    purls +=
+        this.product_tree?.branches?.flatMap {
+            var inner = mutableListOf<String>()
+            it.gatherProductURLs(inner)
+            inner
+        }
+
+    // /product_tree/full_product_names[]/product_identification_helper/purl
+    purls +=
+        this.product_tree?.full_product_names?.mapNotNull {
+            it.product_identification_helper?.purl.toString()
+        }
+
+    // /product_tree/relationships[]/full_product_name/product_identification_helper/purl
+    purls +=
+        this.product_tree?.relationships?.map {
+            it.full_product_name.product_identification_helper?.purl.toString()
+        }
+
+    return purls
+}
+
 /** Gathers all product IDs in the current document. */
 fun Csaf.gatherProductReferences(): Set<String> {
     val ids = mutableSetOf<String>()

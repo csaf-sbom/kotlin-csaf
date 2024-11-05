@@ -16,6 +16,8 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import com.github.packageurl.MalformedPackageURLException
+import com.github.packageurl.PackageURL
 import io.github.csaf.sbom.cvss.MetricValue
 import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
@@ -477,6 +479,31 @@ object Test6112Language : Test {
             ValidationFailed(
                 listOf("The following languages are not valid: ${invalids.joinToString(", ")}")
             )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.13](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6113-purl).
+ */
+object Test6113PURL : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val purls = doc.gatherProductURLs()
+        val invalids =
+            purls.mapNotNull {
+                try {
+                    PackageURL(it)
+                    null
+                } catch (ex: MalformedPackageURLException) {
+                    ex.message
+                }
+            }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid PURLs: ${invalids.joinToString(", ")}"))
         }
     }
 }

@@ -33,6 +33,7 @@ dependencies {
     testFixturesImplementation(project(":csaf-schema"))
     testFixturesImplementation(kotlin("test"))
     implementation(libs.ktor.client.core)
+    implementation(libs.purl)
     implementation("net.swiftzer.semver:semver:2.0.0")
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.ktor.client.mock)
