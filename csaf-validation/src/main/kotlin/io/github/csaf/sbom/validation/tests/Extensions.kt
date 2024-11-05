@@ -136,7 +136,9 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     return ids
 }
 
-internal fun Set<String>?.resolveProductIDs(map: Map<String, Set<String>>): List<String>? {
+internal fun Collection<String>?.resolveProductIDs(
+    map: Map<String, Collection<String>>
+): Collection<String>? {
     return this?.flatMap { map[it] ?: setOf() }
 }
 

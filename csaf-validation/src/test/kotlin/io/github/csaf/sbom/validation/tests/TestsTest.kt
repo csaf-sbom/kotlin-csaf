@@ -910,14 +910,35 @@ class TestsTest {
 
         // failing examples
         assertValidationFailed(
-            "None of the elements cve or ids is present",
+            "None of the elements cve or cwe is present",
             test.test(mandatoryTest("6-1-27-08-01"))
         )
 
         // good examples
         assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities = listOf(Csaf.Vulnerability(cwe = null, cve = "CVE-1234-5000"))
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                cwe = Csaf.Cwe(id = "CWE-123", name = "Some name"),
+                                cve = null
+                            )
+                        )
+                )
+            )
+        )
     }
 
+    @Test
     fun test61279() {
         val test = Test61279ImpactStatement
 
@@ -925,6 +946,12 @@ class TestsTest {
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080702",
             test.test(mandatoryTest("6-1-27-09-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(threats = null))))
         )
     }
 
@@ -936,6 +963,14 @@ class TestsTest {
         assertValidationFailed(
             "Missing action statement for product IDs: CSAFPID-9080702",
             test.test(mandatoryTest("6-1-27-10-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(remediations = null)))
+            )
         )
     }
 

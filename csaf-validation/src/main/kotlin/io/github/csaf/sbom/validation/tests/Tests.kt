@@ -922,7 +922,7 @@ object Test61278VulnerabilityID : Test {
         return if (missing.isEmpty()) {
             ValidationSuccessful
         } else {
-            ValidationFailed(listOf("None of the elements cve or ids is present"))
+            ValidationFailed(listOf("None of the elements cve or cwe is present"))
         }
     }
 }
@@ -1021,7 +1021,10 @@ object Test612711Vulnerabilities : Test {
  */
 object Test6128Translation : Test {
     override fun test(doc: Csaf): ValidationResult {
-        return if (doc.document.source_lang != doc.document.lang) {
+        val sourceLang = doc.document.source_lang
+        val lang = doc.document.lang
+
+        return if (sourceLang != lang || lang == null) {
             ValidationSuccessful
         } else {
             ValidationFailed(

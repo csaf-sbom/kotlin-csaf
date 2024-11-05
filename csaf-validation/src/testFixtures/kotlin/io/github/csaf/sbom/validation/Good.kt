@@ -210,6 +210,7 @@ fun goodVulnerabilities() =
                     )
                 ),
             cwe = null,
+            cve = "CVE-1234-4000",
             notes =
                 listOf(
                     Csaf.Note(

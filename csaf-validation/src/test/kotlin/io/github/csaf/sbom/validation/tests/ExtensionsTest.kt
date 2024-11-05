@@ -160,6 +160,45 @@ class ExtensionsTest {
     }
 
     @Test
+    fun testGatherProductIdsPerGroup() {
+        assertEquals(mapOf(), goodCsaf(productTree = null).gatherProductIdsPerGroup())
+        assertEquals(
+            mapOf(),
+            goodCsaf(productTree = Csaf.ProductTree(product_groups = null))
+                .gatherProductIdsPerGroup()
+        )
+        assertEquals(
+            mapOf("group1" to setOf("product1", "product2")),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            product_groups =
+                                listOf(
+                                    Csaf.ProductGroup(
+                                        group_id = "group1",
+                                        product_ids = setOf("product1", "product2")
+                                    )
+                                )
+                        )
+                )
+                .gatherProductIdsPerGroup()
+        )
+    }
+
+    @Test
+    fun testResolveProductIDs() {
+        assertEquals(null, null.resolveProductIDs(mapOf()))
+        assertEquals(
+            listOf("product1"),
+            setOf("group1").resolveProductIDs(mapOf("group1" to setOf("product1")))
+        )
+        assertEquals(
+            listOf(),
+            setOf("group2").resolveProductIDs(mapOf("group1" to setOf("product1")))
+        )
+    }
+
+    @Test
     fun testPlus() {
         assertEquals(setOf("a", "b"), setOf("a") + setOf("b"))
         assertEquals(setOf("a"), setOf("a") + null)
