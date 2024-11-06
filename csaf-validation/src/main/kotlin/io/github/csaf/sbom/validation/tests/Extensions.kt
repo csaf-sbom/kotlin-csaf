@@ -162,6 +162,7 @@ internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection
     } else if (this != null) {
         this
     } else {
+        // We return a set here, to stay consistent with "union"
         setOf()
     }
 }
@@ -174,6 +175,7 @@ internal operator fun <E> Collection<E>?.minus(other: Collection<E>?): Collectio
     } else if (this != null) {
         this
     } else {
+        // We return a set here, to stay consistent with "union"
         setOf()
     }
 }

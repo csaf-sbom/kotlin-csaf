@@ -756,7 +756,6 @@ object Test61271DocumentNotes : Test {
                 it.category in
                     listOf(
                         Csaf.Category.description,
-                        Csaf.Category.description,
                         Csaf.Category.details,
                         Csaf.Category.general,
                         Csaf.Category.summary,
@@ -917,12 +916,12 @@ object Test61278VulnerabilityID : Test {
             return ValidationNotApplicable
         }
 
-        val missing = doc.vulnerabilities?.filter { it.cve == null && it.cwe == null } ?: listOf()
+        val missing = doc.vulnerabilities?.filter { it.cve == null && it.ids == null } ?: listOf()
 
         return if (missing.isEmpty()) {
             ValidationSuccessful
         } else {
-            ValidationFailed(listOf("None of the elements cve or cwe is present"))
+            ValidationFailed(listOf("None of the elements cve or ids is present"))
         }
     }
 }
@@ -937,7 +936,8 @@ object Test61279ImpactStatement : Test {
             return ValidationNotApplicable
         }
 
-        // First, make a map all product groups and their product IDs, so we can resolve them later
+        // First, make a map of all product groups and their product IDs, so we can resolve them
+        // later
         var map = doc.gatherProductIdsPerGroup()
         val missing = mutableSetOf<String>()
 

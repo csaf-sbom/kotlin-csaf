@@ -910,7 +910,7 @@ class TestsTest {
 
         // failing examples
         assertValidationFailed(
-            "None of the elements cve or cwe is present",
+            "None of the elements cve or ids is present",
             test.test(mandatoryTest("6-1-27-08-01"))
         )
 
@@ -919,7 +919,7 @@ class TestsTest {
         assertValidationSuccessful(
             test.test(
                 goodVexCsaf(
-                    vulnerabilities = listOf(Csaf.Vulnerability(cwe = null, cve = "CVE-1234-5000"))
+                    vulnerabilities = listOf(Csaf.Vulnerability(ids = null, cve = "CVE-1234-5000"))
                 )
             )
         )
@@ -929,7 +929,7 @@ class TestsTest {
                     vulnerabilities =
                         listOf(
                             Csaf.Vulnerability(
-                                cwe = Csaf.Cwe(id = "CWE-123", name = "Some name"),
+                                ids = setOf(Csaf.Id(system_name = "what", text = "is this")),
                                 cve = null
                             )
                         )
