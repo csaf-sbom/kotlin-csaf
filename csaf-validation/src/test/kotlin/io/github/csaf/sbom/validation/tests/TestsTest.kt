@@ -29,6 +29,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
 import io.github.csaf.sbom.validation.goodSecurityAdvisoryCsaf
+import io.github.csaf.sbom.validation.goodSecurityIncidentResponseCsaf
 import io.github.csaf.sbom.validation.goodVexCsaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -743,6 +744,13 @@ class TestsTest {
             "The document references do not contain any item which has the category external",
             test.test(goodInformationalCsaf(references = null))
         )
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(goodSecurityIncidentResponseCsaf(references = null))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf()))
     }
 
     @Test

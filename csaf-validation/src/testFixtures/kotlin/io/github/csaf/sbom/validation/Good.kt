@@ -21,6 +21,7 @@ import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
 import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
 import io.github.csaf.sbom.validation.profiles.VEX
 import java.net.URI
 import java.time.Instant
@@ -382,6 +383,20 @@ fun goodInformationalCsaf(
                 title = "Some Title",
                 tracking = goodTracking(),
                 notes = notes,
+                references = references,
+            )
+    )
+}
+
+fun goodSecurityIncidentResponseCsaf(references: List<Csaf.Reference>? = goodReferences()): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = SecurityIncidentResponse.category,
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
                 references = references,
             )
     )
