@@ -19,6 +19,9 @@ package io.github.csaf.sbom.validation
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
+import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
+import io.github.csaf.sbom.validation.profiles.VEX
 import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -373,7 +376,7 @@ fun goodInformationalCsaf(
     return Csaf(
         document =
             Csaf.Document(
-                category = "csaf_informational_advisory",
+                category = InformationalAdvisory.category,
                 csaf_version = "2.0",
                 publisher = goodPublisher(),
                 title = "Some Title",
@@ -391,7 +394,7 @@ fun goodVexCsaf(
     return Csaf(
         document =
             Csaf.Document(
-                category = "csaf_vex",
+                category = VEX.category,
                 csaf_version = "2.0",
                 publisher = goodPublisher(),
                 title = "Some Title",
@@ -409,7 +412,7 @@ fun goodSecurityAdvisoryCsaf(
     return Csaf(
         document =
             Csaf.Document(
-                category = "csaf_security_advisory",
+                category = SecurityAdvisory.category,
                 csaf_version = "2.0",
                 publisher = goodPublisher(),
                 title = "Some Title",

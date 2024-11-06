@@ -25,6 +25,10 @@ import io.github.csaf.sbom.validation.ValidationNotApplicable
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
+import io.github.csaf.sbom.validation.profiles.VEX
 import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
 import net.swiftzer.semver.SemVer
@@ -744,10 +748,7 @@ object Test6123MultipleUseOfSameCVE : Test {
  */
 object Test61271DocumentNotes : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (
-            doc.document.category !in
-                listOf("csaf_informational_advisory", "csaf_security_incident_response")
-        ) {
+        if (doc.profile !is InformationalAdvisory && doc.profile !is SecurityIncidentResponse) {
             return ValidationNotApplicable
         }
 
@@ -779,10 +780,7 @@ object Test61271DocumentNotes : Test {
  */
 object Test61272DocumentReferences : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (
-            doc.document.category !in
-                listOf("csaf_informational_advisory", "csaf_security_incident_response")
-        ) {
+        if (doc.profile !is InformationalAdvisory && doc.profile !is SecurityIncidentResponse) {
             return ValidationNotApplicable
         }
 
@@ -806,7 +804,7 @@ object Test61272DocumentReferences : Test {
  */
 object Test61273Vulnerabilities : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_informational_advisory")) {
+        if (doc.profile !is InformationalAdvisory) {
             return ValidationNotApplicable
         }
 
@@ -824,7 +822,7 @@ object Test61273Vulnerabilities : Test {
  */
 object Test61274ProductTree : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
             return ValidationNotApplicable
         }
 
@@ -842,7 +840,7 @@ object Test61274ProductTree : Test {
  */
 object Test61275VulnerabilityNotes : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
             return ValidationNotApplicable
         }
 
@@ -862,7 +860,7 @@ object Test61275VulnerabilityNotes : Test {
  */
 object Test61276ProductStatus : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_security_advisory")) {
+        if (doc.profile !is SecurityAdvisory) {
             return ValidationNotApplicable
         }
 
@@ -882,7 +880,7 @@ object Test61276ProductStatus : Test {
  */
 object Test61277VEXProductStatus : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_vex")) {
+        if (doc.profile !is VEX) {
             return ValidationNotApplicable
         }
 
@@ -912,7 +910,7 @@ object Test61277VEXProductStatus : Test {
  */
 object Test61278VulnerabilityID : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_vex")) {
+        if (doc.profile !is VEX) {
             return ValidationNotApplicable
         }
 
@@ -932,7 +930,7 @@ object Test61278VulnerabilityID : Test {
  */
 object Test61279ImpactStatement : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_vex")) {
+        if (doc.profile !is VEX) {
             return ValidationNotApplicable
         }
 
@@ -970,7 +968,7 @@ object Test61279ImpactStatement : Test {
  */
 object Test612710ActionStatement : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_vex")) {
+        if (doc.profile !is VEX) {
             return ValidationNotApplicable
         }
 
@@ -1003,7 +1001,7 @@ object Test612710ActionStatement : Test {
  */
 object Test612711Vulnerabilities : Test {
     override fun test(doc: Csaf): ValidationResult {
-        if (doc.document.category !in listOf("csaf_security_advisory", "csaf_vex")) {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
             return ValidationNotApplicable
         }
 

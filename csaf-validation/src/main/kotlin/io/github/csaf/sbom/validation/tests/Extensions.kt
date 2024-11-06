@@ -18,6 +18,9 @@ package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
+import io.github.csaf.sbom.validation.profiles.CSAFBase
+import io.github.csaf.sbom.validation.profiles.Profile
+import io.github.csaf.sbom.validation.profiles.officialProfiles
 import io.github.csaf.sbom.validation.tests.plusAssign
 
 /**
@@ -135,6 +138,16 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
 
     return ids
 }
+
+/**
+ * Returns the profile according to
+ * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
+ * is a local profile, [CSAFBase] is returned as a "catch-all".
+ */
+val Csaf.profile: Profile?
+    get() {
+        return officialProfiles[this.document.category] ?: CSAFBase
+    }
 
 internal fun Collection<String>?.resolveProductIDs(
     map: Map<String, Collection<String>>
