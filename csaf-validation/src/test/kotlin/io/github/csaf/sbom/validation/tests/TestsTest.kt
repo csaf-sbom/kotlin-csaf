@@ -1054,6 +1054,7 @@ class TestsTest {
                 goodInformationalCsaf(),
                 goodVexCsaf(),
                 goodSecurityAdvisoryCsaf(),
+                goodSecurityIncidentResponseCsaf()
             )
         val tests = mandatoryTests + optionalTests + informativeTests
 

@@ -398,6 +398,7 @@ fun goodSecurityIncidentResponseCsaf(references: List<Csaf.Reference>? = goodRef
                 title = "Some Title",
                 tracking = goodTracking(),
                 references = references,
+                notes = goodNotes(),
             )
     )
 }
