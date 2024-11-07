@@ -25,12 +25,12 @@ import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.generated.Testcases
 import io.github.csaf.sbom.validation.goodCsaf
 import io.github.csaf.sbom.validation.goodInformationalCsaf
-import kotlin.io.path.Path
-import kotlin.io.path.readText
-import kotlin.test.AfterTest
 import io.github.csaf.sbom.validation.goodSecurityAdvisoryCsaf
 import io.github.csaf.sbom.validation.goodSecurityIncidentResponseCsaf
 import io.github.csaf.sbom.validation.goodVexCsaf
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -45,9 +45,9 @@ class TestsTest {
     val executedTests = mutableSetOf<String>()
 
     companion object {
+        val jsonBuilder = Json { ignoreUnknownKeys = true }
         val testCases =
-            Json { ignoreUnknownKeys = true }
-                .decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
+            jsonBuilder.decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
     }
 
     @AfterTest
@@ -955,8 +955,34 @@ class TestsTest {
             "Missing impact statement for product IDs: CSAFPID-9080702",
             test.test(mandatoryTest("6-1-27-09-01"))
         )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-09-02"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-03"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-04"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-05"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080701",
+            test.test(mandatoryTest("6-1-27-09-06"))
+        )
 
         // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-14")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-15")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-16")))
         assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
         assertValidationSuccessful(
             test.test(goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(threats = null))))
