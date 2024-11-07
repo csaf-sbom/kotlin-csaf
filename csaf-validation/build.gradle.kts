@@ -2,12 +2,16 @@ import de.undercouch.gradle.tasks.download.Download
 import groovy.json.JsonOutput
 import groovy.xml.XmlParser
 import org.gradle.kotlin.dsl.invoke
+import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
+import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
+    id("net.pwall.json.json-kotlin")
     id("de.undercouch.download") version "5.6.0"
     kotlin("plugin.serialization")
-
     `java-test-fixtures`
     application
 }
@@ -32,6 +36,33 @@ dependencies {
     implementation("net.swiftzer.semver:semver:2.0.0")
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.kotlinx.json)
+}
+
+configure<JSONSchemaCodegen> {
+    configFile.set(file("src/main/resources/codegen-config.json"))
+    inputs {
+        inputFile(file("../csaf/csaf_2.0/test/validator/testcases_json_schema.json"))
+    }
+    outputDir.set(file("build/generated-sources/kotlin"))
+}
+
+// Configure gradle caching manually for json-kotlin-gradle, as the plugin seems to lack support for it.
+var generateTasks = tasks.withType(JSONSchemaCodegenTask::class) {
+    inputs.file("src/main/resources/codegen-config.json").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("../csaf/csaf_2.0/test/validator/").withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir("build/generated-sources/kotlin")
+}
+
+var jarTasks = tasks.withType<Jar>()
+jarTasks.forEach {
+    it.dependsOn(generateTasks)
+}
+val dokkaHtml by tasks.getting(DokkaTask::class)
+dokkaHtml.dependsOn(generateTasks)
+
+sourceSets.main {
+    kotlin.srcDirs("build/generated-sources/kotlin")
 }
 
 open class IncrementalReverseTask : DefaultTask() {

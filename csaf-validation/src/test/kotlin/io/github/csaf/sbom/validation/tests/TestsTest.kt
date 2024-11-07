@@ -22,30 +22,54 @@ import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
+import io.github.csaf.sbom.validation.generated.Testcases
 import io.github.csaf.sbom.validation.goodCsaf
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlinx.serialization.json.Json
 
 /** The path to the test folder for the CSAF 2.0 tests. */
 var testFolder: String = "../csaf/csaf_2.0/test/validator/data/"
 
-/**
- * Short utility function to construct the path to the test file based on the test file ID for
- * mandatory tests.
- */
-fun mandatoryTest(id: String): String {
-    return "$testFolder/mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
-}
-
-/**
- * Short utility function to construct the path to the test file based on the test file ID for
- * optional tests.
- */
-fun optionalTest(id: String): String {
-    return "$testFolder/optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
-}
-
 class TestsTest {
+
+    val executedTests = mutableSetOf<String>()
+
+    companion object {
+        val testCases =
+            Json { ignoreUnknownKeys = true }
+                .decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
+    }
+
+    @AfterTest
+    fun checkAllTestCases() {
+        val firstExecuted = executedTests.firstOrNull()
+        // Nothing to do, special case for testAllGood
+        if (firstExecuted == null) {
+            return
+        }
+
+        // Try to find the test
+        val test =
+            testCases.tests.firstOrNull {
+                (it.valid + it.failures).any { it.name == firstExecuted }
+            }
+        assertNotNull(test)
+
+        val allTestPaths = (test.valid + test.failures).map { it.name }
+        val missing = allTestPaths - allTestPaths.intersect(executedTests)
+
+        assertTrue(
+            missing.isEmpty(),
+            "The following test cases were not included in the unit test: ${missing.joinToString(", ")}"
+        )
+    }
+
     @Test
     fun test611() {
         val test = Test611MissingDefinitionOfProductID
@@ -710,6 +734,9 @@ class TestsTest {
             "The following IDs are not used: CSAFPID-9080700",
             test.test(optionalTest("6-2-01-01"))
         )
+
+        // good examples
+        assertValidationSuccessful(test.test(optionalTest("6-2-01-11")))
     }
 
     @Test
@@ -724,5 +751,27 @@ class TestsTest {
                 "${it::class.simpleName} was not successful",
             )
         }
+    }
+
+    /**
+     * Short utility function to construct the path to the test file based on the test file ID for
+     * mandatory tests.
+     */
+    fun mandatoryTest(id: String): String {
+        var test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+        executedTests += test
+
+        return "$testFolder/$test"
+    }
+
+    /**
+     * Short utility function to construct the path to the test file based on the test file ID for
+     * optional tests.
+     */
+    fun optionalTest(id: String): String {
+        var test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+        executedTests += test
+
+        return "$testFolder/$test"
     }
 }
