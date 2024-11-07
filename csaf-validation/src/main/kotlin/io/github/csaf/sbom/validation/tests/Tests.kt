@@ -37,7 +37,7 @@ import net.swiftzer.semver.SemVer
  * Mandatory tests as defined in
  * [Section 6.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61-mandatory-tests).
  */
-var mandatoryTests =
+val mandatoryTests =
     listOf(
         Test611MissingDefinitionOfProductID,
         Test612MultipleDefinitionOfProductID,
@@ -79,7 +79,7 @@ var mandatoryTests =
  * Optional tests as defined in
  * [Section 6.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#62-optional-tests).
  */
-var optionalTests =
+val optionalTests =
     listOf(
         Test621UnusedDefinitionOfProductID,
     )
@@ -88,7 +88,7 @@ var optionalTests =
  * Informative tests as defined in
  * [Section 6.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#63-informative-test).
  */
-var informativeTests = listOf<Test>()
+val informativeTests = listOf<Test>()
 
 /** Executes all tests in this list of [Test] objects. */
 fun List<Test>.test(doc: Csaf): ValidationResult {
@@ -680,12 +680,11 @@ object Test6121MissingItemInRevisionHistory : Test {
 
         // Check for missing items
         sortedByDate.reduce { prev, current ->
-            var next = prev.number.versionOrMajorVersion + 1
-            if (
-                next != current.number.versionOrMajorVersion &&
-                    prev.number.versionOrMajorVersion != current.number.versionOrMajorVersion
-            ) {
-                missing += next.toString()
+            val prevVersion = prev.number.versionOrMajorVersion
+            val expectedVersion = prevVersion + 1
+            val currentVersion = current.number.versionOrMajorVersion
+            if (expectedVersion != currentVersion && prevVersion != currentVersion) {
+                missing += expectedVersion.toString()
             }
             current
         }
@@ -936,11 +935,11 @@ object Test61279ImpactStatement : Test {
 
         // First, make a map of all product groups and their product IDs, so we can resolve them
         // later
-        var map = doc.gatherProductIdsPerGroup()
+        val map = doc.gatherProductIdsPerGroup()
         val missing = mutableSetOf<String>()
 
         for (vuln in doc.vulnerabilities ?: listOf()) {
-            var impactStatementsForProductIDs =
+            val impactStatementsForProductIDs =
                 (vuln.threats
                         ?.filter { it.category == Csaf.Category7.impact }
                         ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) } +
@@ -973,11 +972,11 @@ object Test612710ActionStatement : Test {
         }
 
         // First, make a map all product groups and their product IDs, so we can resolve them later
-        var map = doc.gatherProductIdsPerGroup()
+        val map = doc.gatherProductIdsPerGroup()
         val missing = mutableSetOf<String>()
 
         for (vuln in doc.vulnerabilities ?: listOf()) {
-            var actionStatementsForProductIDs =
+            val actionStatementsForProductIDs =
                 vuln.remediations
                     ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) }
                     ?.toSet()

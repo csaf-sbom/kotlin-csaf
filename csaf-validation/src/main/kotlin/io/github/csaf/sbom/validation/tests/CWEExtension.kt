@@ -21,11 +21,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 
-@Serializable data class CWE(var id: String, var name: String)
+@Serializable data class CWE(val id: String, val name: String)
 
-@Serializable data class CWEList(var weaknesses: List<CWE>)
+@Serializable data class CWEList(val weaknesses: List<CWE>)
 
-var weaknesses = loadCWEData()
+val weaknesses = loadCWEData()
 
 @OptIn(ExperimentalSerializationApi::class)
 internal fun loadCWEData(path: String = "/cwe.json"): Map<String, CWE> {

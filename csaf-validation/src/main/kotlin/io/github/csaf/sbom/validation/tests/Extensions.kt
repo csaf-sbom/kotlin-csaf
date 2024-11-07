@@ -21,7 +21,6 @@ import io.github.csaf.sbom.schema.generated.Csaf.Product
 import io.github.csaf.sbom.validation.profiles.CSAFBase
 import io.github.csaf.sbom.validation.profiles.Profile
 import io.github.csaf.sbom.validation.profiles.officialProfiles
-import io.github.csaf.sbom.validation.tests.plusAssign
 
 /**
  * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
@@ -42,7 +41,7 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     // /product_tree/branches[](/branches[])*/product/product_id
     ids +=
         this.product_tree?.branches?.flatMap {
-            var inner = mutableListOf<String>()
+            val inner = mutableListOf<String>()
             it.gatherProductDefinitionsTo(inner)
             inner
         }
@@ -83,7 +82,7 @@ fun Csaf.gatherProductReferences(): Set<String> {
     // /vulnerabilities[]/threats[]/product_ids[]
     ids +=
         vulnerabilities?.flatMap {
-            var inner = mutableSetOf<String>()
+            val inner = mutableSetOf<String>()
             inner += it.product_status?.first_affected
             inner += it.product_status?.first_fixed
             inner += it.product_status?.fixed
@@ -130,7 +129,7 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     // /vulnerabilities[]/threats[]/group_ids
     ids +=
         vulnerabilities?.flatMap {
-            var inner = mutableSetOf<String>()
+            val inner = mutableSetOf<String>()
             inner += it.remediations?.flatMap { it.group_ids ?: setOf() }
             inner += it.threats?.flatMap { it.group_ids ?: setOf() }
             inner
