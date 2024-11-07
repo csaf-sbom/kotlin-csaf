@@ -24,6 +24,10 @@ import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.generated.Testcases
 import io.github.csaf.sbom.validation.goodCsaf
+import io.github.csaf.sbom.validation.goodInformationalCsaf
+import io.github.csaf.sbom.validation.goodSecurityAdvisoryCsaf
+import io.github.csaf.sbom.validation.goodSecurityIncidentResponseCsaf
+import io.github.csaf.sbom.validation.goodVexCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.AfterTest
@@ -41,9 +45,9 @@ class TestsTest {
     val executedTests = mutableSetOf<String>()
 
     companion object {
+        val jsonBuilder = Json { ignoreUnknownKeys = true }
         val testCases =
-            Json { ignoreUnknownKeys = true }
-                .decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
+            jsonBuilder.decodeFromString<Testcases>(Path("$testFolder/testcases.json").readText())
     }
 
     @AfterTest
@@ -713,6 +717,309 @@ class TestsTest {
     }
 
     @Test
+    fun test61271() {
+        val test = Test61271DocumentNotes
+
+        // failing examples
+        assertValidationFailed(
+            "The document notes do not contain an item which has a category of description, details, general or summary",
+            test.test(mandatoryTest("6-1-27-01-01"))
+        )
+        assertValidationFailed(
+            "The document notes do not contain an item which has a category of description, details, general or summary",
+            test.test(goodInformationalCsaf(notes = null))
+        )
+    }
+
+    @Test
+    fun test61272() {
+        val test = Test61272DocumentReferences
+
+        // failing examples
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(mandatoryTest("6-1-27-02-01"))
+        )
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(goodInformationalCsaf(references = null))
+        )
+        assertValidationFailed(
+            "The document references do not contain any item which has the category external",
+            test.test(goodSecurityIncidentResponseCsaf(references = null))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf()))
+    }
+
+    @Test
+    fun test61273() {
+        val test = Test61273Vulnerabilities
+
+        // failing examples
+        assertValidationFailed(
+            "The element /vulnerabilities exists",
+            test.test(mandatoryTest("6-1-27-03-01"))
+        )
+    }
+
+    @Test
+    fun test61274() {
+        val test = Test61274ProductTree
+
+        // failing examples
+        assertValidationFailed(
+            "The element /product_tree does not exist",
+            test.test(mandatoryTest("6-1-27-04-01"))
+        )
+    }
+
+    @Test
+    fun test61275() {
+        val test = Test61275VulnerabilityNotes
+
+        // failing examples
+        assertValidationFailed(
+            "The vulnerability item has no notes element",
+            test.test(mandatoryTest("6-1-27-05-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+    }
+
+    @Test
+    fun test61276() {
+        val test = Test61276ProductStatus
+
+        // failing examples
+        assertValidationFailed(
+            "The vulnerability item has no product_status element",
+            test.test(mandatoryTest("6-1-27-06-01"))
+        )
+        assertValidationSuccessful(test.test(goodSecurityAdvisoryCsaf(vulnerabilities = null)))
+    }
+
+    @Test
+    fun test61277() {
+        val test = Test61277VEXProductStatus
+
+        // failing examples
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(mandatoryTest("6-1-27-07-01"))
+        )
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationFailed(
+            "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
+            test.test(
+                goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(product_status = null)))
+            )
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = setOf("fixed"),
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = setOf("fixed"),
+                                        known_not_affected = null,
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = setOf("fixed"),
+                                        under_investigation = null
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                product_status =
+                                    Csaf.ProductStatus(
+                                        fixed = null,
+                                        known_affected = null,
+                                        known_not_affected = null,
+                                        under_investigation = setOf("fixed")
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test61278() {
+        val test = Test61278VulnerabilityID
+
+        // failing examples
+        assertValidationFailed(
+            "None of the elements cve or ids is present",
+            test.test(mandatoryTest("6-1-27-08-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities = listOf(Csaf.Vulnerability(ids = null, cve = "CVE-1234-5000"))
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                ids = setOf(Csaf.Id(system_name = "what", text = "is this")),
+                                cve = null
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test61279() {
+        val test = Test61279ImpactStatement
+
+        // failing examples
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-09-01"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-09-02"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-03"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-04"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-27-09-05"))
+        )
+        assertValidationFailed(
+            "Missing impact statement for product IDs: CSAFPID-9080701",
+            test.test(mandatoryTest("6-1-27-09-06"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-13")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-14")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-15")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-27-09-16")))
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(threats = null))))
+        )
+    }
+
+    @Test
+    fun test612710() {
+        val test = Test612710ActionStatement
+
+        // failing examples
+        assertValidationFailed(
+            "Missing action statement for product IDs: CSAFPID-9080702",
+            test.test(mandatoryTest("6-1-27-10-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(goodVexCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(
+                goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(remediations = null)))
+            )
+        )
+    }
+
+    @Test
+    fun test612711() {
+        val test = Test612711Vulnerabilities
+
+        // failing examples
+        assertValidationFailed(
+            "The element /vulnerabilities does not exist",
+            test.test(mandatoryTest("6-1-27-11-01"))
+        )
+    }
+
+    @Test
     fun test61128() {
         val test = Test6128Translation
 
@@ -741,15 +1048,24 @@ class TestsTest {
 
     @Test
     fun testAllGood() {
-        val good = goodCsaf()
+        val goods =
+            listOf(
+                goodCsaf(),
+                goodInformationalCsaf(),
+                goodVexCsaf(),
+                goodSecurityAdvisoryCsaf(),
+                goodSecurityIncidentResponseCsaf()
+            )
         val tests = mandatoryTests + optionalTests + informativeTests
 
-        tests.forEach {
-            assertEquals(
-                ValidationSuccessful,
-                it.test(good),
-                "${it::class.simpleName} was not successful",
-            )
+        goods.forEach { good ->
+            tests.forEach {
+                assertEquals(
+                    ValidationSuccessful,
+                    it.test(good),
+                    "${it::class.simpleName} was not successful",
+                )
+            }
         }
     }
 

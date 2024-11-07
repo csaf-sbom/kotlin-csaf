@@ -18,7 +18,9 @@ package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
-import io.github.csaf.sbom.validation.tests.plusAssign
+import io.github.csaf.sbom.validation.profiles.CSAFBase
+import io.github.csaf.sbom.validation.profiles.Profile
+import io.github.csaf.sbom.validation.profiles.officialProfiles
 
 /**
  * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
@@ -39,7 +41,7 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     // /product_tree/branches[](/branches[])*/product/product_id
     ids +=
         this.product_tree?.branches?.flatMap {
-            var inner = mutableListOf<String>()
+            val inner = mutableListOf<String>()
             it.gatherProductDefinitionsTo(inner)
             inner
         }
@@ -80,7 +82,7 @@ fun Csaf.gatherProductReferences(): Set<String> {
     // /vulnerabilities[]/threats[]/product_ids[]
     ids +=
         vulnerabilities?.flatMap {
-            var inner = mutableSetOf<String>()
+            val inner = mutableSetOf<String>()
             inner += it.product_status?.first_affected
             inner += it.product_status?.first_fixed
             inner += it.product_status?.fixed
@@ -96,6 +98,17 @@ fun Csaf.gatherProductReferences(): Set<String> {
         }
 
     return ids
+}
+
+/**
+ * Gathers all [Csaf.ProductGroup.product_ids] definitions in the current document and groups them
+ * into a map with their [Csaf.ProductGroup.group_id]. This is needed because sometimes references
+ * such as [Csaf.Remediation] target a group instead of individual products, and we need to
+ * "resolve" the group ID to their product IDs.
+ */
+fun Csaf.gatherProductIdsPerGroup(): Map<String, Set<String>> {
+    return this.product_tree?.product_groups?.associateBy({ it.group_id }, { it.product_ids })
+        ?: mapOf()
 }
 
 /** Gathers all [Csaf.ProductGroup.group_id] definitions in the current document. */
@@ -116,13 +129,29 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     // /vulnerabilities[]/threats[]/group_ids
     ids +=
         vulnerabilities?.flatMap {
-            var inner = mutableSetOf<String>()
+            val inner = mutableSetOf<String>()
             inner += it.remediations?.flatMap { it.group_ids ?: setOf() }
             inner += it.threats?.flatMap { it.group_ids ?: setOf() }
             inner
         }
 
     return ids
+}
+
+/**
+ * Returns the profile according to
+ * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
+ * is a local profile, [CSAFBase] is returned as a "catch-all".
+ */
+val Csaf.profile: Profile?
+    get() {
+        return officialProfiles[this.document.category] ?: CSAFBase
+    }
+
+internal fun Collection<String>?.resolveProductIDs(
+    map: Map<String, Collection<String>>
+): Collection<String>? {
+    return this?.flatMap { map[it] ?: setOf() }
 }
 
 internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
@@ -145,6 +174,20 @@ internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection
     } else if (this != null) {
         this
     } else {
-        listOf()
+        // We return a set here, to stay consistent with "union"
+        setOf()
+    }
+}
+
+internal operator fun <E> Collection<E>?.minus(other: Collection<E>?): Collection<E> {
+    return if (other != null && this != null) {
+        this.subtract(other)
+    } else if (other != null) {
+        setOf()
+    } else if (this != null) {
+        this
+    } else {
+        // We return a set here, to stay consistent with "union"
+        setOf()
     }
 }

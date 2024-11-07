@@ -16,8 +16,13 @@
  */
 package io.github.csaf.sbom.validation
 
+import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
+import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
+import io.github.csaf.sbom.validation.profiles.VEX
 import java.net.URI
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -29,6 +34,52 @@ fun goodDistribution(label: Csaf.Label? = Csaf.Label.WHITE): Csaf.Distribution {
         text = "can be distributed freely",
     )
 }
+
+fun goodPublisher(): Csaf.Publisher =
+    Csaf.Publisher(
+        category = Csaf.Category1.vendor,
+        name = "Test Aggregator",
+        namespace = URI("example.com"),
+        contact_details = "security@example.com",
+        issuing_authority = "Very authoritative",
+    )
+
+fun goodTracking(): Csaf.Tracking =
+    Tracking(
+        aliases = setOf("alias"),
+        generator = Csaf.Generator(engine = Csaf.Engine(name = "csaf-exporter", version = "1.0")),
+        current_release_date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
+        id = "test-title",
+        initial_release_date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
+        revision_history =
+            listOf(
+                Csaf.RevisionHistory(
+                    date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
+                    number = "1.0.0",
+                    summary = "Initial and final release",
+                    legacy_version = "1.0"
+                )
+            ),
+        status = Csaf.Status.draft,
+        version = "1.0.0",
+    )
+
+fun goodNotes() =
+    listOf(
+        Csaf.Note(
+            category = Csaf.Category.description,
+            text = "Some Text",
+        )
+    )
+
+fun goodReferences() =
+    listOf(
+        Csaf.Reference(
+            category = Csaf.Category2.external,
+            summary = "Some summary",
+            url = JsonUri("https://security.example.com/some-advice"),
+        ),
+    )
 
 fun goodProductTree(): Csaf.ProductTree =
     Csaf.ProductTree(
@@ -163,6 +214,7 @@ fun goodVulnerabilities() =
                     )
                 ),
             cwe = null,
+            cve = "CVE-1234-4000",
             notes =
                 listOf(
                     Csaf.Note(
@@ -176,7 +228,7 @@ fun goodVulnerabilities() =
                     Csaf.Flag(
                         date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
                         label = Csaf.Label1.vulnerable_code_not_in_execute_path,
-                        product_ids = setOf("test-product-name"),
+                        product_ids = setOf("linux-0.3"),
                         group_ids = setOf("test-group-name"),
                     )
                 ),
@@ -242,7 +294,7 @@ fun goodVulnerabilities() =
                                 details = "just restart your machine"
                             ),
                         group_ids = setOf("some-group"),
-                        product_ids = setOf("test-product-name"),
+                        product_ids = setOf("linux-0.1"),
                         entitlements = listOf("not-sure-what-this-is"),
                     )
                 ),
@@ -289,40 +341,10 @@ fun goodCsaf(
                     ),
                 lang = lang,
                 source_lang = sourceLang,
-                publisher =
-                    Csaf.Publisher(
-                        category = Csaf.Category1.vendor,
-                        name = "Test Aggregator",
-                        namespace = URI("example.com"),
-                        contact_details = "security@example.com",
-                        issuing_authority = "Very authoritative",
-                    ),
+                publisher = goodPublisher(),
                 title = "Test Title",
-                tracking =
-                    Tracking(
-                        aliases = setOf("alias"),
-                        generator =
-                            Csaf.Generator(
-                                engine = Csaf.Engine(name = "csaf-exporter", version = "1.0")
-                            ),
-                        current_release_date =
-                            OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-                        id = "test-title",
-                        initial_release_date =
-                            OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-                        revision_history =
-                            listOf(
-                                Csaf.RevisionHistory(
-                                    date = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-                                    number = "1.0.0",
-                                    summary = "Initial and final release",
-                                    legacy_version = "1.0"
-                                )
-                            ),
-                        status = Csaf.Status.draft,
-                        version = "1.0.0",
-                    ),
                 distribution = distribution,
+                tracking = goodTracking(),
                 notes =
                     listOf(
                         Csaf.Note(
@@ -347,3 +369,72 @@ fun goodCsaf(
         product_tree = productTree,
         vulnerabilities = vulnerabilities
     )
+
+fun goodInformationalCsaf(
+    notes: List<Csaf.Note>? = goodNotes(),
+    references: List<Csaf.Reference>? = goodReferences()
+): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = InformationalAdvisory.category,
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+                notes = notes,
+                references = references,
+            )
+    )
+}
+
+fun goodSecurityIncidentResponseCsaf(references: List<Csaf.Reference>? = goodReferences()): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = SecurityIncidentResponse.category,
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+                references = references,
+                notes = goodNotes(),
+            )
+    )
+}
+
+fun goodVexCsaf(
+    productTree: Csaf.ProductTree? = goodProductTree(),
+    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities()
+): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = VEX.category,
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+            ),
+        product_tree = productTree,
+        vulnerabilities = vulnerabilities,
+    )
+}
+
+fun goodSecurityAdvisoryCsaf(
+    productTree: Csaf.ProductTree = goodProductTree(),
+    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
+): Csaf {
+    return Csaf(
+        document =
+            Csaf.Document(
+                category = SecurityAdvisory.category,
+                csaf_version = "2.0",
+                publisher = goodPublisher(),
+                title = "Some Title",
+                tracking = goodTracking(),
+            ),
+        product_tree = productTree,
+        vulnerabilities = vulnerabilities,
+    )
+}

@@ -49,8 +49,8 @@ fun String.toSemVer(): SemVer? {
  * [Int.compareTo].
  */
 fun String.compareVersionTo(version2: String): Int {
-    var semver1 = SemVer.parseOrNull(this)
-    var semver2 = SemVer.parseOrNull(version2)
+    val semver1 = SemVer.parseOrNull(this)
+    val semver2 = SemVer.parseOrNull(version2)
     return if (semver1 != null && semver2 != null) {
         semver1.compareTo(semver2)
     } else {
@@ -70,8 +70,8 @@ fun String.equalsVersion(
     ignoreMetadata: Boolean = true,
     ignorePreRelease: Boolean = false
 ): Boolean {
-    var semver1 = SemVer.parseOrNull(this)
-    var semver2 = SemVer.parseOrNull(version2)
+    val semver1 = SemVer.parseOrNull(this)
+    val semver2 = SemVer.parseOrNull(version2)
 
     return if (semver1 != null && semver2 != null) {
         semver1.major == semver2.major &&

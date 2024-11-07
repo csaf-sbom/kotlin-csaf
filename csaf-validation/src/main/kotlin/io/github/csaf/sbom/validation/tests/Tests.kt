@@ -25,6 +25,11 @@ import io.github.csaf.sbom.validation.ValidationNotApplicable
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.merge
+import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
+import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
+import io.github.csaf.sbom.validation.profiles.VEX
+import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
 import net.swiftzer.semver.SemVer
 
@@ -32,7 +37,7 @@ import net.swiftzer.semver.SemVer
  * Mandatory tests as defined in
  * [Section 6.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61-mandatory-tests).
  */
-var mandatoryTests =
+val mandatoryTests =
     listOf(
         Test611MissingDefinitionOfProductID,
         Test612MultipleDefinitionOfProductID,
@@ -56,14 +61,25 @@ var mandatoryTests =
         Test6121MissingItemInRevisionHistory,
         Test6122MultipleDefinitionInRevisionHistory,
         Test6123MultipleUseOfSameCVE,
-        Test6128Translation
+        Test61271DocumentNotes,
+        Test61272DocumentReferences,
+        Test61273Vulnerabilities,
+        Test61274ProductTree,
+        Test61275VulnerabilityNotes,
+        Test61276ProductStatus,
+        Test61277VEXProductStatus,
+        Test61278VulnerabilityID,
+        Test61279ImpactStatement,
+        Test612710ActionStatement,
+        Test612711Vulnerabilities,
+        Test6128Translation,
     )
 
 /**
  * Optional tests as defined in
  * [Section 6.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#62-optional-tests).
  */
-var optionalTests =
+val optionalTests =
     listOf(
         Test621UnusedDefinitionOfProductID,
     )
@@ -72,7 +88,7 @@ var optionalTests =
  * Informative tests as defined in
  * [Section 6.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#63-informative-test).
  */
-var informativeTests = listOf<Test>()
+val informativeTests = listOf<Test>()
 
 /** Executes all tests in this list of [Test] objects. */
 fun List<Test>.test(doc: Csaf): ValidationResult {
@@ -664,12 +680,11 @@ object Test6121MissingItemInRevisionHistory : Test {
 
         // Check for missing items
         sortedByDate.reduce { prev, current ->
-            var next = prev.number.versionOrMajorVersion + 1
-            if (
-                next != current.number.versionOrMajorVersion &&
-                    prev.number.versionOrMajorVersion != current.number.versionOrMajorVersion
-            ) {
-                missing += next.toString()
+            val prevVersion = prev.number.versionOrMajorVersion
+            val expectedVersion = prevVersion + 1
+            val currentVersion = current.number.versionOrMajorVersion
+            if (expectedVersion != currentVersion && prevVersion != currentVersion) {
+                missing += expectedVersion.toString()
             }
             current
         }
@@ -728,11 +743,285 @@ object Test6123MultipleUseOfSameCVE : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.27.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61271-document-notes).
+ */
+object Test61271DocumentNotes : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is InformationalAdvisory && doc.profile !is SecurityIncidentResponse) {
+            return ValidationNotApplicable
+        }
+
+        return if (
+            doc.document.notes?.any {
+                it.category in
+                    listOf(
+                        Csaf.Category.description,
+                        Csaf.Category.details,
+                        Csaf.Category.general,
+                        Csaf.Category.summary,
+                    )
+            } == true
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document notes do not contain an item which has a category of description, details, general or summary"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61272-document-references).
+ */
+object Test61272DocumentReferences : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is InformationalAdvisory && doc.profile !is SecurityIncidentResponse) {
+            return ValidationNotApplicable
+        }
+
+        return if (
+            doc.document.references?.any { it.category == Csaf.Category2.external } == true
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The document references do not contain any item which has the category external"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.3](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61273-vulnerabilities).
+ */
+object Test61273Vulnerabilities : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is InformationalAdvisory) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.vulnerabilities == null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /vulnerabilities exists"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61274-product-tree).
+ */
+object Test61274ProductTree : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.product_tree != null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /product_tree does not exist"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.5](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61275-vulnerability-notes).
+ */
+object Test61275VulnerabilityNotes : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.notes == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The vulnerability item has no notes element"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.6](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61276-product-status).
+ */
+object Test61276ProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is SecurityAdvisory) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.product_status == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The vulnerability item has no product_status element"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.7](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61277-vex-product-status).
+ */
+object Test61277VEXProductStatus : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX) {
+            return ValidationNotApplicable
+        }
+
+        val missing =
+            doc.vulnerabilities?.filter {
+                it.product_status?.fixed == null &&
+                    it.product_status?.known_affected == null &&
+                    it.product_status?.known_not_affected == null &&
+                    it.product_status?.under_investigation == null
+            } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61278-vulnerability-id).
+ */
+object Test61278VulnerabilityID : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX) {
+            return ValidationNotApplicable
+        }
+
+        val missing = doc.vulnerabilities?.filter { it.cve == null && it.ids == null } ?: listOf()
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("None of the elements cve or ids is present"))
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.9](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#61279-impact-statement).
+ */
+object Test61279ImpactStatement : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX) {
+            return ValidationNotApplicable
+        }
+
+        // First, make a map of all product groups and their product IDs, so we can resolve them
+        // later
+        val map = doc.gatherProductIdsPerGroup()
+        val missing = mutableSetOf<String>()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val impactStatementsForProductIDs =
+                (vuln.threats
+                        ?.filter { it.category == Csaf.Category7.impact }
+                        ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) } +
+                        vuln.flags?.flatMap {
+                            it.product_ids + it.group_ids.resolveProductIDs(map)
+                        })
+                    .toSet()
+
+            missing += vuln.product_status?.known_not_affected - impactStatementsForProductIDs
+        }
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("Missing impact statement for product IDs: ${missing.joinToString(", ")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.10](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612710-action-statement).
+ */
+object Test612710ActionStatement : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX) {
+            return ValidationNotApplicable
+        }
+
+        // First, make a map all product groups and their product IDs, so we can resolve them later
+        val map = doc.gatherProductIdsPerGroup()
+        val missing = mutableSetOf<String>()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val actionStatementsForProductIDs =
+                vuln.remediations
+                    ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(map) }
+                    ?.toSet()
+
+            missing += vuln.product_status?.known_affected - actionStatementsForProductIDs
+        }
+
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("Missing action statement for product IDs: ${missing.joinToString(", ")}")
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.27.11](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#612711-vulnerabilities).
+ */
+object Test612711Vulnerabilities : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.profile !is VEX && doc.profile !is SecurityAdvisory) {
+            return ValidationNotApplicable
+        }
+
+        return if (doc.vulnerabilities != null) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("The element /vulnerabilities does not exist"))
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.1.28](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6128-translation).
  */
 object Test6128Translation : Test {
     override fun test(doc: Csaf): ValidationResult {
-        return if (doc.document.source_lang != doc.document.lang) {
+        val sourceLang = doc.document.source_lang
+        val lang = doc.document.lang
+
+        return if (sourceLang != lang || lang == null) {
             ValidationSuccessful
         } else {
             ValidationFailed(
