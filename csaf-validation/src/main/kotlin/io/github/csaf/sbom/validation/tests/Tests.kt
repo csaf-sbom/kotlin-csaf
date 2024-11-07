@@ -53,6 +53,7 @@ val mandatoryTests =
         Test6110InconsistentCVSS,
         Test6111CWE,
         Test6112Language,
+        Test6113PURL,
         Test6114SortedRevisionHistory,
         Test6115Translator,
         Test6116LatestDocumentVersion,
@@ -63,6 +64,7 @@ val mandatoryTests =
         Test6121MissingItemInRevisionHistory,
         Test6122MultipleDefinitionInRevisionHistory,
         Test6123MultipleUseOfSameCVE,
+        Test6124MultipleDefinitionInInvolvements,
         Test61271DocumentNotes,
         Test61272DocumentReferences,
         Test61273Vulnerabilities,
@@ -762,6 +764,29 @@ object Test6123MultipleUseOfSameCVE : Test {
             return ValidationFailed(
                 listOf(
                     "The following CVE identifiers are duplicate: ${duplicates.keys.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.24](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6124-multiple-definition-in-involvements).
+ */
+object Test6124MultipleDefinitionInInvolvements : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val duplicates =
+            doc.vulnerabilities?.flatMap {
+                (it.involvements?.map { Pair(it.party, it.date) } ?: listOf()).duplicates().keys
+            } ?: listOf()
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following party/date pairs are duplicate: ${duplicates.joinToString(", ")}"
                 )
             )
         }

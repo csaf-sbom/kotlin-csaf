@@ -753,6 +753,26 @@ class TestsTest {
     }
 
     @Test
+    fun test6124() {
+        val test = Test6124MultipleDefinitionInInvolvements
+
+        // failing examples
+        assertValidationFailed(
+            "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00Z)",
+            test.test(mandatoryTest("6-1-24-01"))
+        )
+        assertValidationFailed(
+            "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00Z)",
+            test.test(mandatoryTest("6-1-24-02"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-24-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-24-12")))
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+    }
+
+    @Test
     fun test61271() {
         val test = Test61271DocumentNotes
 
