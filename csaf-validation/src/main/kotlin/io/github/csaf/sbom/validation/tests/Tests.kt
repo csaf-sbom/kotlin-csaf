@@ -31,6 +31,7 @@ import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
 import io.github.csaf.sbom.validation.profiles.VEX
+import io.github.csaf.sbom.validation.profiles.officialProfiles
 import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
 import net.swiftzer.semver.SemVer
@@ -65,6 +66,8 @@ val mandatoryTests =
         Test6122MultipleDefinitionInRevisionHistory,
         Test6123MultipleUseOfSameCVE,
         Test6124MultipleDefinitionInInvolvements,
+        Test6125MultipleUseOfSameHashAlgorithm,
+        Test6126ProhibitedDocumentCategoryName,
         Test61271DocumentNotes,
         Test61272DocumentReferences,
         Test61273Vulnerabilities,
@@ -787,6 +790,52 @@ object Test6124MultipleDefinitionInInvolvements : Test {
             return ValidationFailed(
                 listOf(
                     "The following party/date pairs are duplicate: ${duplicates.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.25](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6125-multiple-use-of-same-hash-algorithm).
+ */
+object Test6125MultipleUseOfSameHashAlgorithm : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        var hashLists = doc.gatherFileHashLists()
+        var duplicates = hashLists.flatMap { it.map { it.algorithm }.duplicates().keys }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following hash algorithms are duplicate: ${duplicates.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.26](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6126-prohibited-document-category-name).
+ */
+object Test6126ProhibitedDocumentCategoryName : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category in officialProfiles.keys) {
+            return ValidationNotApplicable
+        }
+
+        val cleanedCategory = doc.document.category.lowercase().replace("(_-)", "")
+
+        // It is not allowed to match an official profile's name (without csaf_ prefix)
+        return if (cleanedCategory !in officialProfiles.keys.map { it.substringAfter("csaf_") }) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The value $cleanedCategory is the name of a profile where the space was replaced with underscores"
                 )
             )
         }

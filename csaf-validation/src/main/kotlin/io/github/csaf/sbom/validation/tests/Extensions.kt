@@ -60,7 +60,7 @@ fun Csaf.gatherProductDefinitions(): List<String> {
  */
 fun Csaf.Branche.gatherProductURLs(products: MutableCollection<String>) {
     // Add ID at this leaf
-    products += product?.product_identification_helper?.purl.toString()
+    products += product?.product_identification_helper?.purl?.toString()
 
     // Go down the branch
     this.branches?.forEach { it.gatherProductURLs(products) }
@@ -81,13 +81,13 @@ fun Csaf.gatherProductURLs(): MutableList<String> {
     // /product_tree/full_product_names[]/product_identification_helper/purl
     purls +=
         this.product_tree?.full_product_names?.mapNotNull {
-            it.product_identification_helper?.purl.toString()
+            it.product_identification_helper?.purl?.toString()
         }
 
     // /product_tree/relationships[]/full_product_name/product_identification_helper/purl
     purls +=
-        this.product_tree?.relationships?.map {
-            it.full_product_name.product_identification_helper?.purl.toString()
+        this.product_tree?.relationships?.mapNotNull {
+            it.full_product_name.product_identification_helper?.purl?.toString()
         }
 
     return purls
@@ -174,6 +174,36 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
         }
 
     return ids
+}
+
+fun Csaf.Branche.gatherFileHashLists(lists: MutableCollection<List<Csaf.FileHashe>>) {
+    // Add file hashes at this leaf
+    lists += this.product?.product_identification_helper?.hashes?.map { it.file_hashes }
+
+    // Go down the branch
+    this.branches?.forEach { it.gatherFileHashLists(lists) }
+}
+
+fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
+    var lists = mutableListOf<List<Csaf.FileHashe>>()
+
+    // /product_tree/branches[](/branches[])*/product/product_identification_helper/hashes[]/file_hashes
+    this.product_tree?.branches?.forEach { it.gatherFileHashLists(lists) }
+
+    // /product_tree/full_product_names[]/product_identification_helper/hashes[]/file_hashes
+    lists +=
+        this.product_tree?.full_product_names?.flatMap {
+            it.product_identification_helper?.hashes?.map { it.file_hashes } ?: listOf()
+        }
+
+    // /product_tree/relationships[]/full_product_name/product_identification_helper/hashes[]/file_hashes
+    lists +=
+        this.product_tree?.relationships?.flatMap {
+            it.full_product_name.product_identification_helper?.hashes?.map { it.file_hashes }
+                ?: listOf()
+        }
+
+    return lists
 }
 
 /**

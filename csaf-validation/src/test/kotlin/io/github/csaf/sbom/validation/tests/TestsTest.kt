@@ -773,6 +773,28 @@ class TestsTest {
     }
 
     @Test
+    fun test6125() {
+        val test = Test6125MultipleUseOfSameHashAlgorithm
+
+        // failing examples
+        assertValidationFailed(
+            "The following hash algorithms are duplicate: sha256",
+            test.test(mandatoryTest("6-1-25-01"))
+        )
+    }
+
+    @Test
+    fun test6126() {
+        val test = Test6126ProhibitedDocumentCategoryName
+
+        // failing examples
+        assertValidationFailed(
+            "The value security_incident_response is the name of a profile where the space was replaced with underscores",
+            test.test(mandatoryTest("6-1-26-01"))
+        )
+    }
+
+    @Test
     fun test61271() {
         val test = Test61271DocumentNotes
 

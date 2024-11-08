@@ -30,7 +30,7 @@ sealed interface Profile {
  * Base](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#41-profile-1-csaf-base).
  */
 object CSAFBase : Profile {
-    override val category = null
+    override val category = "csaf_base"
 }
 
 /**
@@ -67,7 +67,7 @@ object VEX : Profile {
 
 /** List of defined "official" profiles. */
 val officialProfiles =
-    mapOf<String?, Profile>(
+    mapOf<String, Profile>(
         CSAFBase.category to CSAFBase,
         SecurityIncidentResponse.category to SecurityIncidentResponse,
         InformationalAdvisory.category to InformationalAdvisory,
