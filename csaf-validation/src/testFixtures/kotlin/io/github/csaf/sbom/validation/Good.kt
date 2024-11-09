@@ -320,6 +320,7 @@ fun goodVulnerabilities() =
 
 fun goodCsaf(
     distribution: Csaf.Distribution? = goodDistribution(Csaf.Label.WHITE),
+    tracking: Tracking = goodTracking(),
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
     lang: String? = "en",
@@ -344,7 +345,7 @@ fun goodCsaf(
                 publisher = goodPublisher(),
                 title = "Test Title",
                 distribution = distribution,
-                tracking = goodTracking(),
+                tracking = tracking,
                 notes =
                     listOf(
                         Csaf.Note(

@@ -80,6 +80,8 @@ val mandatoryTests =
         Test612710ActionStatement,
         Test612711Vulnerabilities,
         Test6128Translation,
+        Test6129RemediationWithoutProductReference,
+        Test6130MixedIntegerAndSemanticVersioning,
     )
 
 /**
@@ -1128,6 +1130,63 @@ object Test6128Translation : Test {
             ValidationFailed(
                 listOf(
                     "The document language and the source language have the same value: ${doc.document.source_lang}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.29](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6129-remediation-without-product-reference).
+ */
+object Test6129RemediationWithoutProductReference : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val withoutRef =
+            doc.vulnerabilities?.flatMap {
+                it.remediations?.filter { it.product_ids == null && it.group_ids == null }
+                    ?: listOf()
+            } ?: listOf()
+
+        return if (withoutRef.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The given remediation does not specify to which products it should be applied"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.30](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6130-mixed-integer-and-semantic-versioning).
+ */
+object Test6130MixedIntegerAndSemanticVersioning : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val versions =
+            listOf(
+                *doc.document.tracking.revision_history.map { it.number }.toTypedArray(),
+                doc.document.tracking.version,
+            )
+
+        val isSemver = versions.first().toSemVer() != null
+        val invalids =
+            if (isSemver) {
+                    versions.map { Pair(it, it.toSemVer()) }.filter { it.second == null }
+                } else {
+                    versions.map { Pair(it, it.toIntOrNull()) }.filter { it.second == null }
+                }
+                .map { it.first }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following versions are invalid because of a mix of integer and semantic versioning: ${invalids.joinToString(", ")}"
                 )
             )
         }

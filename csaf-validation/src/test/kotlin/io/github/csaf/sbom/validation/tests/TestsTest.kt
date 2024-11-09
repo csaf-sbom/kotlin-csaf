@@ -1098,7 +1098,7 @@ class TestsTest {
     }
 
     @Test
-    fun test61128() {
+    fun test6128() {
         val test = Test6128Translation
 
         // failing examples
@@ -1109,6 +1109,57 @@ class TestsTest {
 
         // good examples
         assertValidationSuccessful(test.test(mandatoryTest("6-1-28-11")))
+    }
+
+    @Test
+    fun test6129() {
+        val test = Test6129RemediationWithoutProductReference
+
+        // failing examples
+        assertValidationFailed(
+            "The given remediation does not specify to which products it should be applied",
+            test.test(mandatoryTest("6-1-29-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-29-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-29-12")))
+    }
+
+    @Test
+    fun test6130() {
+        val test = Test6130MixedIntegerAndSemanticVersioning
+
+        // failing examples
+        assertValidationFailed(
+            "The following versions are invalid because of a mix of integer and semantic versioning: 2, 2",
+            test.test(mandatoryTest("6-1-30-01"))
+        )
+        assertValidationFailed(
+            "The following versions are invalid because of a mix of integer and semantic versioning: 1.0.0",
+            test.test(
+                goodCsaf(
+                    tracking =
+                        Csaf.Tracking(
+                            revision_history =
+                                listOf(
+                                    Csaf.RevisionHistory(
+                                        date = JsonOffsetDateTime.now(),
+                                        number = "2",
+                                        summary = "test"
+                                    )
+                                ),
+                            current_release_date = JsonOffsetDateTime.now(),
+                            id = "test",
+                            initial_release_date = JsonOffsetDateTime.now(),
+                            status = Csaf.Status.final,
+                            version = "1.0.0",
+                        )
+                )
+            )
+        )
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-30-11")))
     }
 
     @Test
