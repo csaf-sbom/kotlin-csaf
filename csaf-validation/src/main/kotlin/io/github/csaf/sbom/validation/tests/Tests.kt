@@ -1227,6 +1227,28 @@ object Test6131VersionRangeInProductVersion : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.31](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6132-flag-without-product-reference).
+ */
+object Test6132FlatWithoutProductReference : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val missing =
+            doc.vulnerabilities
+                ?.flatMap { it.flags ?: setOf() }
+                ?.filter { it.group_ids == null && it.product_ids == null } ?: listOf()
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following flags are missing products or groups: ${missing.map { it.label }.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.2.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#621-unused-definition-of-product-id).
  */
 object Test621UnusedDefinitionOfProductID : Test {

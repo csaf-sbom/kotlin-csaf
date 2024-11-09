@@ -1210,6 +1210,64 @@ class TestsTest {
     }
 
     @Test
+    fun test6132() {
+        val test = Test6132FlatWithoutProductReference
+
+        // failing examples
+        assertValidationFailed(
+            "The following flags are missing products or groups: component_not_present",
+            test.test(mandatoryTest("6-1-32-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-32-11")))
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(flags = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            date = JsonOffsetDateTime.now(),
+                                            group_ids = setOf("group1"),
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = null,
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            date = JsonOffsetDateTime.now(),
+                                            group_ids = null,
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = setOf("product1"),
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
