@@ -32,9 +32,9 @@ import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
 import io.github.csaf.sbom.validation.profiles.VEX
 import io.github.csaf.sbom.validation.profiles.officialProfiles
+import net.swiftzer.semver.SemVer
 import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
-import net.swiftzer.semver.SemVer
 
 /**
  * Mandatory tests as defined in
@@ -83,6 +83,8 @@ val mandatoryTests =
         Test6129RemediationWithoutProductReference,
         Test6130MixedIntegerAndSemanticVersioning,
         Test6131VersionRangeInProductVersion,
+        Test6132FlatWithoutProductReference,
+        Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
     )
 
 /**
@@ -146,8 +148,12 @@ object Test612MultipleDefinitionOfProductID : Test {
     }
 }
 
-private fun <T> List<T>.duplicates(): Map<T, Int> {
-    return groupingBy { it }.eachCount().filter { it.value > 1 }
+private fun <T> List<T>?.duplicates(): Map<T, Int> {
+    return if (this == null) {
+        mapOf()
+    } else {
+        groupingBy { it }.eachCount().filter { it.value > 1 }
+    }
 }
 
 /**
@@ -1241,6 +1247,34 @@ object Test6132FlatWithoutProductReference : Test {
             ValidationFailed(
                 listOf(
                     "The following flags are missing products or groups: ${missing.map { it.label }.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.33](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6133-multiple-flags-with-vex-justification-codes-per-product).
+ */
+object Test6133MultipleFlagsWithVEXJustificationCodesPerProduct : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        var duplicates = mutableListOf<String>()
+        var groupMap = doc.gatherProductIdsPerGroup()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val productsIDsInFlags =
+                (vuln.flags?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) })
+
+            duplicates += productsIDsInFlags.duplicates().keys
+        }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following product IDs are part of multiple flags: ${duplicates.joinToString(", ")}"
                 )
             )
         }

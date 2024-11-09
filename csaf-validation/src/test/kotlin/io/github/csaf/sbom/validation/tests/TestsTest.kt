@@ -1268,6 +1268,42 @@ class TestsTest {
     }
 
     @Test
+    fun test6133() {
+        val test = Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
+
+        // failing examples
+        assertValidationFailed(
+            "The following product IDs are part of multiple flags: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-33-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-33-11")))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(flags = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = null,
+                                            group_ids = null
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
