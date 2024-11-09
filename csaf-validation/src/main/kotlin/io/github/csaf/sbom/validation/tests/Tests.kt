@@ -82,6 +82,7 @@ val mandatoryTests =
         Test6128Translation,
         Test6129RemediationWithoutProductReference,
         Test6130MixedIntegerAndSemanticVersioning,
+        Test6131VersionRangeInProductVersion,
     )
 
 /**
@@ -1187,6 +1188,37 @@ object Test6130MixedIntegerAndSemanticVersioning : Test {
             ValidationFailed(
                 listOf(
                     "The following versions are invalid because of a mix of integer and semantic versioning: ${invalids.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+val keywords = listOf("after", "all", "before", "earlier", "later", "prior", "versions")
+val operatorsRegex = """(?)(<|<=|>>=|>)""".toRegex()
+
+/**
+ * Implementation of
+ * [Test 6.1.31](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6131-version-range-in-product-version).
+ */
+object Test6131VersionRangeInProductVersion : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        var versions =
+            doc.product_tree
+                .flatBranches()
+                .filter { it.category == Csaf.Category3.product_version }
+                .map { it.name }
+        val invalids =
+            versions.filter {
+                operatorsRegex.containsMatchIn(it) ||
+                    keywords.any { kw -> it.split("""\s""".toRegex()).contains(kw) }
+            }
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following product versions are invalid and contain version ranges: ${invalids.joinToString(", ")}"
                 )
             )
         }

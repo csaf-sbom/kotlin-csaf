@@ -206,6 +206,24 @@ fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
     return lists
 }
 
+fun Csaf.ProductTree?.flatBranches(): List<Csaf.Branche> {
+    var flattened = mutableListOf<Csaf.Branche>()
+
+    var worklist = this?.branches?.toMutableList() ?: mutableListOf()
+    while (worklist.isNotEmpty()) {
+        // Retrieve item from work-list
+        var next = worklist.removeFirst()
+
+        // Add children to flattened list
+        flattened += next.branches
+
+        // Add children to work-list
+        worklist += next.branches
+    }
+
+    return flattened
+}
+
 /**
  * Returns the profile according to
  * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this

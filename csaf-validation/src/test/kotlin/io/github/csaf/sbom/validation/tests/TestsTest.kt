@@ -1163,6 +1163,53 @@ class TestsTest {
     }
 
     @Test
+    fun test6131() {
+        val test = Test6131VersionRangeInProductVersion
+
+        // failing examples
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: prior to 4.2",
+            test.test(mandatoryTest("6-1-31-01"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <4.2",
+            test.test(mandatoryTest("6-1-31-02"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <=4.1",
+            test.test(mandatoryTest("6-1-31-03"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <= 4.1",
+            test.test(mandatoryTest("6-1-31-04"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 4.1 and earlier",
+            test.test(mandatoryTest("6-1-31-05"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: all",
+            test.test(mandatoryTest("6-1-31-06"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: before 4.2",
+            test.test(mandatoryTest("6-1-31-07"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 4.2 and later",
+            test.test(mandatoryTest("6-1-31-08"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 3.X versions",
+            test.test(mandatoryTest("6-1-31-09"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-31-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-31-12")))
+    }
+
+    @Test
     fun test621() {
         val test = Test621UnusedDefinitionOfProductID
 
