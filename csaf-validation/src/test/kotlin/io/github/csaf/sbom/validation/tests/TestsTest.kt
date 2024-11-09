@@ -1124,6 +1124,49 @@ class TestsTest {
         // good examples
         assertValidationSuccessful(test.test(mandatoryTest("6-1-29-11")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-29-12")))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(remediations = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            category = Csaf.Category5.vendor_fix,
+                                            details = "test",
+                                            product_ids = null,
+                                            group_ids = setOf("group1"),
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            category = Csaf.Category5.vendor_fix,
+                                            details = "test",
+                                            product_ids = setOf("product1"),
+                                            group_ids = null,
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
     }
 
     @Test

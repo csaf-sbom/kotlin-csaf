@@ -32,9 +32,9 @@ import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
 import io.github.csaf.sbom.validation.profiles.VEX
 import io.github.csaf.sbom.validation.profiles.officialProfiles
-import net.swiftzer.semver.SemVer
 import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
+import net.swiftzer.semver.SemVer
 
 /**
  * Mandatory tests as defined in
@@ -1264,7 +1264,7 @@ object Test6133MultipleFlagsWithVEXJustificationCodesPerProduct : Test {
 
         for (vuln in doc.vulnerabilities ?: listOf()) {
             val productsIDsInFlags =
-                (vuln.flags?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) })
+                vuln.flags?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) }
 
             duplicates += productsIDsInFlags.duplicates().keys
         }
