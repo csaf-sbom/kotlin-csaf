@@ -16,8 +16,10 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.goodCsaf
+import io.github.csaf.sbom.validation.goodFileHashes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -113,6 +115,329 @@ class ExtensionsTest {
                         )
                 )
                 .gatherProductReferences()
+        )
+    }
+
+    @Test
+    fun testGatherProductURLs() {
+        assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductURLs())
+        assertEquals(
+            emptyList(),
+            goodCsaf(productTree = Csaf.ProductTree(full_product_names = null)).gatherProductURLs()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My product",
+                                        product_id = "product1",
+                                        product_identification_helper = null
+                                    )
+                                ),
+                            relationships =
+                                listOf(
+                                    Csaf.Relationship(
+                                        full_product_name =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1_on_the_rocks",
+                                                product_identification_helper = null
+                                            ),
+                                        category = Csaf.Category4.installed_on,
+                                        product_reference = "product1",
+                                        relates_to_product_reference = "rocks"
+                                    )
+                                )
+                        )
+                )
+                .gatherProductURLs()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(purl = null)
+                                            )
+                                    ),
+                                )
+                        )
+                )
+                .gatherProductURLs()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product = null
+                                    ),
+                                )
+                        )
+                )
+                .gatherProductURLs()
+        )
+        assertEquals(
+            listOf("pkg:github/product/base@1.0.0"),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(
+                                                        purl =
+                                                            JsonUri("pkg:github/product/base@1.0.0")
+                                                    )
+                                            )
+                                    ),
+                                )
+                        )
+                )
+                .gatherProductURLs()
+        )
+        assertEquals(
+            listOf("pkg:github/product/rocks@1.0.0"),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            relationships =
+                                listOf(
+                                    Csaf.Relationship(
+                                        full_product_name =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1_on_the_rocks",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(
+                                                        purl =
+                                                            JsonUri(
+                                                                "pkg:github/product/rocks@1.0.0"
+                                                            )
+                                                    )
+                                            ),
+                                        category = Csaf.Category4.installed_on,
+                                        product_reference = "product1",
+                                        relates_to_product_reference = "rocks"
+                                    )
+                                )
+                        )
+                )
+                .gatherProductURLs()
+        )
+    }
+
+    @Test
+    fun testGatherFileHashLists() {
+        assertEquals(emptyList(), goodCsaf(productTree = null).gatherFileHashLists())
+        assertEquals(
+            emptyList(),
+            goodCsaf(productTree = Csaf.ProductTree(full_product_names = null))
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My product",
+                                        product_id = "product1",
+                                        product_identification_helper = null
+                                    )
+                                ),
+                            relationships =
+                                listOf(
+                                    Csaf.Relationship(
+                                        full_product_name =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1_on_the_rocks",
+                                                product_identification_helper = null
+                                            ),
+                                        category = Csaf.Category4.installed_on,
+                                        product_reference = "product1",
+                                        relates_to_product_reference = "rocks"
+                                    )
+                                )
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(hashes = null)
+                                            )
+                                    ),
+                                )
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product = null
+                                    ),
+                                )
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            emptyList(),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My product",
+                                        product_id = "product1",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(hashes = null)
+                                    )
+                                ),
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            listOf(goodFileHashes()),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My product",
+                                        product_id = "product1",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(
+                                                hashes =
+                                                    listOf(
+                                                        Csaf.Hashe(
+                                                            file_hashes = goodFileHashes(),
+                                                            filename = "test.file"
+                                                        )
+                                                    )
+                                            )
+                                    )
+                                ),
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            listOf(goodFileHashes()),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            branches =
+                                listOf(
+                                    Csaf.Branche(
+                                        category = Csaf.Category3.product_name,
+                                        name = "My product",
+                                        product =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(
+                                                        hashes =
+                                                            listOf(
+                                                                Csaf.Hashe(
+                                                                    file_hashes = goodFileHashes(),
+                                                                    filename = "test.file"
+                                                                )
+                                                            )
+                                                    )
+                                            )
+                                    ),
+                                )
+                        )
+                )
+                .gatherFileHashLists()
+        )
+        assertEquals(
+            listOf(goodFileHashes()),
+            goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            relationships =
+                                listOf(
+                                    Csaf.Relationship(
+                                        full_product_name =
+                                            Csaf.Product(
+                                                name = "My product",
+                                                product_id = "product1_on_the_rocks",
+                                                product_identification_helper =
+                                                    Csaf.ProductIdentificationHelper(
+                                                        hashes =
+                                                            listOf(
+                                                                Csaf.Hashe(
+                                                                    file_hashes = goodFileHashes(),
+                                                                    filename = "test.file"
+                                                                )
+                                                            )
+                                                    )
+                                            ),
+                                        category = Csaf.Category4.installed_on,
+                                        product_reference = "product1",
+                                        relates_to_product_reference = "rocks"
+                                    )
+                                )
+                        )
+                )
+                .gatherFileHashLists()
         )
     }
 

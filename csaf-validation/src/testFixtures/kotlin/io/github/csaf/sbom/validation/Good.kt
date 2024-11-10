@@ -202,6 +202,12 @@ fun goodProductTree(): Csaf.ProductTree =
             )
     )
 
+fun goodFileHashes(): List<Csaf.FileHashe> {
+    return listOf(
+        Csaf.FileHashe(value = "21c9a43d22cd02babb34b45a9defb881ae8228f0d034a0779b1321e851cad6a4")
+    )
+}
+
 fun goodVulnerabilities() =
     listOf(
         Csaf.Vulnerability(

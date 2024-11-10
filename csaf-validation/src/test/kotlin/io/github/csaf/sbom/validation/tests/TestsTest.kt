@@ -1250,6 +1250,7 @@ class TestsTest {
         // good examples
         assertValidationSuccessful(test.test(mandatoryTest("6-1-31-11")))
         assertValidationSuccessful(test.test(mandatoryTest("6-1-31-12")))
+        assertValidationSuccessful(test.test(goodCsaf(productTree = null)))
     }
 
     @Test

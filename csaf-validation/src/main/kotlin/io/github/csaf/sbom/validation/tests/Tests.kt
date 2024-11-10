@@ -1210,10 +1210,11 @@ val operatorsRegex = """(?)(<|<=|>>=|>)""".toRegex()
 object Test6131VersionRangeInProductVersion : Test {
     override fun test(doc: Csaf): ValidationResult {
         var versions =
-            doc.product_tree
-                .flatBranches()
-                .filter { it.category == Csaf.Category3.product_version }
-                .map { it.name }
+            doc.product_tree.mapBranchesNotNull(
+                predicate = { it.category == Csaf.Category3.product_version }
+            ) {
+                it.name
+            }
         val invalids =
             versions.filter {
                 operatorsRegex.containsMatchIn(it) ||

@@ -22,29 +22,12 @@ import io.github.csaf.sbom.validation.profiles.CSAFBase
 import io.github.csaf.sbom.validation.profiles.Profile
 import io.github.csaf.sbom.validation.profiles.officialProfiles
 
-/**
- * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
- * recursively.
- */
-fun Csaf.Branche.gatherProductDefinitionsTo(products: MutableCollection<String>) {
-    // Add ID at this leaf
-    products += product?.product_id
-
-    // Go down the branch
-    this.branches?.forEach { it.gatherProductDefinitionsTo(products) }
-}
-
 /** Gathers all [Product.product_id] definitions in the current document. */
 fun Csaf.gatherProductDefinitions(): List<String> {
     val ids = mutableListOf<String>()
 
     // /product_tree/branches[](/branches[])*/product/product_id
-    ids +=
-        this.product_tree?.branches?.flatMap {
-            val inner = mutableListOf<String>()
-            it.gatherProductDefinitionsTo(inner)
-            inner
-        }
+    ids += this.product_tree?.mapBranchesNotNull { it.product?.product_id }
 
     // /product_tree/full_product_names[]/product_id
     ids += this.product_tree?.full_product_names?.map { it.product_id }
@@ -55,27 +38,14 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     return ids
 }
 
-/**
- * Gathers product URLs at a [Csaf.Branche]. This is needed because we need to do it recursively.
- */
-fun Csaf.Branche.gatherProductURLs(products: MutableCollection<String>) {
-    // Add ID at this leaf
-    products += product?.product_identification_helper?.purl?.toString()
-
-    // Go down the branch
-    this.branches?.forEach { it.gatherProductURLs(products) }
-}
-
 /** Gathers all [Csaf.ProductIdentificationHelper.purl] definitions in the current document. */
 fun Csaf.gatherProductURLs(): MutableList<String> {
     val purls = mutableListOf<String>()
 
     // /product_tree/branches[](/branches[])*/product/product_identification_helper/purl
     purls +=
-        this.product_tree?.branches?.flatMap {
-            var inner = mutableListOf<String>()
-            it.gatherProductURLs(inner)
-            inner
+        this.product_tree?.mapBranchesNotNull {
+            it.product?.product_identification_helper?.purl?.toString()
         }
 
     // /product_tree/full_product_names[]/product_identification_helper/purl
@@ -176,46 +146,58 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     return ids
 }
 
-fun Csaf.Branche.gatherFileHashLists(lists: MutableCollection<List<Csaf.FileHashe>>) {
-    // Add file hashes at this leaf
-    lists += this.product?.product_identification_helper?.hashes?.map { it.file_hashes }
-
-    // Go down the branch
-    this.branches?.forEach { it.gatherFileHashLists(lists) }
-}
-
 fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
     var lists = mutableListOf<List<Csaf.FileHashe>>()
 
     // /product_tree/branches[](/branches[])*/product/product_identification_helper/hashes[]/file_hashes
-    this.product_tree?.branches?.forEach { it.gatherFileHashLists(lists) }
+    lists +=
+        this.product_tree?.mapBranchesNotNull {
+            it.product?.product_identification_helper?.hashes?.flatMap { it.file_hashes }
+        }
 
     // /product_tree/full_product_names[]/product_identification_helper/hashes[]/file_hashes
     lists +=
-        this.product_tree?.full_product_names?.flatMap {
-            it.product_identification_helper?.hashes?.map { it.file_hashes } ?: listOf()
+        this.product_tree?.full_product_names?.mapNotNull {
+            it.product_identification_helper?.hashes?.flatMap { it.file_hashes }
         }
 
     // /product_tree/relationships[]/full_product_name/product_identification_helper/hashes[]/file_hashes
     lists +=
-        this.product_tree?.relationships?.flatMap {
-            it.full_product_name.product_identification_helper?.hashes?.map { it.file_hashes }
-                ?: listOf()
+        this.product_tree?.relationships?.mapNotNull {
+            it.full_product_name.product_identification_helper?.hashes?.flatMap { it.file_hashes }
         }
 
     return lists
 }
 
-fun Csaf.ProductTree?.flatBranches(): List<Csaf.Branche> {
-    var flattened = mutableListOf<Csaf.Branche>()
+/**
+ * This utility function gathers all [Csaf.Branche] objects in a flattened list. Furthermore, it
+ * executes [transform] on the selected [Csaf.Branche], so that it behaves similar to [mapNotNull]
+ * on the individual objects.
+ *
+ * Furthermore, an optional [predicate] can be specified to further select branches that go into the
+ * list. Note: this only affects the addition to the final flattened list; all branches are walked
+ * until the leaf even through the predicate might fail at a higher level.
+ */
+fun <T> Csaf.ProductTree?.mapBranchesNotNull(
+    predicate: ((Csaf.Branche) -> Boolean)? = null,
+    transform: ((Csaf.Branche) -> T?)
+): List<T> {
+    val branches = this?.branches ?: return listOf()
+    val flattened = mutableListOf<T>()
+    val worklist = branches.toMutableList()
 
-    var worklist = this?.branches?.toMutableList() ?: mutableListOf()
     while (worklist.isNotEmpty()) {
         // Retrieve item from work-list
         var next = worklist.removeFirst()
 
-        // Add children to flattened list
-        flattened += next.branches
+        // Add to flattened, if predicate holds
+        if (predicate?.let { it(next) } != false) {
+            val value = transform(next)
+            if (value != null) {
+                flattened += value
+            }
+        }
 
         // Add children to work-list
         worklist += next.branches
