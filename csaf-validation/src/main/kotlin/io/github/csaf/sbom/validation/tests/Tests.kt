@@ -1242,7 +1242,7 @@ object Test6131VersionRangeInProductVersion : Test {
  * Implementation of
  * [Test 6.1.32](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6132-flag-without-product-reference).
  */
-object Test6132FlatWithoutProductReference : Test {
+object Test6132FlagWithoutProductReference : Test {
     override fun test(doc: Csaf): ValidationResult {
         val missing =
             doc.vulnerabilities
