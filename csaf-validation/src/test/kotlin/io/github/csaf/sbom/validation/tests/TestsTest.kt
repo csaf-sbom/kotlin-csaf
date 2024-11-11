@@ -311,6 +311,42 @@ class TestsTest {
     }
 
     @Test
+    fun test6113() {
+        val test = Test6113PURL
+
+        // failing examples
+        assertValidationFailed(
+            "Invalid PURLs: The PackageURL name specified is invalid",
+            test.test(mandatoryTest("6-1-13-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    productTree =
+                        Csaf.ProductTree(
+                            full_product_names =
+                                listOf(
+                                    Csaf.Product(
+                                        name = "My Product",
+                                        product_id = "product1",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(
+                                                purl =
+                                                    JsonUri(
+                                                        "pkg:github/package-url/purl-spec@244fd47e07d1004f0aed9c"
+                                                    )
+                                            )
+                                    )
+                                )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
     fun test6114() {
         val test = Test6114SortedRevisionHistory
 
@@ -717,6 +753,48 @@ class TestsTest {
     }
 
     @Test
+    fun test6124() {
+        val test = Test6124MultipleDefinitionInInvolvements
+
+        // failing examples
+        assertValidationFailed(
+            "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00Z)",
+            test.test(mandatoryTest("6-1-24-01"))
+        )
+        assertValidationFailed(
+            "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00Z)",
+            test.test(mandatoryTest("6-1-24-02"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-24-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-24-12")))
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+    }
+
+    @Test
+    fun test6125() {
+        val test = Test6125MultipleUseOfSameHashAlgorithm
+
+        // failing examples
+        assertValidationFailed(
+            "The following hash algorithms are duplicate: sha256",
+            test.test(mandatoryTest("6-1-25-01"))
+        )
+    }
+
+    @Test
+    fun test6126() {
+        val test = Test6126ProhibitedDocumentCategoryName
+
+        // failing examples
+        assertValidationFailed(
+            "The value Security_Incident_Response conflicts with the name of an official profile",
+            test.test(mandatoryTest("6-1-26-01"))
+        )
+    }
+
+    @Test
     fun test61271() {
         val test = Test61271DocumentNotes
 
@@ -1020,7 +1098,7 @@ class TestsTest {
     }
 
     @Test
-    fun test61128() {
+    fun test6128() {
         val test = Test6128Translation
 
         // failing examples
@@ -1031,6 +1109,242 @@ class TestsTest {
 
         // good examples
         assertValidationSuccessful(test.test(mandatoryTest("6-1-28-11")))
+    }
+
+    @Test
+    fun test6129() {
+        val test = Test6129RemediationWithoutProductReference
+
+        // failing examples
+        assertValidationFailed(
+            "The given remediation does not specify to which products it should be applied",
+            test.test(mandatoryTest("6-1-29-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-29-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-29-12")))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(remediations = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            category = Csaf.Category5.vendor_fix,
+                                            details = "test",
+                                            product_ids = null,
+                                            group_ids = setOf("group1"),
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                remediations =
+                                    listOf(
+                                        Csaf.Remediation(
+                                            category = Csaf.Category5.vendor_fix,
+                                            details = "test",
+                                            product_ids = setOf("product1"),
+                                            group_ids = null,
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test6130() {
+        val test = Test6130MixedIntegerAndSemanticVersioning
+
+        // failing examples
+        assertValidationFailed(
+            "The following versions are invalid because of a mix of integer and semantic versioning: 2, 2",
+            test.test(mandatoryTest("6-1-30-01"))
+        )
+        assertValidationFailed(
+            "The following versions are invalid because of a mix of integer and semantic versioning: 1.0.0",
+            test.test(
+                goodCsaf(
+                    tracking =
+                        Csaf.Tracking(
+                            revision_history =
+                                listOf(
+                                    Csaf.RevisionHistory(
+                                        date = JsonOffsetDateTime.now(),
+                                        number = "2",
+                                        summary = "test"
+                                    )
+                                ),
+                            current_release_date = JsonOffsetDateTime.now(),
+                            id = "test",
+                            initial_release_date = JsonOffsetDateTime.now(),
+                            status = Csaf.Status.final,
+                            version = "1.0.0",
+                        )
+                )
+            )
+        )
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-30-11")))
+    }
+
+    @Test
+    fun test6131() {
+        val test = Test6131VersionRangeInProductVersion
+
+        // failing examples
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: prior to 4.2",
+            test.test(mandatoryTest("6-1-31-01"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <4.2",
+            test.test(mandatoryTest("6-1-31-02"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <=4.1",
+            test.test(mandatoryTest("6-1-31-03"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: <= 4.1",
+            test.test(mandatoryTest("6-1-31-04"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 4.1 and earlier",
+            test.test(mandatoryTest("6-1-31-05"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: all",
+            test.test(mandatoryTest("6-1-31-06"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: before 4.2",
+            test.test(mandatoryTest("6-1-31-07"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 4.2 and later",
+            test.test(mandatoryTest("6-1-31-08"))
+        )
+        assertValidationFailed(
+            "The following product versions are invalid and contain version ranges: 3.X versions",
+            test.test(mandatoryTest("6-1-31-09"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-31-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-31-12")))
+        assertValidationSuccessful(test.test(goodCsaf(productTree = null)))
+    }
+
+    @Test
+    fun test6132() {
+        val test = Test6132FlagWithoutProductReference
+
+        // failing examples
+        assertValidationFailed(
+            "The following flags are missing products or groups: component_not_present",
+            test.test(mandatoryTest("6-1-32-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-32-11")))
+        assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(flags = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            date = JsonOffsetDateTime.now(),
+                                            group_ids = setOf("group1"),
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = null,
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            date = JsonOffsetDateTime.now(),
+                                            group_ids = null,
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = setOf("product1"),
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun test6133() {
+        val test = Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
+
+        // failing examples
+        assertValidationFailed(
+            "The following product IDs are part of multiple flags: CSAFPID-9080700",
+            test.test(mandatoryTest("6-1-33-01"))
+        )
+
+        // good examples
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-33-11")))
+        assertValidationSuccessful(
+            test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(flags = null))))
+        )
+        assertValidationSuccessful(
+            test.test(
+                goodCsaf(
+                    vulnerabilities =
+                        listOf(
+                            Csaf.Vulnerability(
+                                flags =
+                                    setOf(
+                                        Csaf.Flag(
+                                            label = Csaf.Label1.component_not_present,
+                                            product_ids = null,
+                                            group_ids = null
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+        )
     }
 
     @Test
@@ -1073,8 +1387,8 @@ class TestsTest {
      * Short utility function to construct the path to the test file based on the test file ID for
      * mandatory tests.
      */
-    fun mandatoryTest(id: String): String {
-        var test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+    private fun mandatoryTest(id: String): String {
+        val test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
         executedTests += test
 
         return "$testFolder/$test"
@@ -1084,8 +1398,8 @@ class TestsTest {
      * Short utility function to construct the path to the test file based on the test file ID for
      * optional tests.
      */
-    fun optionalTest(id: String): String {
-        var test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+    private fun optionalTest(id: String): String {
+        val test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
         executedTests += test
 
         return "$testFolder/$test"

@@ -22,29 +22,12 @@ import io.github.csaf.sbom.validation.profiles.CSAFBase
 import io.github.csaf.sbom.validation.profiles.Profile
 import io.github.csaf.sbom.validation.profiles.officialProfiles
 
-/**
- * Gathers product definitions at a [Csaf.Branche]. This is needed because we need to do it
- * recursively.
- */
-fun Csaf.Branche.gatherProductDefinitionsTo(products: MutableCollection<String>) {
-    // Add ID at this leaf
-    products += product?.product_id
-
-    // Go down the branch
-    this.branches?.forEach { it.gatherProductDefinitionsTo(products) }
-}
-
 /** Gathers all [Product.product_id] definitions in the current document. */
 fun Csaf.gatherProductDefinitions(): List<String> {
     val ids = mutableListOf<String>()
 
     // /product_tree/branches[](/branches[])*/product/product_id
-    ids +=
-        this.product_tree?.branches?.flatMap {
-            val inner = mutableListOf<String>()
-            it.gatherProductDefinitionsTo(inner)
-            inner
-        }
+    ids += this.product_tree?.mapBranchesNotNull { it.product?.product_id }
 
     // /product_tree/full_product_names[]/product_id
     ids += this.product_tree?.full_product_names?.map { it.product_id }
@@ -53,6 +36,31 @@ fun Csaf.gatherProductDefinitions(): List<String> {
     ids += this.product_tree?.relationships?.map { it.full_product_name.product_id }
 
     return ids
+}
+
+/** Gathers all [Csaf.ProductIdentificationHelper.purl] definitions in the current document. */
+fun Csaf.gatherProductURLs(): MutableList<String> {
+    val purls = mutableListOf<String>()
+
+    // /product_tree/branches[](/branches[])*/product/product_identification_helper/purl
+    purls +=
+        this.product_tree?.mapBranchesNotNull {
+            it.product?.product_identification_helper?.purl?.toString()
+        }
+
+    // /product_tree/full_product_names[]/product_identification_helper/purl
+    purls +=
+        this.product_tree?.full_product_names?.mapNotNull {
+            it.product_identification_helper?.purl?.toString()
+        }
+
+    // /product_tree/relationships[]/full_product_name/product_identification_helper/purl
+    purls +=
+        this.product_tree?.relationships?.mapNotNull {
+            it.full_product_name.product_identification_helper?.purl?.toString()
+        }
+
+    return purls
 }
 
 /** Gathers all product IDs in the current document. */
@@ -139,11 +147,76 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
 }
 
 /**
+ * This utility function gathers all lists of [Csaf.FileHashe] contained in
+ * [Csaf.ProductIdentificationHelper.hashes] in a list of lists. We intentionally do not flatten the
+ * lists, since we need to look for duplicates WITHIN the inner layer of lists.
+ */
+fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
+    val lists = mutableListOf<List<Csaf.FileHashe>>()
+
+    // /product_tree/branches[](/branches[])*/product/product_identification_helper/hashes[]/file_hashes
+    lists +=
+        this.product_tree?.mapBranchesNotNull {
+            it.product?.product_identification_helper?.hashes?.flatMap { it.file_hashes }
+        }
+
+    // /product_tree/full_product_names[]/product_identification_helper/hashes[]/file_hashes
+    lists +=
+        this.product_tree?.full_product_names?.mapNotNull {
+            it.product_identification_helper?.hashes?.flatMap { it.file_hashes }
+        }
+
+    // /product_tree/relationships[]/full_product_name/product_identification_helper/hashes[]/file_hashes
+    lists +=
+        this.product_tree?.relationships?.mapNotNull {
+            it.full_product_name.product_identification_helper?.hashes?.flatMap { it.file_hashes }
+        }
+
+    return lists
+}
+
+/**
+ * This utility function gathers all [Csaf.Branche] objects in a flattened list. Furthermore, it
+ * executes [transform] on the selected [Csaf.Branche], so that it behaves similar to [mapNotNull]
+ * on the individual objects.
+ *
+ * Furthermore, an optional [predicate] can be specified to further select branches that go into the
+ * list. Note: this only affects the addition to the final flattened list; all branches are walked
+ * until the leaf even through the predicate might fail at a higher level.
+ */
+fun <T> Csaf.ProductTree?.mapBranchesNotNull(
+    predicate: ((Csaf.Branche) -> Boolean)? = null,
+    transform: ((Csaf.Branche) -> T?)
+): List<T> {
+    val branches = this?.branches ?: return listOf()
+    val flattened = mutableListOf<T>()
+    val worklist = branches.toMutableList()
+
+    while (worklist.isNotEmpty()) {
+        // Retrieve item from work-list
+        val next = worklist.removeFirst()
+
+        // Add to flattened, if predicate holds
+        if (predicate?.let { it(next) } != false) {
+            val value = transform(next)
+            if (value != null) {
+                flattened += value
+            }
+        }
+
+        // Add children to work-list
+        worklist += next.branches
+    }
+
+    return flattened
+}
+
+/**
  * Returns the profile according to
  * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
  * is a local profile, [CSAFBase] is returned as a "catch-all".
  */
-val Csaf.profile: Profile?
+val Csaf.profile: Profile
     get() {
         return officialProfiles[this.document.category] ?: CSAFBase
     }

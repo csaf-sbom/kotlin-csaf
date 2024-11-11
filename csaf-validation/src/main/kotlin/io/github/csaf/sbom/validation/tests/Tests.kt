@@ -16,9 +16,12 @@
  */
 package io.github.csaf.sbom.validation.tests
 
+import com.github.packageurl.MalformedPackageURLException
+import com.github.packageurl.PackageURL
 import io.github.csaf.sbom.cvss.MetricValue
 import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.schema.generated.Csaf.Label1
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationNotApplicable
@@ -29,6 +32,7 @@ import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
 import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
 import io.github.csaf.sbom.validation.profiles.VEX
+import io.github.csaf.sbom.validation.profiles.officialProfiles
 import kotlin.collections.flatMap
 import kotlin.reflect.KProperty1
 import net.swiftzer.semver.SemVer
@@ -51,6 +55,7 @@ val mandatoryTests =
         Test6110InconsistentCVSS,
         Test6111CWE,
         Test6112Language,
+        Test6113PURL,
         Test6114SortedRevisionHistory,
         Test6115Translator,
         Test6116LatestDocumentVersion,
@@ -61,6 +66,9 @@ val mandatoryTests =
         Test6121MissingItemInRevisionHistory,
         Test6122MultipleDefinitionInRevisionHistory,
         Test6123MultipleUseOfSameCVE,
+        Test6124MultipleDefinitionInInvolvements,
+        Test6125MultipleUseOfSameHashAlgorithm,
+        Test6126ProhibitedDocumentCategoryName,
         Test61271DocumentNotes,
         Test61272DocumentReferences,
         Test61273Vulnerabilities,
@@ -73,6 +81,11 @@ val mandatoryTests =
         Test612710ActionStatement,
         Test612711Vulnerabilities,
         Test6128Translation,
+        Test6129RemediationWithoutProductReference,
+        Test6130MixedIntegerAndSemanticVersioning,
+        Test6131VersionRangeInProductVersion,
+        Test6132FlagWithoutProductReference,
+        Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
     )
 
 /**
@@ -136,8 +149,12 @@ object Test612MultipleDefinitionOfProductID : Test {
     }
 }
 
-private fun <T> List<T>.duplicates(): Map<T, Int> {
-    return groupingBy { it }.eachCount().filter { it.value > 1 }
+private fun <T> List<T>?.duplicates(): Map<T, Int> {
+    return if (this == null) {
+        mapOf()
+    } else {
+        groupingBy { it }.eachCount().filter { it.value > 1 }
+    }
 }
 
 /**
@@ -483,6 +500,31 @@ object Test6112Language : Test {
 
 /**
  * Implementation of
+ * [Test 6.1.13](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6113-purl).
+ */
+object Test6113PURL : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val purls = doc.gatherProductURLs()
+        val invalids =
+            purls.mapNotNull {
+                try {
+                    PackageURL(it)
+                    null
+                } catch (ex: MalformedPackageURLException) {
+                    ex.message
+                }
+            }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(listOf("Invalid PURLs: ${invalids.joinToString(", ")}"))
+        }
+    }
+}
+
+/**
+ * Implementation of
  * [Test 6.1.14](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6114-sorted-revision-history).
  */
 object Test6114SortedRevisionHistory : Test {
@@ -505,7 +547,6 @@ object Test6114SortedRevisionHistory : Test {
         } else {
             ValidationFailed(listOf("The revision history is not sorted by ascending date"))
         }
-        println(isSortedByNumber)
     }
 }
 
@@ -736,6 +777,81 @@ object Test6123MultipleUseOfSameCVE : Test {
                 listOf(
                     "The following CVE identifiers are duplicate: ${duplicates.keys.joinToString(", ")}"
                 )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.24](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6124-multiple-definition-in-involvements).
+ */
+object Test6124MultipleDefinitionInInvolvements : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val duplicates =
+            doc.vulnerabilities?.flatMap {
+                (it.involvements?.map { Pair(it.party, it.date) } ?: listOf()).duplicates().keys
+            } ?: listOf()
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following party/date pairs are duplicate: ${duplicates.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.25](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6125-multiple-use-of-same-hash-algorithm).
+ */
+object Test6125MultipleUseOfSameHashAlgorithm : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val hashLists = doc.gatherFileHashLists()
+        val duplicates = hashLists.flatMap { it.map { it.algorithm }.duplicates().keys }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            return ValidationFailed(
+                listOf(
+                    "The following hash algorithms are duplicate: ${duplicates.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+val whitespaceDashesUnderScore = """[\s-_]""".toRegex()
+
+/**
+ * Implementation of
+ * [Test 6.1.26](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6126-prohibited-document-category-name).
+ */
+object Test6126ProhibitedDocumentCategoryName : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        if (doc.document.category in officialProfiles.keys) {
+            return ValidationNotApplicable
+        }
+
+        val originalCategory = doc.document.category
+        val cleanedCategory = originalCategory.lowercase().replace(whitespaceDashesUnderScore, "")
+
+        // It is not allowed to match an official profile's name (without csaf_ prefix)
+        return if (
+            cleanedCategory !in
+                officialProfiles.keys.map {
+                    it.substringAfter("csaf_").replace(whitespaceDashesUnderScore, "")
+                }
+        ) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf("The value $originalCategory conflicts with the name of an official profile")
             )
         }
     }
@@ -1027,6 +1143,156 @@ object Test6128Translation : Test {
             ValidationFailed(
                 listOf(
                     "The document language and the source language have the same value: ${doc.document.source_lang}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.29](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6129-remediation-without-product-reference).
+ */
+object Test6129RemediationWithoutProductReference : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val withoutRef =
+            doc.vulnerabilities?.flatMap {
+                it.remediations?.filter { it.product_ids == null && it.group_ids == null }
+                    ?: listOf()
+            } ?: listOf()
+
+        return if (withoutRef.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The given remediation does not specify to which products it should be applied"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.30](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6130-mixed-integer-and-semantic-versioning).
+ */
+object Test6130MixedIntegerAndSemanticVersioning : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val versions =
+            listOf(
+                *doc.document.tracking.revision_history.map { it.number }.toTypedArray(),
+                doc.document.tracking.version,
+            )
+
+        val isSemver = versions.first().toSemVer() != null
+        val invalids =
+            if (isSemver) {
+                    versions.map { Pair(it, it.toSemVer()) }.filter { it.second == null }
+                } else {
+                    versions.map { Pair(it, it.toIntOrNull()) }.filter { it.second == null }
+                }
+                .map { it.first }
+
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following versions are invalid because of a mix of integer and semantic versioning: ${invalids.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+val keywords = listOf("after", "all", "before", "earlier", "later", "prior", "versions")
+val operatorsRegex = """(?)(<|<=|>=|>)""".toRegex()
+
+/**
+ * Implementation of
+ * [Test 6.1.31](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6131-version-range-in-product-version).
+ */
+object Test6131VersionRangeInProductVersion : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val versions =
+            doc.product_tree.mapBranchesNotNull(
+                predicate = { it.category == Csaf.Category3.product_version }
+            ) {
+                it.name
+            }
+        val invalids =
+            versions.filter {
+                operatorsRegex.containsMatchIn(it) ||
+                    keywords.any { kw -> it.split("""\s+""".toRegex()).contains(kw) }
+            }
+        return if (invalids.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following product versions are invalid and contain version ranges: ${invalids.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.32](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6132-flag-without-product-reference).
+ */
+object Test6132FlagWithoutProductReference : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val missing =
+            doc.vulnerabilities
+                ?.flatMap { it.flags ?: setOf() }
+                ?.filter { it.group_ids == null && it.product_ids == null } ?: listOf()
+        return if (missing.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following flags are missing products or groups: ${missing.map { it.label }.joinToString(", ")}"
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Implementation of
+ * [Test 6.1.33](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6133-multiple-flags-with-vex-justification-codes-per-product).
+ */
+object Test6133MultipleFlagsWithVEXJustificationCodesPerProduct : Test {
+    override fun test(doc: Csaf): ValidationResult {
+        val duplicates = mutableListOf<String>()
+        val groupMap = doc.gatherProductIdsPerGroup()
+
+        for (vuln in doc.vulnerabilities ?: listOf()) {
+            val productsIDsInFlags =
+                vuln.flags
+                    ?.filter {
+                        it.label in
+                            listOf(
+                                Label1.component_not_present,
+                                Label1.inline_mitigations_already_exist,
+                                Label1.vulnerable_code_cannot_be_controlled_by_adversary,
+                                Label1.vulnerable_code_not_in_execute_path,
+                                Label1.vulnerable_code_not_present
+                            )
+                    }
+                    ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) }
+
+            duplicates += productsIDsInFlags.duplicates().keys
+        }
+
+        return if (duplicates.isEmpty()) {
+            ValidationSuccessful
+        } else {
+            ValidationFailed(
+                listOf(
+                    "The following product IDs are part of multiple flags: ${duplicates.joinToString(", ")}"
                 )
             )
         }
