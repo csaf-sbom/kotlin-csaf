@@ -146,8 +146,13 @@ fun Csaf.gatherProductGroupReferences(): Set<String> {
     return ids
 }
 
+/**
+ * This utility function gathers all lists of [Csaf.FileHashe] contained in
+ * [Csaf.ProductIdentificationHelper.hashes] in a list of lists. We intentionally do not flatten the
+ * lists, since we need to look for duplicates WITHIN the inner layer of lists.
+ */
 fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
-    var lists = mutableListOf<List<Csaf.FileHashe>>()
+    val lists = mutableListOf<List<Csaf.FileHashe>>()
 
     // /product_tree/branches[](/branches[])*/product/product_identification_helper/hashes[]/file_hashes
     lists +=
@@ -189,7 +194,7 @@ fun <T> Csaf.ProductTree?.mapBranchesNotNull(
 
     while (worklist.isNotEmpty()) {
         // Retrieve item from work-list
-        var next = worklist.removeFirst()
+        val next = worklist.removeFirst()
 
         // Add to flattened, if predicate holds
         if (predicate?.let { it(next) } != false) {
@@ -211,7 +216,7 @@ fun <T> Csaf.ProductTree?.mapBranchesNotNull(
  * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
  * is a local profile, [CSAFBase] is returned as a "catch-all".
  */
-val Csaf.profile: Profile?
+val Csaf.profile: Profile
     get() {
         return officialProfiles[this.document.category] ?: CSAFBase
     }

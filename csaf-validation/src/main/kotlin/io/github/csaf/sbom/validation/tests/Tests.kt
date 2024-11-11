@@ -21,6 +21,7 @@ import com.github.packageurl.PackageURL
 import io.github.csaf.sbom.cvss.MetricValue
 import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.schema.generated.Csaf.Label1
 import io.github.csaf.sbom.validation.Test
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationNotApplicable
@@ -546,7 +547,6 @@ object Test6114SortedRevisionHistory : Test {
         } else {
             ValidationFailed(listOf("The revision history is not sorted by ascending date"))
         }
-        println(isSortedByNumber)
     }
 }
 
@@ -811,8 +811,8 @@ object Test6124MultipleDefinitionInInvolvements : Test {
  */
 object Test6125MultipleUseOfSameHashAlgorithm : Test {
     override fun test(doc: Csaf): ValidationResult {
-        var hashLists = doc.gatherFileHashLists()
-        var duplicates = hashLists.flatMap { it.map { it.algorithm }.duplicates().keys }
+        val hashLists = doc.gatherFileHashLists()
+        val duplicates = hashLists.flatMap { it.map { it.algorithm }.duplicates().keys }
 
         return if (duplicates.isEmpty()) {
             ValidationSuccessful
@@ -836,7 +836,7 @@ object Test6126ProhibitedDocumentCategoryName : Test {
             return ValidationNotApplicable
         }
 
-        val cleanedCategory = doc.document.category.lowercase().replace("(_-)", "")
+        val cleanedCategory = doc.document.category.lowercase().replace("""(\s_-)""".toRegex(), "")
 
         // It is not allowed to match an official profile's name (without csaf_ prefix)
         return if (cleanedCategory !in officialProfiles.keys.map { it.substringAfter("csaf_") }) {
@@ -1209,7 +1209,7 @@ val operatorsRegex = """(?)(<|<=|>>=|>)""".toRegex()
  */
 object Test6131VersionRangeInProductVersion : Test {
     override fun test(doc: Csaf): ValidationResult {
-        var versions =
+        val versions =
             doc.product_tree.mapBranchesNotNull(
                 predicate = { it.category == Csaf.Category3.product_version }
             ) {
@@ -1234,7 +1234,7 @@ object Test6131VersionRangeInProductVersion : Test {
 
 /**
  * Implementation of
- * [Test 6.1.31](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6132-flag-without-product-reference).
+ * [Test 6.1.32](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6132-flag-without-product-reference).
  */
 object Test6132FlatWithoutProductReference : Test {
     override fun test(doc: Csaf): ValidationResult {
@@ -1260,12 +1260,23 @@ object Test6132FlatWithoutProductReference : Test {
  */
 object Test6133MultipleFlagsWithVEXJustificationCodesPerProduct : Test {
     override fun test(doc: Csaf): ValidationResult {
-        var duplicates = mutableListOf<String>()
-        var groupMap = doc.gatherProductIdsPerGroup()
+        val duplicates = mutableListOf<String>()
+        val groupMap = doc.gatherProductIdsPerGroup()
 
         for (vuln in doc.vulnerabilities ?: listOf()) {
             val productsIDsInFlags =
-                vuln.flags?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) }
+                vuln.flags
+                    ?.filter {
+                        it.label in
+                            listOf(
+                                Label1.component_not_present,
+                                Label1.inline_mitigations_already_exist,
+                                Label1.vulnerable_code_cannot_be_controlled_by_adversary,
+                                Label1.vulnerable_code_not_in_execute_path,
+                                Label1.vulnerable_code_not_present
+                            )
+                    }
+                    ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) }
 
             duplicates += productsIDsInFlags.duplicates().keys
         }

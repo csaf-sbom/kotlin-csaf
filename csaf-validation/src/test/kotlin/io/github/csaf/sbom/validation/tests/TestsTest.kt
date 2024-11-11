@@ -1387,8 +1387,8 @@ class TestsTest {
      * Short utility function to construct the path to the test file based on the test file ID for
      * mandatory tests.
      */
-    fun mandatoryTest(id: String): String {
-        var test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+    private fun mandatoryTest(id: String): String {
+        val test = "mandatory/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
         executedTests += test
 
         return "$testFolder/$test"
@@ -1398,8 +1398,8 @@ class TestsTest {
      * Short utility function to construct the path to the test file based on the test file ID for
      * optional tests.
      */
-    fun optionalTest(id: String): String {
-        var test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
+    private fun optionalTest(id: String): String {
+        val test = "optional/oasis_csaf_tc-csaf_2_0-2021-${id}.json"
         executedTests += test
 
         return "$testFolder/$test"
