@@ -1255,7 +1255,7 @@ class TestsTest {
 
     @Test
     fun test6132() {
-        val test = Test6132FlatWithoutProductReference
+        val test = Test6132FlagWithoutProductReference
 
         // failing examples
         assertValidationFailed(

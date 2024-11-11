@@ -84,7 +84,7 @@ val mandatoryTests =
         Test6129RemediationWithoutProductReference,
         Test6130MixedIntegerAndSemanticVersioning,
         Test6131VersionRangeInProductVersion,
-        Test6132FlatWithoutProductReference,
+        Test6132FlagWithoutProductReference,
         Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
     )
 
@@ -1224,7 +1224,7 @@ object Test6131VersionRangeInProductVersion : Test {
         val invalids =
             versions.filter {
                 operatorsRegex.containsMatchIn(it) ||
-                    keywords.any { kw -> it.split("""\s""".toRegex()).contains(kw) }
+                    keywords.any { kw -> it.split("""\s+""".toRegex()).contains(kw) }
             }
         return if (invalids.isEmpty()) {
             ValidationSuccessful
