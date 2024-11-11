@@ -789,7 +789,7 @@ class TestsTest {
 
         // failing examples
         assertValidationFailed(
-            "The value security_incident_response is the name of a profile where the space was replaced with underscores",
+            "The value Security_Incident_Response conflicts with the name of an official profile",
             test.test(mandatoryTest("6-1-26-01"))
         )
     }

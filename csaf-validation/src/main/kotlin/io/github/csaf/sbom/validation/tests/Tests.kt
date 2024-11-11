@@ -826,6 +826,8 @@ object Test6125MultipleUseOfSameHashAlgorithm : Test {
     }
 }
 
+val whitespaceDashesUnderScore = """[\s-_]""".toRegex()
+
 /**
  * Implementation of
  * [Test 6.1.26](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#6126-prohibited-document-category-name).
@@ -836,16 +838,20 @@ object Test6126ProhibitedDocumentCategoryName : Test {
             return ValidationNotApplicable
         }
 
-        val cleanedCategory = doc.document.category.lowercase().replace("""[\s-_]""".toRegex(), "")
+        val originalCategory = doc.document.category
+        val cleanedCategory = originalCategory.lowercase().replace(whitespaceDashesUnderScore, "")
 
         // It is not allowed to match an official profile's name (without csaf_ prefix)
-        return if (cleanedCategory !in officialProfiles.keys.map { it.substringAfter("csaf_") }) {
+        return if (
+            cleanedCategory !in
+                officialProfiles.keys.map {
+                    it.substringAfter("csaf_").replace(whitespaceDashesUnderScore, "")
+                }
+        ) {
             ValidationSuccessful
         } else {
             ValidationFailed(
-                listOf(
-                    "The value $cleanedCategory is the name of a profile where the space was replaced with underscores"
-                )
+                listOf("The value $originalCategory conflicts with the name of an official profile")
             )
         }
     }
