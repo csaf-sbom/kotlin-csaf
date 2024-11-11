@@ -1207,7 +1207,7 @@ object Test6130MixedIntegerAndSemanticVersioning : Test {
 }
 
 val keywords = listOf("after", "all", "before", "earlier", "later", "prior", "versions")
-val operatorsRegex = """(?)(<|<=|>>=|>)""".toRegex()
+val operatorsRegex = """(?)(<|<=|>=|>)""".toRegex()
 
 /**
  * Implementation of
