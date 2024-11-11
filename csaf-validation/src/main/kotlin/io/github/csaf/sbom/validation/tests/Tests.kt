@@ -836,7 +836,7 @@ object Test6126ProhibitedDocumentCategoryName : Test {
             return ValidationNotApplicable
         }
 
-        val cleanedCategory = doc.document.category.lowercase().replace("""(\s_-)""".toRegex(), "")
+        val cleanedCategory = doc.document.category.lowercase().replace("""[\s-_]""".toRegex(), "")
 
         // It is not allowed to match an official profile's name (without csaf_ prefix)
         return if (cleanedCategory !in officialProfiles.keys.map { it.substringAfter("csaf_") }) {
