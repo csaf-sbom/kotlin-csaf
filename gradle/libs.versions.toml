@@ -11,6 +11,7 @@ kover = "0.8.3"
 mockito-kotlin = "5.4.0"
 spotless = "6.25.0"
 publish = "0.30.0"
+semver = "2.0.0"
 purl = "1.5.0"
 
 [libraries]
@@ -24,6 +25,7 @@ ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref =
 ktor-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 purl = { group = "com.github.package-url", name = "packageurl-java", version.ref = "purl" }
+semver = { group = "net.swiftzer.semver", name = "semver", version.ref = "semver" }
 
 # plugins
 kotlin-json-codegen = { module = "com.github.csaf-sbom:json-kotlin-gradle", version.ref = "codegen" }
@@ -38,3 +40,6 @@ spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", ver
 
 [bundles]
 ktor-client = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-client-java"]
+
+[plugins]
+download = { id = "de.undercouch.download", version = "5.6.0" }

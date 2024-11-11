@@ -10,7 +10,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("buildlogic.kotlin-library-conventions")
     id("net.pwall.json.json-kotlin")
-    id("de.undercouch.download") version "5.6.0"
+    alias(libs.plugins.download)
     kotlin("plugin.serialization")
     `java-test-fixtures`
     application
@@ -34,7 +34,7 @@ dependencies {
     testFixturesImplementation(kotlin("test"))
     implementation(libs.ktor.client.core)
     implementation(libs.purl)
-    implementation("net.swiftzer.semver:semver:2.0.0")
+    implementation(libs.semver)
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.kotlinx.json)
