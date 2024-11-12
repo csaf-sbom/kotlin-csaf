@@ -4,16 +4,16 @@ import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     id("org.jetbrains.dokka")
-    signing
+    //signing
     id("com.vanniktech.maven.publish")
 }
 
 // Publication settings for maven central
 mavenPublishing {
-    configure(KotlinJvm(
+    /*configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka("dokkaHtml"),
         sourcesJar = true,
-    ))
+    ))*/
     coordinates(project.group.toString(), project.name, version.toString())
 
     pom {

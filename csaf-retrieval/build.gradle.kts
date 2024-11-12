@@ -9,17 +9,32 @@ mavenPublishing {
     }
 }
 
-dependencies {
-    api(project(":csaf-schema"))
-    api(project(":csaf-validation"))
-    api(libs.kotlinx.coroutines)
-    api(libs.kotlinx.json)
-    implementation(libs.bundles.ktor.client)
-    implementation(libs.ktor.kotlinx.json)
-    implementation(libs.kotlin.logging)
-    implementation(libs.bundles.slf4j)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.ktor.client.mock)
-    testImplementation(libs.mockk)
-    testImplementation(testFixtures(project(":csaf-validation")))
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(project(":csaf-schema"))
+                api(project(":csaf-validation"))
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.kotlinx.json)
+                implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlinx.json)
+                implementation(libs.kotlin.logging)
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation(libs.ktor.client.java)
+                implementation(libs.bundles.slf4j)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.ktor.client.mock)
+                implementation(libs.mockk)
+            }
+        }
+    }
 }
