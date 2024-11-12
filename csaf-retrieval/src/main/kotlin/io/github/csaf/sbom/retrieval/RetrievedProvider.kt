@@ -89,7 +89,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     fun fetchRolieFeeds(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
-    ): ReceiveChannel<Pair<Provider.Feed, Result<ROLIEFeed>>> {
+    ): ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>> {
         val feeds = json.distributions?.mapNotNull { it.rolie }?.flatMap { it.feeds } ?: listOf()
 
         // This channel collects up to `channelCapacity` feeds concurrently.
@@ -164,6 +164,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
+    /** Populates this [ProducerScope] with the contents of the [indexChannel]. */
     private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
         .fetchDocumentsFromIndices(
         indexChannel: ReceiveChannel<Pair<String, Result<String>>>,
@@ -197,9 +198,10 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
+    /** Populates this [ProducerScope] with the contents of the [rolieChannel]. */
     private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
         .fetchDocumentsFromRolieFeeds(
-        rolieChannel: ReceiveChannel<Pair<Provider.Feed, Result<ROLIEFeed>>>,
+        rolieChannel: ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>>,
         loader: CsafLoader
     ) {
         for ((feed, rolieResult) in rolieChannel) {
