@@ -102,4 +102,13 @@ class CsafLoaderTest {
             }
         assertFalse { result.isSuccess }
     }
+
+    @Test
+    fun testFetchROLIEFeed() = runTest {
+        val result =
+            loader.fetchROLIEFeed("does-not-really-exist.json") {
+                assertSame(HttpStatusCode.NotFound, it.status)
+            }
+        assertFalse { result.isSuccess }
+    }
 }
