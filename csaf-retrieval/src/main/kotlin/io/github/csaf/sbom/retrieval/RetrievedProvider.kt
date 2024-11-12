@@ -55,20 +55,22 @@ class RetrievedProvider(val json: Provider) : Validatable {
             }
 
     /**
-     * This function fetches all directory indices referenced by this provider.
+     * This function fetches all directory indices referenced by this provider and sends them to a
+     * [ReceiveChannel].
      *
      * @param loader The instance of [CsafLoader] used for fetching of online resources.
      * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
      *   to [DEFAULT_CHANNEL_CAPACITY].
-     * @return The fetched [Result]s, representing index contents or fetch errors.
+     * @return A [ReceiveChannel] containing the fetched [Result]s, representing index contents or
+     *   fetch errors.
      */
     fun fetchDocumentIndices(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
     ): ReceiveChannel<Pair<String, Result<String>>> {
-        @Suppress("SimpleRedundantLet")
         val directoryUrls =
             (json.distributions ?: emptySet()).mapNotNull { distribution ->
+                @Suppress("SimpleRedundantLet")
                 distribution.directory_url?.let { it.toString().trimEnd('/') }
             }
         // This channel collects up to `channelCapacity` directory indices concurrently.
@@ -86,6 +88,16 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
+    /**
+     * This function fetches all ROLIE feeds referenced by this provider and sends them to a
+     * [ReceiveChannel].
+     *
+     * @param loader The instance of [CsafLoader] used for fetching of online resources.
+     * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
+     *   to [DEFAULT_CHANNEL_CAPACITY].
+     * @return A [ReceiveChannel] containing the fetched [Result]s, representing ROLIE feeds'
+     *   contents (as [ROLIEFeed]) or fetch errors.
+     */
     fun fetchRolieFeeds(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
