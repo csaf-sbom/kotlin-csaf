@@ -73,13 +73,9 @@ class RetrievedProviderTest {
     @Test
     fun testFetchRolieFeeds() = runTest {
         val provider = RetrievedProvider.from("example.com").getOrThrow()
-        val documentIndexResults = provider.fetchRolieFeeds().toList()
-        assertEquals(
-            1,
-            documentIndexResults.size,
-            "Expected exactly 1 results: One index.txt content and one fetch error"
-        )
-        assertTrue(documentIndexResults[0].second.isSuccess)
+        val rolieFeedsResults = provider.fetchRolieFeeds().toList()
+        assertEquals(1, rolieFeedsResults.size, "Expected exactly 1 result: One parsed ROLIE feed")
+        assertTrue(rolieFeedsResults[0].second.isSuccess)
     }
 
     private suspend fun providerTest(domain: String) {
@@ -88,9 +84,9 @@ class RetrievedProviderTest {
         assertEquals(3, expectedDocumentCount, "Expected 3 documents")
         val documentResults = provider.fetchDocuments().toList()
         assertEquals(
-            4,
+            5,
             documentResults.size,
-            "Expected exactly 4 results: One document, two document errors, one index error"
+            "Expected exactly 5 results: Two documents, two document errors, one index error"
         )
         // Check some random property on successful document
         assertEquals(

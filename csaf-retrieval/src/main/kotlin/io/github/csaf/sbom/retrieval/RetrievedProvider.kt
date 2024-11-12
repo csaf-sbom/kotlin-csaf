@@ -21,6 +21,7 @@ import io.github.csaf.sbom.retrieval.roles.CSAFProviderRole
 import io.github.csaf.sbom.retrieval.roles.CSAFPublisherRole
 import io.github.csaf.sbom.retrieval.roles.CSAFTrustedProviderRole
 import io.github.csaf.sbom.schema.generated.Provider
+import io.github.csaf.sbom.schema.generated.Provider.Feed
 import io.github.csaf.sbom.schema.generated.ROLIEFeed
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -91,7 +92,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     ): ReceiveChannel<Pair<Provider.Feed, Result<ROLIEFeed>>> {
         val feeds = json.distributions?.mapNotNull { it.rolie }?.flatMap { it.feeds } ?: listOf()
 
-        // This channel collects up to `channelCapacity` directory indices concurrently.
+        // This channel collects up to `channelCapacity` feeds concurrently.
         val rolieChannel =
             ioScope.produce(capacity = channelCapacity) {
                 for (feed in feeds) {
@@ -100,8 +101,8 @@ class RetrievedProvider(val json: Provider) : Validatable {
             }
         // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
         return ioScope.produce {
-            for ((feed, indexDeferred) in rolieChannel) {
-                send(feed to indexDeferred.await())
+            for ((feed, feedDeferred) in rolieChannel) {
+                send(feed to feedDeferred.await())
             }
         }
     }
@@ -146,13 +147,14 @@ class RetrievedProvider(val json: Provider) : Validatable {
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
     ): ReceiveChannel<Result<RetrievedDocument>> {
         val indexChannel = fetchDocumentIndices(loader, channelCapacity)
-        val rolieChannel = fetchRolieFeeds(loader, channelCapacity)
+        val rolieFeedsChannel = fetchRolieFeeds(loader, channelCapacity)
 
         // This second channel collects up to `channelCapacity` Results concurrently, which
         // represent CSAF Documents or errors from fetching or validation.
         val documentJobChannel =
             ioScope.produce<Deferred<Result<RetrievedDocument>>>(capacity = channelCapacity) {
-                fetchDirectoryBased(indexChannel, loader)
+                fetchDocumentsFromIndices(indexChannel, loader)
+                fetchDocumentsFromRolieFeeds(rolieFeedsChannel, loader)
             }
         // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
         return ioScope.produce {
@@ -162,7 +164,8 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
-    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>.fetchDirectoryBased(
+    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
+        .fetchDocumentsFromIndices(
         indexChannel: ReceiveChannel<Pair<String, Result<String>>>,
         loader: CsafLoader
     ) {
@@ -186,6 +189,35 @@ class RetrievedProvider(val json: Provider) : Validatable {
                                     "Failed to fetch index.txt from directory at $directoryUrl",
                                     e
                                 )
+                            )
+                        }
+                    )
+                }
+            )
+        }
+    }
+
+    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
+        .fetchDocumentsFromRolieFeeds(
+        rolieChannel: ReceiveChannel<Pair<Provider.Feed, Result<ROLIEFeed>>>,
+        loader: CsafLoader
+    ) {
+        for ((feed, rolieResult) in rolieChannel) {
+            rolieResult.fold(
+                { rolie ->
+                    rolie.feed.entry.map { entry ->
+                        send(
+                            async {
+                                RetrievedDocument.from(entry.content.src.toString(), loader, role)
+                            }
+                        )
+                    }
+                },
+                { e ->
+                    send(
+                        async {
+                            Result.failure(
+                                Exception("Failed to fetch feeds from directory at ${feed.url}", e)
                             )
                         }
                     )
