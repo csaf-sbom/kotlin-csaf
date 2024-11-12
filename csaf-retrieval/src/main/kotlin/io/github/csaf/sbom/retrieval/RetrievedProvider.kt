@@ -21,11 +21,13 @@ import io.github.csaf.sbom.retrieval.roles.CSAFProviderRole
 import io.github.csaf.sbom.retrieval.roles.CSAFPublisherRole
 import io.github.csaf.sbom.retrieval.roles.CSAFTrustedProviderRole
 import io.github.csaf.sbom.schema.generated.Provider
+import io.github.csaf.sbom.schema.generated.ROLIEFeed
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.channels.toList
@@ -36,6 +38,7 @@ import kotlinx.coroutines.future.future
  * "trusted provider"), including its metadata (in the form of [Provider]) as well as functionality
  * to retrieve its documents.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RetrievedProvider(val json: Provider) : Validatable {
 
     /**
@@ -58,7 +61,6 @@ class RetrievedProvider(val json: Provider) : Validatable {
      *   to [DEFAULT_CHANNEL_CAPACITY].
      * @return The fetched [Result]s, representing index contents or fetch errors.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchDocumentIndices(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
@@ -83,6 +85,27 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
+    fun fetchRolieFeeds(
+        loader: CsafLoader = lazyLoader,
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+    ): ReceiveChannel<Pair<Provider.Feed, Result<ROLIEFeed>>> {
+        val feeds = json.distributions?.mapNotNull { it.rolie }?.flatMap { it.feeds } ?: listOf()
+
+        // This channel collects up to `channelCapacity` directory indices concurrently.
+        val rolieChannel =
+            ioScope.produce(capacity = channelCapacity) {
+                for (feed in feeds) {
+                    send(feed to async { loader.fetchROLIEFeed(feed.url.toString()) })
+                }
+            }
+        // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
+        return ioScope.produce {
+            for ((feed, indexDeferred) in rolieChannel) {
+                send(feed to indexDeferred.await())
+            }
+        }
+    }
+
     /**
      * This function sums up the expected number of [RetrievedDocument]s that will be fetched from
      * this Provider.
@@ -92,7 +115,6 @@ class RetrievedProvider(val json: Provider) : Validatable {
      *   to [DEFAULT_CHANNEL_CAPACITY].
      * @return The expected number of [RetrievedDocument]s provided.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun countExpectedDocuments(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
@@ -124,42 +146,51 @@ class RetrievedProvider(val json: Provider) : Validatable {
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
     ): ReceiveChannel<Result<RetrievedDocument>> {
         val indexChannel = fetchDocumentIndices(loader, channelCapacity)
+        val rolieChannel = fetchRolieFeeds(loader, channelCapacity)
+
         // This second channel collects up to `channelCapacity` Results concurrently, which
         // represent CSAF Documents or errors from fetching or validation.
         val documentJobChannel =
             ioScope.produce<Deferred<Result<RetrievedDocument>>>(capacity = channelCapacity) {
-                for ((directoryUrl, indexResult) in indexChannel) {
-                    indexResult.fold(
-                        { index ->
-                            index.lines().map { line ->
-                                send(
-                                    async {
-                                        val csafUrl = "$directoryUrl/$line"
-                                        RetrievedDocument.from(csafUrl, loader, role)
-                                    }
-                                )
-                            }
-                        },
-                        { e ->
-                            send(
-                                async {
-                                    Result.failure(
-                                        Exception(
-                                            "Failed to fetch index.txt from directory at $directoryUrl",
-                                            e
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    )
-                }
+                fetchDirectoryBased(indexChannel, loader)
             }
         // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
         return ioScope.produce {
             for (documentJob in documentJobChannel) {
                 send(documentJob.await())
             }
+        }
+    }
+
+    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>.fetchDirectoryBased(
+        indexChannel: ReceiveChannel<Pair<String, Result<String>>>,
+        loader: CsafLoader
+    ) {
+        for ((directoryUrl, indexResult) in indexChannel) {
+            indexResult.fold(
+                { index ->
+                    index.lines().map { line ->
+                        send(
+                            async {
+                                val csafUrl = "$directoryUrl/$line"
+                                RetrievedDocument.from(csafUrl, loader, role)
+                            }
+                        )
+                    }
+                },
+                { e ->
+                    send(
+                        async {
+                            Result.failure(
+                                Exception(
+                                    "Failed to fetch index.txt from directory at $directoryUrl",
+                                    e
+                                )
+                            )
+                        }
+                    )
+                }
+            )
         }
     }
 

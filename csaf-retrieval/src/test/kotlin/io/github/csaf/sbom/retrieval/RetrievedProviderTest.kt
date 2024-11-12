@@ -70,6 +70,18 @@ class RetrievedProviderTest {
         assertFalse(documentIndexResults[1].second.isSuccess)
     }
 
+    @Test
+    fun testFetchRolieFeeds() = runTest {
+        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val documentIndexResults = provider.fetchRolieFeeds().toList()
+        assertEquals(
+            1,
+            documentIndexResults.size,
+            "Expected exactly 1 results: One index.txt content and one fetch error"
+        )
+        assertTrue(documentIndexResults[0].second.isSuccess)
+    }
+
     private suspend fun providerTest(domain: String) {
         val provider = RetrievedProvider.from(domain).getOrThrow()
         val expectedDocumentCount = provider.countExpectedDocuments()
