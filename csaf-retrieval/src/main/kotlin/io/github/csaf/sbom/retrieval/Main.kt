@@ -25,6 +25,7 @@ fun main(args: Array<String>) {
         RetrievedProvider.from(args[0])
             .onSuccess { provider ->
                 println("Discovered provider-metadata.json @ ${provider.json.canonical_url}")
+                println("Expected documents: ${provider.countExpectedDocuments()}")
                 // Retrieve all documents from all feeds. Note: we currently only support index.txt
                 for (result in provider.fetchDocuments()) {
                     result.onSuccess { doc ->

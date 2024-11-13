@@ -19,6 +19,7 @@ package io.github.csaf.sbom.retrieval
 import io.github.csaf.sbom.schema.generated.Aggregator
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Provider
+import io.github.csaf.sbom.schema.generated.ROLIEFeed
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -95,6 +96,19 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
      */
     suspend fun fetchDocument(url: String, ctx: RetrievalContext): Result<Csaf> =
         Result.of { get<Csaf>(url, ctx.responseCallback()).also(ctx.jsonCallback()) }
+
+    /**
+     * Fetch and parse a ROLE feed from a given URL.
+     *
+     * @param url the URL where the ROLIE feed is found
+     * @param responseCallback An optional callback to further evaluate the [HttpResponse].
+     * @return The resulting [ROLIEFeed], wrapped in a [Result] monad, if successful. A failed
+     *   [Result] wrapping the thrown [Throwable] in case of an error.
+     */
+    suspend fun fetchROLIEFeed(
+        url: String,
+        responseCallback: ((HttpResponse) -> Unit)? = null
+    ): Result<ROLIEFeed> = Result.of { get(url, responseCallback ?: {}) }
 
     /**
      * Fetch an arbitrary URL's content as plain text [String], falling back to UTF-8 if no charset

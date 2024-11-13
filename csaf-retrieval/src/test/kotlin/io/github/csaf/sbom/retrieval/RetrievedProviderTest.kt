@@ -20,13 +20,14 @@ import io.github.csaf.sbom.validation.ValidationException
 import kotlin.test.*
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
     init {
         CsafLoader.defaultLoaderFactory = { CsafLoader(mockEngine()) }
     }
 
-    @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com") }
+    @Test fun testRetrievedProviderFrom() = runTest { providerTest("example.com", 4) }
 
     @Test
     fun testRetrievedProviderFromSecurityTxt() = runTest {
@@ -70,16 +71,20 @@ class RetrievedProviderTest {
         assertFalse(documentIndexResults[1].second.isSuccess)
     }
 
-    private suspend fun providerTest(domain: String) {
+    @Test
+    fun testFetchRolieFeeds() = runTest {
+        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val rolieFeedsResults = provider.fetchRolieFeeds().toList()
+        assertEquals(1, rolieFeedsResults.size, "Expected exactly 1 result: One parsed ROLIE feed")
+        assertTrue(rolieFeedsResults[0].second.isSuccess)
+    }
+
+    private suspend fun providerTest(domain: String, numResults: Int = 5) {
         val provider = RetrievedProvider.from(domain).getOrThrow()
         val expectedDocumentCount = provider.countExpectedDocuments()
         assertEquals(3, expectedDocumentCount, "Expected 3 documents")
         val documentResults = provider.fetchDocuments().toList()
-        assertEquals(
-            4,
-            documentResults.size,
-            "Expected exactly 4 results: One document, two document errors, one index error"
-        )
+        assertEquals(numResults, documentResults.size, "Expected exactly $numResults results")
         // Check some random property on successful document
         assertEquals(
             "Bundesamt für Sicherheit in der Informationstechnik",
@@ -104,6 +109,30 @@ class RetrievedProviderTest {
         assertEquals(
             "Failed to fetch index.txt from directory at https://$domain/invalid-directory",
             documentResults[3].exceptionOrNull()?.message
+        )
+    }
+
+    @Test
+    fun testFetchAllDocumentUrls() = runTest {
+        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val urlResults = provider.fetchAllDocumentUrls().toList()
+
+        assertEquals(4, urlResults.size, "Expected exactly 4 results")
+        assertEquals(
+            "https://example.com/directory/2022/bsi-2022-0001.json",
+            urlResults[0].getOrThrow()
+        )
+        assertEquals(
+            "https://example.com/directory/2022/bsi-2022_2-01.json",
+            urlResults[1].getOrThrow()
+        )
+        assertEquals(
+            "https://example.com/directory/2024/does-not-exist.json",
+            urlResults[2].getOrThrow()
+        )
+        assertEquals(
+            "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
+            (assertThrows<Exception> { urlResults[3].getOrThrow() }).message
         )
     }
 }
