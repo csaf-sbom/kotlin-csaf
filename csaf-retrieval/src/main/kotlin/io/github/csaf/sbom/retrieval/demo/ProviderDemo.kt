@@ -14,8 +14,9 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.retrieval
+package io.github.csaf.sbom.retrieval.demo
 
+import io.github.csaf.sbom.retrieval.RetrievedProvider
 import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) {

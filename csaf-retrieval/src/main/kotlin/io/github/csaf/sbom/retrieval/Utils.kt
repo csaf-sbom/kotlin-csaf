@@ -20,6 +20,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
+val CSAF_ENTRY_REGEX = Regex("CSAF: (https://.*)")
+
 /**
  * An async replacement for `Iterable.map()`, which processes all elements in parallel using
  * coroutines. The function preserves the order of the `Iterable` it is applied on.
