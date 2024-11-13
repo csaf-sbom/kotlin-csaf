@@ -52,9 +52,9 @@ public class RetrievedProviderJavaTest {
         final var documentResultsExplicit = providerExplicit.streamDocuments(loader, DEFAULT_CHANNEL_CAPACITY).toList();
         final var documentResultsExplicitSlow = providerExplicit.streamDocuments(loader, 1).toList();
         assertEquals(
-                5,
+                4,
                 documentResults.size(),
-                "Expected exactly 5 results: Two documents, two document errors, one index error"
+                "Expected exactly 4 results: One document, two document errors, one index error"
         );
         assertEquals(
                 documentResults.size(),

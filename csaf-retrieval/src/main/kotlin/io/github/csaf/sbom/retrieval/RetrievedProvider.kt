@@ -28,10 +28,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.channels.toList
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.future.future
 
 /**
@@ -132,17 +129,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
     ): Int {
-        val indexChannel = fetchDocumentIndices(loader, channelCapacity)
-        // This second channel collects up to `channelCapacity` Results concurrently, which
-        // represent CSAF Documents or errors from fetching or validation.
-        val documentCountChannel =
-            ioScope.produce(capacity = channelCapacity) {
-                for ((_, indexResult) in indexChannel) {
-                    indexResult.onSuccess { send(it.lines().size) }
-                }
-            }
-        // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
-        return documentCountChannel.toList().sum()
+        return fetchAllDocumentUrls(loader, channelCapacity).toList().filter { it.isSuccess }.size
     }
 
     /**
@@ -158,15 +145,17 @@ class RetrievedProvider(val json: Provider) : Validatable {
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
     ): ReceiveChannel<Result<RetrievedDocument>> {
-        val indexChannel = fetchDocumentIndices(loader, channelCapacity)
-        val rolieFeedsChannel = fetchRolieFeeds(loader, channelCapacity)
-
+        val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity)
         // This second channel collects up to `channelCapacity` Results concurrently, which
         // represent CSAF Documents or errors from fetching or validation.
         val documentJobChannel =
             ioScope.produce<Deferred<Result<RetrievedDocument>>>(capacity = channelCapacity) {
-                fetchDocumentsFromIndices(indexChannel, loader)
-                fetchDocumentsFromRolieFeeds(rolieFeedsChannel, loader)
+                for (result in documentUrlChannel) {
+                    result.fold(
+                        { send(async { RetrievedDocument.from(it, loader, role) }) },
+                        { send(async { Result.failure(it) }) }
+                    )
+                }
             }
         // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
         return ioScope.produce {
@@ -176,64 +165,87 @@ class RetrievedProvider(val json: Provider) : Validatable {
         }
     }
 
-    /** Populates this [ProducerScope] with the contents of the [indexChannel]. */
-    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
-        .fetchDocumentsFromIndices(
-        indexChannel: ReceiveChannel<Pair<String, Result<String>>>,
-        loader: CsafLoader
+    /**
+     * Returns a channel that produces all URLs from ROLIE feeds and directory indices without
+     * duplicates.
+     *
+     * @param loader The instance of [CsafLoader] used for fetching of online resources.
+     * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
+     *   to [DEFAULT_CHANNEL_CAPACITY].
+     * @return
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun fetchAllDocumentUrls(
+        loader: CsafLoader = lazyLoader,
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+    ): ReceiveChannel<Result<String>> {
+        val urlResultChannel =
+            ioScope.produce(capacity = channelCapacity) {
+                fetchDocumentUrlsFromIndices(fetchDocumentIndices(loader, channelCapacity))
+                fetchDocumentUrlsFromRolieFeeds(fetchRolieFeeds(loader, channelCapacity))
+            }
+        return ioScope.produce {
+            val seenUrls = mutableSetOf<String>()
+            for (urlResult in urlResultChannel) {
+                urlResult.fold(
+                    {
+                        if (seenUrls.add(it)) {
+                            send(Result.success(it))
+                        }
+                    },
+                    { send(Result.failure(it)) }
+                )
+            }
+        }
+    }
+
+    /**
+     * Sends the URLs obtained from the [indexChannel] to the given [ProducerScope].
+     *
+     * @param indexChannel The source channel providing directory index data.
+     * @receiver urlChannel The target channel where URLs are sent to.
+     */
+    private suspend fun SendChannel<Result<String>>.fetchDocumentUrlsFromIndices(
+        indexChannel: ReceiveChannel<Pair<String, Result<String>>>
     ) {
         for ((directoryUrl, indexResult) in indexChannel) {
             indexResult.fold(
                 { index ->
-                    index.lines().map { line ->
-                        send(
-                            async {
-                                val csafUrl = "$directoryUrl/$line"
-                                RetrievedDocument.from(csafUrl, loader, role)
-                            }
-                        )
-                    }
+                    index.lines().map { line -> send(Result.success("$directoryUrl/$line")) }
                 },
                 { e ->
                     send(
-                        async {
-                            Result.failure(
-                                Exception(
-                                    "Failed to fetch index.txt from directory at $directoryUrl",
-                                    e
-                                )
+                        Result.failure(
+                            Exception(
+                                "Failed to fetch index.txt from directory at $directoryUrl",
+                                e
                             )
-                        }
+                        )
                     )
                 }
             )
         }
     }
 
-    /** Populates this [ProducerScope] with the contents of the [rolieChannel]. */
-    private suspend fun ProducerScope<Deferred<Result<RetrievedDocument>>>
-        .fetchDocumentsFromRolieFeeds(
-        rolieChannel: ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>>,
-        loader: CsafLoader
+    /**
+     * Sends the URLs obtained from the [rolieChannel] feeds to the given [ProducerScope].
+     *
+     * @param rolieChannel The source channel providing ROLIE feed data.
+     * @receiver urlChannel The target channel where URLs are sent to.
+     */
+    private suspend fun SendChannel<Result<String>>.fetchDocumentUrlsFromRolieFeeds(
+        rolieChannel: ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>>
     ) {
         for ((feed, rolieResult) in rolieChannel) {
             rolieResult.fold(
                 { rolie ->
                     rolie.feed.entry.map { entry ->
-                        send(
-                            async {
-                                RetrievedDocument.from(entry.content.src.toString(), loader, role)
-                            }
-                        )
+                        send(Result.success(entry.content.src.toString()))
                     }
                 },
                 { e ->
                     send(
-                        async {
-                            Result.failure(
-                                Exception("Failed to fetch feeds from directory at ${feed.url}", e)
-                            )
-                        }
+                        Result.failure(Exception("Failed to fetch ROLIE feed from ${feed.url}", e))
                     )
                 }
             )
