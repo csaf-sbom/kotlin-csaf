@@ -10,5 +10,5 @@ mavenPublishing {
 }
 
 dependencies {
-    implementation(project(":csaf-schema"))
+    api(project(":csaf-schema"))
 }

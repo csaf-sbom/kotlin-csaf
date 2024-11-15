@@ -23,7 +23,7 @@ kover {
         excludedClasses.add("io.github.csaf.sbom.validation.tests.CWE*")
 
         // Ignore main classes, since they are for demo only - might be removed in the future
-        excludedClasses.add("io.github.csaf.sbom.retrieval.Main*")
+        excludedClasses.add("io.github.csaf.sbom.retrieval.demo.*")
         excludedClasses.add("io.github.csaf.sbom.validation.Main*")
     }
 }

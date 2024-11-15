@@ -17,6 +17,7 @@
 package io.github.csaf.sbom.retrieval.demo
 
 import io.github.csaf.sbom.retrieval.RetrievedAggregator
+import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) {
@@ -36,10 +37,20 @@ fun main(args: Array<String>) {
                         "${publishers.filter { it.isSuccess }.size} publishers."
                 )
                 // Retrieve all documents from all feeds. Note: we currently only support index.txt
-                for (result in aggregator.fetchAll()) {
-                    result.onSuccess { println("Fetched provider @ ${it.json.canonical_url}") }
+                for (result in providers + publishers) {
+                    result.onSuccess {
+                        println("Provider @ ${it.json.canonical_url}")
+                        println("Estimated number of documents: ${it.countExpectedDocuments()}")
+                        for (error in it.fetchAllDocumentUrls().toList().filter { it.isFailure }) {
+                            error.onFailure {
+                                println("Could not fetch index/feed: ${it.message}, ${it.cause}")
+                            }
+                        }
+                        println("---")
+                    }
                     result.onFailure {
                         println("Could not fetch document: ${it.message}, ${it.cause}")
+                        println("---")
                     }
                 }
             }
