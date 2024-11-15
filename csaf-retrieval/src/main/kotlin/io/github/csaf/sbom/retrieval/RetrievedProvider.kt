@@ -23,6 +23,7 @@ import io.github.csaf.sbom.retrieval.roles.CSAFTrustedProviderRole
 import io.github.csaf.sbom.schema.generated.Provider
 import io.github.csaf.sbom.schema.generated.Provider.Feed
 import io.github.csaf.sbom.schema.generated.ROLIEFeed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.stream.Stream
@@ -300,6 +301,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     companion object {
         const val DEFAULT_CHANNEL_CAPACITY = 256
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        private val log = KotlinLogging.logger {}
 
         @JvmStatic
         @JvmOverloads
@@ -333,15 +335,18 @@ class RetrievedProvider(val json: Provider) : Validatable {
         ): Result<RetrievedProvider> {
             val ctx = RetrievalContext()
             val mapAndValidateProvider = { p: Provider ->
+                // TODO: Add some more logging when any implemented tests can fail
                 RetrievedProvider(p).also { it.validate(ctx) }
             }
-            // TODO: Only the last error will be available in result. We should do some logging.
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return loader
                 .fetchProvider(wellKnownPath, ctx)
                 .mapCatching(mapAndValidateProvider)
                 .recoverCatching {
+                    log.info(it) {
+                        "Failed to fetch and validate provider via .well-known, trying security.txt..."
+                    }
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
@@ -352,6 +357,9 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     }
                 }
                 .recoverCatching {
+                    log.info(it) {
+                        "Failed to fetch and validate provider via security.txt, trying DNS..."
+                    }
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
@@ -359,6 +367,15 @@ class RetrievedProvider(val json: Provider) : Validatable {
                         .fetchProvider("https://csaf.data.security.$domain", ctx)
                         .mapCatching(mapAndValidateProvider)
                         .getOrThrow()
+                }
+                .recoverCatching {
+                    log.info(it) {
+                        "Failed to fetch and validate provider via DNS, resolution finally failed."
+                    }
+                    throw Exception(
+                        "Failed to resolve provider for $domain via .well-known, security.txt or DNS.",
+                        it
+                    )
                 }
         }
     }

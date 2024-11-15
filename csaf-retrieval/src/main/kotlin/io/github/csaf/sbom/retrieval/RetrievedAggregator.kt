@@ -65,12 +65,12 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
      * @return A list of [Result] objects containing [RetrievedProvider] instances.
      */
     suspend fun fetchPublishers(loader: CsafLoader = lazyLoader): List<Result<RetrievedProvider>> {
-        return json.csaf_publishers?.map { publisherMeta ->
+        return (json.csaf_publishers ?: emptyList()).map { publisherMeta ->
             val ctx = RetrievalContext()
             loader.fetchProvider(publisherMeta.metadata.url.toString(), ctx).mapCatching { p ->
                 RetrievedProvider(p).also { it.validate(ctx) }
             }
-        } ?: emptyList()
+        }
     }
 
     /**

@@ -73,5 +73,9 @@ class RequirementTest {
         val requirement = oneOf(alwaysFail, alwaysGood, alwaysGood, alwaysFail)
         val result = requirement.check(TestRetrievalContext())
         assertIs<ValidationSuccessful>(result)
+
+        val failingRequirement = oneOf(alwaysFail, alwaysFail, alwaysFail)
+        val failingResult = failingRequirement.check(TestRetrievalContext())
+        assertIs<ValidationFailed>(failingResult)
     }
 }

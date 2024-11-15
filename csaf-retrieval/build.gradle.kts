@@ -16,7 +16,10 @@ dependencies {
     api(libs.kotlinx.json)
     implementation(libs.bundles.ktor.client)
     implementation(libs.ktor.kotlinx.json)
+    implementation(libs.kotlin.logging)
+    implementation(libs.bundles.slf4j)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.mockk)
     testImplementation(testFixtures(project(":csaf-validation")))
 }
