@@ -25,16 +25,16 @@ class ExtensionTest {
     @Test
     fun testSeverity() {
         assertEquals(
-            io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity.CRITICAL,
+            Csaf.BaseSeverity.CRITICAL,
             10.0.toSeverity()
         )
-        assertEquals(io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity.HIGH, 7.2.toSeverity())
+        assertEquals(Csaf.BaseSeverity.HIGH, 7.2.toSeverity())
         assertEquals(
-            io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity.MEDIUM,
+            Csaf.BaseSeverity.MEDIUM,
             5.1.toSeverity()
         )
-        assertEquals(io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity.LOW, 0.4.toSeverity())
-        assertEquals(io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity.NONE, 0.0.toSeverity())
-        assertFailsWith<IllegalArgumentException>() { 20.0.toSeverity() }
+        assertEquals(Csaf.BaseSeverity.LOW, 0.4.toSeverity())
+        assertEquals(Csaf.BaseSeverity.NONE, 0.0.toSeverity())
+        assertFailsWith<IllegalArgumentException> { 20.0.toSeverity() }
     }
 }

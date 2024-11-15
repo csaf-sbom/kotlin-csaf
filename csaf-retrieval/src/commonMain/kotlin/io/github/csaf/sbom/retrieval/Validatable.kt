@@ -26,7 +26,7 @@ interface Validatable {
      *
      * @param retrievalContext The validation context used for validation.
      */
-    fun validate(retrievalContext: io.github.csaf.sbom.retrieval.RetrievalContext) {
+    fun validate(retrievalContext: RetrievalContext) {
         role.checkRole(retrievalContext).let { vr ->
             if (vr is ValidationFailed) {
                 throw vr.toException()

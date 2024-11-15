@@ -41,7 +41,7 @@ fun goodPublisher(): Csaf.Publisher =
         issuing_authority = "Very authoritative",
     )
 
-fun goodTracking(): Csaf.Tracking =
+fun goodTracking(): Tracking =
     Tracking(
         aliases = setOf("alias"),
         generator = Csaf.Generator(engine = Csaf.Engine(name = "csaf-exporter", version = "1.0")),
