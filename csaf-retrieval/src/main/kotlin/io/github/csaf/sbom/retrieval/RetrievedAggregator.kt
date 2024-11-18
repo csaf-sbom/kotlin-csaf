@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.retrieval.roles.CSAFAggregatorRole
 import io.github.csaf.sbom.retrieval.roles.CSAFListerRole
 import io.github.csaf.sbom.schema.generated.Aggregator
@@ -40,6 +41,49 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
                 Aggregator.Category.aggregator -> CSAFAggregatorRole
             }
 
+    /**
+     * Fetches a list of CSAF providers using the specified loader.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A list of [Result] objects containing [RetrievedProvider] instances.
+     */
+    suspend fun fetchProviders(loader: CsafLoader = lazyLoader): List<Result<RetrievedProvider>> {
+        return json.csaf_providers.map { providerMeta ->
+            val ctx = RetrievalContext()
+            loader.fetchProvider(providerMeta.metadata.url.toString(), ctx).mapCatching { p ->
+                RetrievedProvider(p).also { it.validate(ctx) }
+            }
+        }
+    }
+
+    /**
+     * Fetches a list of CSAF publishers using the specified loader.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A list of [Result] objects containing [RetrievedProvider] instances.
+     */
+    suspend fun fetchPublishers(loader: CsafLoader = lazyLoader): List<Result<RetrievedProvider>> {
+        return (json.csaf_publishers ?: emptyList()).map { publisherMeta ->
+            val ctx = RetrievalContext()
+            loader.fetchProvider(publisherMeta.metadata.url.toString(), ctx).mapCatching { p ->
+                RetrievedProvider(p).also { it.validate(ctx) }
+            }
+        }
+    }
+
+    /**
+     * Fetches all providers and publishers, optionally using the specified loader.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A list of [Result] objects containing [RetrievedProvider] instances.
+     */
+    suspend fun fetchAll(loader: CsafLoader = lazyLoader): List<Result<RetrievedProvider>> {
+        return fetchProviders(loader) + fetchPublishers(loader)
+    }
+
     companion object {
         /**
          * Retrieves an [Aggregator] from a given [url].
@@ -51,15 +95,12 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
          */
         suspend fun from(
             url: String,
-            loader: CsafLoader = CsafLoader.lazyLoader
+            loader: CsafLoader = lazyLoader
         ): Result<RetrievedAggregator> {
             val ctx = RetrievalContext()
-            val mapAndValidateAggregator = { a: Aggregator ->
-                RetrievedAggregator(a).also { it.validate(ctx) }
-            }
             return loader
                 .fetchAggregator(url, ctx)
-                .mapCatching(mapAndValidateAggregator)
+                .mapCatching { a -> RetrievedAggregator(a).also { it.validate(ctx) } }
                 .recoverCatching { e ->
                     throw Exception("Failed to load CSAF Aggregator from $url", e)
                 }

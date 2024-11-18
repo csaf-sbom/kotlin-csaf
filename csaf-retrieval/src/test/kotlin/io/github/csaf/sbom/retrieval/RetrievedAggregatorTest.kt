@@ -22,9 +22,9 @@ import io.github.csaf.sbom.retrieval.requirements.mockResponse
 import io.github.csaf.sbom.retrieval.roles.CSAFAggregatorRole
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.goodCsaf
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.Url
+import io.ktor.http.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 
@@ -60,5 +60,23 @@ class RetrievedAggregatorTest {
                 }
             )
         )
+    }
+
+    @Test
+    fun testFetchAll() = runTest {
+        RetrievedAggregator.from("https://example.com/example-01-aggregator.json")
+            .getOrThrow()
+            .let { aggregator ->
+                val (successes, failures) = aggregator.fetchAll().partition { it.isSuccess }
+                assertEquals(2, successes.size)
+                assertEquals(2, failures.size)
+            }
+        RetrievedAggregator.from("https://example.com/example-01-lister.json").getOrThrow().let {
+            lister ->
+            val (successes, failures) = lister.fetchProviders().partition { it.isSuccess }
+            assertEquals(1, successes.size)
+            assertEquals(0, failures.size)
+            assertEquals(0, lister.fetchPublishers().size)
+        }
     }
 }

@@ -1,6 +1,6 @@
 {
   "aggregator": {
-    "category": "lister",
+    "category": "aggregator",
     "contact_details": "Example CSAF Lister can be reached at contact_us@lister.example, or via our website at https://lister.example/security/csaf/aggregator/contact.",
     "issuing_authority": "This service is provided as it is. It is free for everybody.",
     "name": "Example CSAF Lister",
@@ -19,6 +19,41 @@
         },
         "url": "https://example.com/.well-known/csaf/provider-metadata.json"
       }
+    }, {
+      "metadata": {
+        "last_updated": "2021-07-12T20:20:56.169Z",
+        "publisher": {
+          "category": "vendor",
+          "name": "Non-Existing Company ProductCERT",
+          "namespace": "https://psirt.example.com"
+        },
+        "url": "https://does-not-exist.com/.well-known/csaf/provider-metadata.json"
+      }
+    }
+  ],
+  "csaf_publishers": [
+    {
+      "metadata": {
+        "last_updated": "2021-07-12T20:20:56.169Z",
+        "publisher": {
+          "category": "vendor",
+          "name": "Example Company ProductCERT",
+          "namespace": "https://psirt.example.com"
+        },
+        "url": "https://example.com/.well-known/csaf/provider-metadata.json"
+      },
+      "update_interval": "best effort"
+    }, {
+      "metadata": {
+        "last_updated": "2021-07-12T20:20:56.169Z",
+        "publisher": {
+          "category": "vendor",
+          "name": "Non-Existing Company ProductCERT",
+          "namespace": "https://psirt.example.com"
+        },
+        "url": "https://does-not-exist.com/.well-known/csaf/provider-metadata.json"
+      },
+      "update_interval": "best effort"
     }
   ],
   "last_updated":"2021-07-12T22:35:38.978Z"

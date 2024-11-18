@@ -17,7 +17,6 @@ mavenPublishing {
 
 dependencies {
     api(libs.kotlinx.json)
-    testImplementation(libs.mockito.kotlin)
 }
 
 configure<JSONSchemaCodegen> {

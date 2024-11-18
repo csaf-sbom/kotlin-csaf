@@ -16,10 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval.requirements
 
-import io.github.csaf.sbom.retrieval.DNSPath
 import io.github.csaf.sbom.retrieval.RetrievalContext
-import io.github.csaf.sbom.retrieval.SecurityTxt
-import io.github.csaf.sbom.retrieval.WellKnownPath
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label
 import io.github.csaf.sbom.validation.*
@@ -79,10 +76,7 @@ object Requirement2ValidFilename : Requirement {
  */
 object Requirement3UsageOfTls : Requirement {
     override fun check(ctx: RetrievalContext): ValidationResult {
-        var response = ctx.httpResponse
-        if (response == null) {
-            return ValidationNotApplicable
-        }
+        val response = ctx.httpResponse ?: return ValidationNotApplicable
 
         return if (response.request.url.protocol == URLProtocol.HTTPS) {
             ValidationSuccessful
@@ -143,54 +137,6 @@ object Requirement7 : Requirement {
         // TODO: actually implement the requirement
         return ValidationSuccessful
     }
-}
-
-/**
- * Represents
- * [Requirement 8: security.txt](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt).
- *
- * The check itself is already performed in the retrieval API, we can just check for the existence
- * of the data source here.
- */
-object Requirement8SecurityTxt : Requirement {
-    override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == SecurityTxt) {
-            ValidationSuccessful
-        } else {
-            ValidationFailed(listOf("Not resolved via security.txt"))
-        }
-}
-
-/**
- * Represents
- * [Requirement 9: Well-known URL](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#719-requirement-9-well-known-url-for-provider-metadatajson).
- *
- * The check itself is already performed in the retrieval API, we can just check for the existence
- * of the data source here.
- */
-object Requirement9WellKnownURL : Requirement {
-    override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == WellKnownPath) {
-            ValidationSuccessful
-        } else {
-            ValidationFailed(listOf("Not resolved via .well-known"))
-        }
-}
-
-/**
- * Represents
- * [Requirement 10: DNS path](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path).
- *
- * The check itself is already performed in the retrieval API, we can just check for the existence
- * of the data source here.
- */
-object Requirement10DNSPath : Requirement {
-    override fun check(ctx: RetrievalContext) =
-        if (ctx.dataSource == DNSPath) {
-            ValidationSuccessful
-        } else {
-            ValidationFailed(listOf("Not resolved via CSAF domain (csaf.data.security.domain.tld)"))
-        }
 }
 
 // TODO(oxisto): This is actually a document requirement, but it is part of an OR clause in the role

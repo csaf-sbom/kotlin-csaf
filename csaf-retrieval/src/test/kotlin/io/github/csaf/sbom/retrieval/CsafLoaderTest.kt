@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.retrieval
 
-import io.github.csaf.sbom.validation.ValidationException
 import io.ktor.http.*
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
@@ -54,10 +53,6 @@ class CsafLoaderTest {
             result.isSuccess,
             "Failed to \"download\" example-01-aggregator.json from resources."
         )
-        // Fresh [ValidationContext] should always throw.
-        assertFailsWith<ValidationException> {
-            RetrievedProvider(result.getOrThrow()).validate(RetrievalContext())
-        }
 
         val provider = result.getOrNull()
         assertNotNull(provider)

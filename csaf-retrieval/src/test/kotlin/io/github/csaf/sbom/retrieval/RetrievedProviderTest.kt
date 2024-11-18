@@ -44,7 +44,7 @@ class RetrievedProviderTest {
                 runTest { RetrievedProvider.from("broken-domain.com").getOrThrow() }
             }
         assertEquals(
-            "Could not retrieve https://csaf.data.security.broken-domain.com: Not Found",
+            "Failed to resolve provider for broken-domain.com via .well-known, security.txt or DNS.",
             exception.message
         )
     }

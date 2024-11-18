@@ -18,20 +18,6 @@ package io.github.csaf.sbom.retrieval
 
 import io.ktor.client.statement.HttpResponse
 
-/** Specifies the data source of the "provider-metadata.json". */
-sealed class ProviderMetaDataSource
-
-/** provider-metadata.json was fetched from a well-known location. */
-object WellKnownPath : ProviderMetaDataSource()
-
-/** provider-metadata.json was fetched from a location specified in a security.txt. */
-data object SecurityTxt : ProviderMetaDataSource() {
-    val csafEntry = Regex("CSAF: (https://.*)")
-}
-
-/** provider-metadata.json was fetched from a special DNS path. */
-object DNSPath : ProviderMetaDataSource()
-
 /**
  * This [RetrievalContext] holds all the necessary information that is needed to validate a
  * validatable object. According to the requirements in the specification we probably need access to
@@ -43,13 +29,10 @@ object DNSPath : ProviderMetaDataSource()
  * - The HTTP headers used in the HTTP communication to check for redirects; or the complete HTTP
  *   request; see [RetrievalContext.httpResponse])
  */
-open class RetrievalContext() {
+open class RetrievalContext {
 
     /** The document to validate. */
     var json: Any? = null
-
-    /** If this validates a provider, this will be the data source of the provider-metadata.json. */
-    var dataSource: ProviderMetaDataSource? = null
 
     /** The HTTP response used to retrieve the [json]. */
     var httpResponse: HttpResponse? = null

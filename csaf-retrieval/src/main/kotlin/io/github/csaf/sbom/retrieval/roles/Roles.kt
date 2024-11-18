@@ -38,12 +38,18 @@ object CSAFPublisherRole : Role {
 /**
  * The "CSAF provider" role. See
  * https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#722-role-csaf-provider.
+ *
+ * Requirements 8, 9 and 10 need to be implicitly fulfilled by the domain-based fetching algorithm.
+ * They are therefore not explicitly checked. For reference, see these links:
+ * [Requirement 8: security.txt](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
+ * [Requirement 9: Well-known
+ * URL](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#719-requirement-9-well-known-url-for-provider-metadatajson)
+ * [Requirement 10: DNS path](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path)
  */
 object CSAFProviderRole : Role {
     override val roleRequirements =
         CSAFPublisherRole.roleRequirements +
             allOf(Requirement6, Requirement7) +
-            oneOf(Requirement8SecurityTxt, Requirement9WellKnownURL, Requirement10DNSPath) +
             (allOf(Requirement11YearInFolder, Requirement12, Requirement13, Requirement14) or
                 allOf(Requirement15, Requirement16, Requirement17))
 

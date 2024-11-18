@@ -149,7 +149,7 @@ class CsafLoader(engine: HttpClientEngine = Java.create()) {
                 securityTxt
                     .lineSequence()
                     .mapNotNull { line ->
-                        SecurityTxt.csafEntry.matchEntire(line)?.let { it.groupValues[1] }
+                        CSAF_ENTRY_REGEX.matchEntire(line)?.let { it.groupValues[1] }
                     }
                     .toList()
             }
