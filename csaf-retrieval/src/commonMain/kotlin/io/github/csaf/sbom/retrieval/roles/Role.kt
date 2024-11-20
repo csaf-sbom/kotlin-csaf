@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval.roles
 
+import io.github.csaf.sbom.retrieval.RetrievalContext
 import io.github.csaf.sbom.retrieval.requirements.*
 import io.github.csaf.sbom.validation.ValidationResult
 
@@ -39,11 +40,11 @@ interface Role {
      */
     val documentRequirements: Requirement
 
-    fun checkRole(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult {
+    fun checkRole(ctx: RetrievalContext): ValidationResult {
         return roleRequirements.check(ctx)
     }
 
-    fun checkDocument(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult {
+    fun checkDocument(ctx: RetrievalContext): ValidationResult {
         return documentRequirements.check(ctx)
     }
 }

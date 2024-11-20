@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval.requirements
 
+import io.github.csaf.sbom.retrieval.RetrievalContext
 import io.github.csaf.sbom.validation.ValidationFailed
 import io.github.csaf.sbom.validation.ValidationResult
 import io.github.csaf.sbom.validation.ValidationSuccessful
@@ -28,11 +29,11 @@ import io.github.csaf.sbom.validation.merge
  * combine requirements, such as [oneOf], [allOf] or [or].
  */
 interface Requirement {
-    fun check(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult
+    fun check(ctx: RetrievalContext): ValidationResult
 }
 
 private class NoRequirement : Requirement {
-    override fun check(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult {
+    override fun check(ctx: RetrievalContext): ValidationResult {
         return ValidationSuccessful
     }
 }
@@ -54,7 +55,7 @@ fun allOf(vararg requirements: Requirement): Requirement {
 }
 
 private class AllOf(private val list: List<Requirement>) : Requirement {
-    override fun check(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult {
+    override fun check(ctx: RetrievalContext): ValidationResult {
         val results = list.map { it.check(ctx) }
         return results.merge()
     }
@@ -73,7 +74,7 @@ fun oneOf(vararg requirements: Requirement): Requirement {
 }
 
 private class OneOf(private val list: List<Requirement>) : Requirement {
-    override fun check(ctx: io.github.csaf.sbom.retrieval.RetrievalContext): ValidationResult {
+    override fun check(ctx: RetrievalContext): ValidationResult {
         val results = list.map { it.check(ctx) }
         return if (results.all { it is ValidationFailed }) {
             ValidationFailed(results.flatMap { (it as ValidationFailed).errors })

@@ -31,6 +31,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.mockk)
+                implementation(kotlin("reflect"))
             }
         }
     }
