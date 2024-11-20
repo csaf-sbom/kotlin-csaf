@@ -1,6 +1,6 @@
 plugins {
     id("buildlogic.kotlin-common-conventions")
-    id("buildlogic.kotlin-publishing-root-conventions")
+    //id("buildlogic.kotlin-publishing-root-conventions")
 }
 
 // Create and register ExecutionService which enforces serial execution of assigned tasks.

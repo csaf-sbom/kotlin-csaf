@@ -1,0 +1,16 @@
+{
+  "packageName": "io.github.csaf.sbom.schema.generated",
+  "annotations": {
+    "classes": {
+      "kotlinx.serialization.Serializable": null
+    }
+  },
+  "customClasses": {
+    "format": {
+      "uri": "io.github.csaf.sbom.schema.JsonUri",
+      "date-time": "kotlinx.datetime.Instant",
+      "generic": "kotlinx.serialization.json.JsonObject"
+    }
+  },
+  "decimalClassName": "kotlin.Double"
+}

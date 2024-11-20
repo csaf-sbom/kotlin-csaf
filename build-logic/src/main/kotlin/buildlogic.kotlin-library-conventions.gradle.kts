@@ -6,5 +6,5 @@ plugins {
     id("buildlogic.kotlin-publishing-conventions")
 
     // Apply the java-library plugin for API and implementation separation.
-    `java-library`
+    //`java-library`
 }

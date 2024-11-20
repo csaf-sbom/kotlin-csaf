@@ -9,6 +9,10 @@ mavenPublishing {
     }
 }
 
-dependencies {
-    api(project(":csaf-schema"))
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":csaf-schema"))
+        }
+    }
 }
