@@ -22,9 +22,9 @@ import io.github.csaf.sbom.retrieval.roles.CSAFListerRole
 import io.github.csaf.sbom.schema.generated.Aggregator
 
 /**
- * This class represents a wrapper around a [io.github.csaf.sbom.schema.generated.Aggregator]
- * document, that provides functionality for parsing the metadata about an aggregator from a
- * location, including validation according to the specification.
+ * This class represents a wrapper around a [Aggregator] document, that provides functionality for
+ * parsing the metadata about an aggregator from a location, including validation according to the
+ * specification.
  *
  * This class is not yet complete.
  */
