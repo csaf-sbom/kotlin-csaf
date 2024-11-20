@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.validation
+package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.epoch

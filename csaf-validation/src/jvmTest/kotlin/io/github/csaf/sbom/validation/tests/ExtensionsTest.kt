@@ -18,8 +18,6 @@ package io.github.csaf.sbom.validation.tests
 
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.goodCsaf
-import io.github.csaf.sbom.validation.goodFileHashes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

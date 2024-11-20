@@ -20,10 +20,6 @@ import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.epoch
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Tracking
-import io.github.csaf.sbom.validation.profiles.InformationalAdvisory
-import io.github.csaf.sbom.validation.profiles.SecurityAdvisory
-import io.github.csaf.sbom.validation.profiles.SecurityIncidentResponse
-import io.github.csaf.sbom.validation.profiles.VEX
 
 fun goodDistribution(label: Csaf.Label? = Csaf.Label.WHITE): Csaf.Distribution {
     return Csaf.Distribution(
@@ -59,23 +55,6 @@ fun goodTracking(): Tracking =
             ),
         status = Csaf.Status.draft,
         version = "1.0.0",
-    )
-
-fun goodNotes() =
-    listOf(
-        Csaf.Note(
-            category = Csaf.Category.description,
-            text = "Some Text",
-        )
-    )
-
-fun goodReferences() =
-    listOf(
-        Csaf.Reference(
-            category = Csaf.Category2.external,
-            summary = "Some summary",
-            url = JsonUri("https://security.example.com/some-advice"),
-        ),
     )
 
 fun goodProductTree(): Csaf.ProductTree =
@@ -198,12 +177,6 @@ fun goodProductTree(): Csaf.ProductTree =
                 )
             )
     )
-
-fun goodFileHashes(): List<Csaf.FileHashe> {
-    return listOf(
-        Csaf.FileHashe(value = "21c9a43d22cd02babb34b45a9defb881ae8228f0d034a0779b1321e851cad6a4")
-    )
-}
 
 fun goodVulnerabilities() =
     listOf(
@@ -373,72 +346,3 @@ fun goodCsaf(
         product_tree = productTree,
         vulnerabilities = vulnerabilities
     )
-
-fun goodInformationalCsaf(
-    notes: List<Csaf.Note>? = goodNotes(),
-    references: List<Csaf.Reference>? = goodReferences()
-): Csaf {
-    return Csaf(
-        document =
-            Csaf.Document(
-                category = InformationalAdvisory.category,
-                csaf_version = "2.0",
-                publisher = goodPublisher(),
-                title = "Some Title",
-                tracking = goodTracking(),
-                notes = notes,
-                references = references,
-            )
-    )
-}
-
-fun goodSecurityIncidentResponseCsaf(references: List<Csaf.Reference>? = goodReferences()): Csaf {
-    return Csaf(
-        document =
-            Csaf.Document(
-                category = SecurityIncidentResponse.category,
-                csaf_version = "2.0",
-                publisher = goodPublisher(),
-                title = "Some Title",
-                tracking = goodTracking(),
-                references = references,
-                notes = goodNotes(),
-            )
-    )
-}
-
-fun goodVexCsaf(
-    productTree: Csaf.ProductTree? = goodProductTree(),
-    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities()
-): Csaf {
-    return Csaf(
-        document =
-            Csaf.Document(
-                category = VEX.category,
-                csaf_version = "2.0",
-                publisher = goodPublisher(),
-                title = "Some Title",
-                tracking = goodTracking(),
-            ),
-        product_tree = productTree,
-        vulnerabilities = vulnerabilities,
-    )
-}
-
-fun goodSecurityAdvisoryCsaf(
-    productTree: Csaf.ProductTree = goodProductTree(),
-    vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
-): Csaf {
-    return Csaf(
-        document =
-            Csaf.Document(
-                category = SecurityAdvisory.category,
-                csaf_version = "2.0",
-                publisher = goodPublisher(),
-                title = "Some Title",
-                tracking = goodTracking(),
-            ),
-        product_tree = productTree,
-        vulnerabilities = vulnerabilities,
-    )
-}

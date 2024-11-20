@@ -23,18 +23,9 @@ import io.github.csaf.sbom.validation.ValidationSuccessful
 import io.github.csaf.sbom.validation.assertValidationFailed
 import io.github.csaf.sbom.validation.assertValidationSuccessful
 import io.github.csaf.sbom.validation.generated.Testcases
-import io.github.csaf.sbom.validation.goodCsaf
-import io.github.csaf.sbom.validation.goodInformationalCsaf
-import io.github.csaf.sbom.validation.goodSecurityAdvisoryCsaf
-import io.github.csaf.sbom.validation.goodSecurityIncidentResponseCsaf
-import io.github.csaf.sbom.validation.goodVexCsaf
 import kotlin.io.path.Path
 import kotlin.io.path.readText
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 import kotlinx.serialization.json.Json
 
 /** The path to the test folder for the CSAF 2.0 tests. */
