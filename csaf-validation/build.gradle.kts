@@ -12,10 +12,6 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-/*application {
-    mainClass = "io.github.csaf.sbom.validation.MainKt"
-}*/
-
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - Validation Module")
