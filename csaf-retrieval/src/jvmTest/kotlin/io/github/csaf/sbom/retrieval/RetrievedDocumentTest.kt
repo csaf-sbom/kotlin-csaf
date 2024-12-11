@@ -35,7 +35,7 @@ class RetrievedDocumentTest {
 
         // Assert success
         assertTrue(result.isSuccess, "Parsing should succeed for valid CSAF JSON")
-        val document = result.getOrThrow()
+        val document = result.getOrNull()
         assertNotNull(document, "The RetrievedDocument should not be null")
     }
 

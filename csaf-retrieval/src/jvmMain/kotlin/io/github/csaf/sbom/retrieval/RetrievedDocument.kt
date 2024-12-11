@@ -63,11 +63,11 @@ data class RetrievedDocument(val json: Csaf) {
                 }
         }
 
-        fun fromJson(json: String): Result<RetrievedDocument> {
+        fun fromJson(json: String): ResultCompat<RetrievedDocument> {
             return try {
-                Result.success(RetrievedDocument(Json.decodeFromString<Csaf>(json)))
+                ResultCompat.success(RetrievedDocument(Json.decodeFromString<Csaf>(json)))
             } catch (t: Throwable) {
-                Result.failure(t)
+                ResultCompat.failure(t)
             }
         }
     }
