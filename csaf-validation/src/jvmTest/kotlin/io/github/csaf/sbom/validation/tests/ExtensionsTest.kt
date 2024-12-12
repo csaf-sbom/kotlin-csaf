@@ -54,7 +54,7 @@ class ExtensionsTest {
     @Test
     fun testGatherProductReferences() {
         assertEquals(
-            setOf(
+            listOf(
                 "linux-0.1",
                 "linux-0.5",
                 "linux-0.3",
@@ -67,7 +67,7 @@ class ExtensionsTest {
             goodCsaf().gatherProductReferences()
         )
         assertEquals(
-            setOf(
+            listOf(
                 "linux-0.1",
                 "linux-0.5",
                 "linux-0.3",
@@ -78,7 +78,7 @@ class ExtensionsTest {
             goodCsaf(productTree = null).gatherProductReferences()
         )
         assertEquals(
-            setOf(),
+            listOf(),
             goodCsaf(
                     productTree = null,
                     vulnerabilities = listOf(Csaf.Vulnerability(product_status = null))
@@ -86,7 +86,7 @@ class ExtensionsTest {
                 .gatherProductReferences()
         )
         assertEquals(
-            setOf(),
+            listOf(),
             goodCsaf(
                     productTree = null,
                     vulnerabilities =
