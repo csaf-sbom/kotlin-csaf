@@ -20,7 +20,10 @@ import io.github.csaf.sbom.retrieval.roles.CSAFTrustedProviderRole
 import io.github.csaf.sbom.retrieval.roles.Role
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationFailed
+import java.io.InputStream
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 
 /**
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
@@ -63,9 +66,30 @@ data class RetrievedDocument(val json: Csaf) {
                 }
         }
 
+        /**
+         * Load [RetrievedDocument] from JSON string.
+         *
+         * @param json JSON String to parse.
+         * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
+         */
         fun fromJson(json: String): ResultCompat<RetrievedDocument> {
             return try {
                 ResultCompat.success(RetrievedDocument(Json.decodeFromString<Csaf>(json)))
+            } catch (t: Throwable) {
+                ResultCompat.failure(t)
+            }
+        }
+
+        /**
+         * Load [RetrievedDocument] from JSON-yielding InputStream.
+         *
+         * @param stream InputStream yielding JSON to parse.
+         * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
+         */
+        @OptIn(ExperimentalSerializationApi::class)
+        fun fromJson(stream: InputStream): ResultCompat<RetrievedDocument> {
+            return try {
+                ResultCompat.success(RetrievedDocument(Json.decodeFromStream<Csaf>(stream)))
             } catch (t: Throwable) {
                 ResultCompat.failure(t)
             }
