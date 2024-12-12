@@ -55,13 +55,21 @@ class ExtensionsTest {
     fun testGatherProductReferences() {
         assertEquals(
             listOf(
-                "linux-0.1",
-                "linux-0.5",
-                "linux-0.3",
-                "linux-0.2",
-                "linux-0.4",
+                "test-product-name",
                 "linux-all",
                 "linux-product",
+                "test-product-name",
+                "linux-all",
+                "linux-0.1",
+                "linux-0.5",
+                "linux-0.5",
+                "linux-0.1",
+                "linux-0.3",
+                "linux-0.2",
+                "linux-0.5",
+                "linux-0.4",
+                "linux-0.1",
+                "test-product-name",
                 "test-product-name",
             ),
             goodCsaf().gatherProductReferences()
@@ -70,9 +78,14 @@ class ExtensionsTest {
             listOf(
                 "linux-0.1",
                 "linux-0.5",
+                "linux-0.5",
+                "linux-0.1",
                 "linux-0.3",
                 "linux-0.2",
+                "linux-0.5",
                 "linux-0.4",
+                "linux-0.1",
+                "test-product-name",
                 "test-product-name"
             ),
             goodCsaf(productTree = null).gatherProductReferences()
