@@ -1,19 +1,19 @@
 import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
+    kotlin("multiplatform")
     id("org.jetbrains.dokka")
-    //signing
     id("com.vanniktech.maven.publish")
 }
 
 // Publication settings for maven central
 mavenPublishing {
-    /*configure(KotlinJvm(
+    configure(KotlinMultiplatform(
         javadocJar = JavadocJar.Dokka("dokkaHtml"),
         sourcesJar = true,
-    ))*/
+    ))
     coordinates(project.group.toString(), project.name, version.toString())
 
     pom {

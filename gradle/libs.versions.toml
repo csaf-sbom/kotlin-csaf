@@ -16,6 +16,8 @@ purl = "1.5.0"
 semver = "2.0.0"
 slf4j = "2.0.16"
 spotless = "6.25.0"
+protobuf = "4.29.1"
+pbandk = "0.16.0"
 
 [libraries]
 kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version.ref = "kotlin-logging" }
@@ -33,6 +35,8 @@ purl = { group = "com.github.package-url", name = "packageurl-java", version.ref
 semver = { group = "net.swiftzer.semver", name = "semver", version.ref = "semver" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version.ref = "slf4j" }
+protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
+pbandk-runtime = { group = "pro.streem.pbandk", name = "pbandk-runtime", version.ref = "pbandk" }
 
 # plugins
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
@@ -50,3 +54,4 @@ slf4j = ["slf4j-api", "slf4j-jdk14"]
 
 [plugins]
 download = { id = "de.undercouch.download", version = "5.6.0" }
+protobuf = { id = "com.google.protobuf", version = "0.9.4" }
