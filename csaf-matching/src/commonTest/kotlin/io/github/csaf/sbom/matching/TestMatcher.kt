@@ -16,16 +16,15 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.schema.generated.Csaf
+import kotlin.test.Test
+import kotlin.test.assertTrue
+import protobom.protobom.Document
 
-/**
- * Matches the provided SBOM document with the CSAF document and determines whether they meet
- * specific criteria.
- *
- * @param sbom The SBOM document represented by a protobom.protobom.Document instance.
- * @param doc The CSAF document to be matched against, represented by a Csaf instance.
- * @return A boolean value indicating whether the SBOM document matches the CSAF document.
- */
-fun match(sbom: protobom.protobom.Document, doc: Csaf): Boolean {
-    return true
+class TestMatcher {
+    @Test
+    fun testMatch() {
+        val sbom = Document()
+        val result = match(sbom, goodCsaf())
+        assertTrue(result)
+    }
 }
