@@ -8,6 +8,12 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+tasks.whenTaskAdded {
+    if (name == "generate") {
+        dependsOn(tasks.named("jvmSourcesJar"))
+    }
+}
+
 // Publication settings for maven central
 mavenPublishing {
     configure(KotlinMultiplatform(
