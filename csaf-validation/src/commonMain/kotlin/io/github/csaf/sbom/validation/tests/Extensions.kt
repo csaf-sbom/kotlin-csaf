@@ -64,8 +64,8 @@ fun Csaf.gatherProductURLs(): MutableList<String> {
 }
 
 /** Gathers all product IDs in the current document. */
-fun Csaf.gatherProductReferences(): Set<String> {
-    val ids = mutableSetOf<String>()
+fun Csaf.gatherProductReferences(): List<String> {
+    val ids = mutableListOf<String>()
 
     // /product_tree/product_groups[]/product_ids[]
     ids += product_tree?.product_groups?.flatMap { it.product_ids }
@@ -90,7 +90,7 @@ fun Csaf.gatherProductReferences(): Set<String> {
     // /vulnerabilities[]/threats[]/product_ids[]
     ids +=
         vulnerabilities?.flatMap {
-            val inner = mutableSetOf<String>()
+            val inner = mutableListOf<String>()
             inner += it.product_status?.first_affected
             inner += it.product_status?.first_fixed
             inner += it.product_status?.fixed
@@ -99,9 +99,9 @@ fun Csaf.gatherProductReferences(): Set<String> {
             inner += it.product_status?.last_affected
             inner += it.product_status?.recommended
             inner += it.product_status?.under_investigation
-            inner += it.remediations?.flatMap { it.product_ids ?: emptySet() }
+            inner += it.remediations?.flatMap { it.product_ids ?: emptyList() }
             inner += it.scores?.flatMap { it.products }
-            inner += it.threats?.flatMap { it.product_ids ?: emptySet() }
+            inner += it.threats?.flatMap { it.product_ids ?: emptyList() }
             inner
         }
 

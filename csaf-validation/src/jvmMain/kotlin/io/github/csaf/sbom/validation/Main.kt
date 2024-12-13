@@ -27,12 +27,12 @@ import kotlin.io.path.readText
 import kotlinx.serialization.json.Json
 
 fun main(args: Array<String>) {
+    val globalStart = Instant.now()
+
     val path = Path(args[0])
     val doc = Json.decodeFromString<Csaf>(path.readText())
 
     println("Analyzing file ${path}...\n")
-
-    val globalStart = Instant.now()
 
     val allTests =
         mapOf(
