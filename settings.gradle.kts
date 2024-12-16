@@ -10,7 +10,7 @@ pluginManagement {
 plugins {
     // Apply the foojay-resolver plugin to allow automatic download of JDKs
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
-    id("org.jetbrains.kotlinx.kover.aggregation") version "0.8.3"
+    id("org.jetbrains.kotlinx.kover.aggregation") version "0.9.0"
 }
 
 kover {
