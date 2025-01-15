@@ -186,7 +186,7 @@ fun Csaf.gatherFileHashLists(): MutableList<List<Csaf.FileHashe>> {
  */
 fun <T> Csaf.ProductTree?.mapBranchesNotNull(
     predicate: ((Csaf.Branche) -> Boolean)? = null,
-    transform: ((Csaf.Branche) -> T?)
+    transform: ((Csaf.Branche) -> T?),
 ): List<T> {
     val branches = this?.branches ?: return listOf()
     val flattened = mutableListOf<T>()

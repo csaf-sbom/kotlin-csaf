@@ -95,7 +95,7 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
          */
         suspend fun from(
             url: String,
-            loader: CsafLoader = lazyLoader
+            loader: CsafLoader = lazyLoader,
         ): Result<RetrievedAggregator> {
             val ctx = RetrievalContext()
             return loader

@@ -124,15 +124,15 @@ class RequirementsTest {
             ValidationNotApplicable,
             rule.check(
                 ctx.also { ctx.json = goodCsaf(distribution = goodDistribution(Csaf.Label.RED)) }
-            )
+            ),
         )
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { ctx.json = goodCsaf(distribution = null) })
+            rule.check(ctx.also { ctx.json = goodCsaf(distribution = null) }),
         )
         assertEquals(
             ValidationNotApplicable,
-            rule.check(ctx.also { ctx.json = goodCsaf(distribution = goodDistribution(null)) })
+            rule.check(ctx.also { ctx.json = goodCsaf(distribution = goodDistribution(null)) }),
         )
 
         // No http response -> fail
@@ -154,9 +154,9 @@ class RequirementsTest {
                         mockResponse(
                             mockRequest(
                                 Url("https://example.com"),
-                                headers = headers { set("Authorization", "Bearer: 1234") }
+                                headers = headers { set("Authorization", "Bearer: 1234") },
                             ),
-                            HttpStatusCode.OK
+                            HttpStatusCode.OK,
                         )
                 }
             )
@@ -180,10 +180,7 @@ class RequirementsTest {
             rule.check(
                 ctx.also {
                     ctx.httpResponse =
-                        mockResponse(
-                            mockRequest(Url("https://example.com")),
-                            HttpStatusCode.OK,
-                        )
+                        mockResponse(mockRequest(Url("https://example.com")), HttpStatusCode.OK)
                 }
             )
         )
@@ -207,7 +204,7 @@ fun mockResponse(
             header,
             HttpProtocolVersion(name = "HTTP", major = 2, minor = 0),
             "",
-            EmptyCoroutineContext
+            EmptyCoroutineContext,
         )
 
     val call = HttpClientCall(HttpClient(), requestData, responseData)
@@ -218,7 +215,7 @@ fun mockResponse(
 fun mockRequest(
     url: Url,
     method: HttpMethod = HttpMethod.Get,
-    headers: Headers = Headers.Empty
+    headers: Headers = Headers.Empty,
 ): HttpRequestData {
     return HttpRequestData(url, method, headers, EmptyContent, Job(), Attributes())
 }

@@ -25,7 +25,7 @@ class ValidationExceptionTest {
         val validationException = ValidationException(listOf("Single error"))
         assertEquals(
             "Validation failed with this errors: [Single error]",
-            validationException.message
+            validationException.message,
         )
     }
 
@@ -34,7 +34,7 @@ class ValidationExceptionTest {
         val validationException = ValidationException(listOf("First error", "Second error"))
         assertEquals(
             "Validation failed with this errors: [First error, Second error]",
-            validationException.message
+            validationException.message,
         )
     }
 

@@ -54,7 +54,7 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
      */
     private suspend inline fun <reified T> get(
         url: String,
-        crossinline responseCallback: ((HttpResponse) -> Unit)
+        crossinline responseCallback: ((HttpResponse) -> Unit),
     ): T {
         val response = httpClient.get(url)
         responseCallback.invoke(response)
@@ -112,7 +112,7 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
      */
     suspend fun fetchROLIEFeed(
         url: String,
-        responseCallback: ((HttpResponse) -> Unit)? = null
+        responseCallback: ((HttpResponse) -> Unit)? = null,
     ): Result<ROLIEFeed> = Result.of { get(url, responseCallback ?: {}) }
 
     /**
@@ -126,7 +126,7 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
      */
     suspend fun fetchText(
         url: String,
-        responseCallback: ((HttpResponse) -> Unit)? = null
+        responseCallback: ((HttpResponse) -> Unit)? = null,
     ): Result<String> = Result.of { get(url, responseCallback ?: {}) }
 
     /**
@@ -141,7 +141,7 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
      */
     suspend fun fetchSecurityTxtCsafUrls(
         domain: String,
-        responseCallback: ((HttpResponse) -> Unit)? = null
+        responseCallback: ((HttpResponse) -> Unit)? = null,
     ) =
         // TODO: A security.txt can be PGP-signed. Signature check not implemented yet.
         //  See https://github.com/csaf-sbom/kotlin-csaf/issues/43

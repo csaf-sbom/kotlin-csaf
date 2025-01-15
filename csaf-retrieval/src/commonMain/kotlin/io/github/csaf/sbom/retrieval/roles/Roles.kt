@@ -31,7 +31,7 @@ object CSAFPublisherRole : Role {
             Requirement1ValidCSAFDocument,
             Requirement2ValidFilename,
             Requirement3UsageOfTls,
-            Requirement4TlpWhiteAccessible
+            Requirement4TlpWhiteAccessible,
         )
 }
 
@@ -92,6 +92,6 @@ object CSAFAggregatorRole : Role {
             Requirement4TlpWhiteAccessible,
             Requirement5,
             Requirement18,
-            Requirement19
+            Requirement19,
         )
 }

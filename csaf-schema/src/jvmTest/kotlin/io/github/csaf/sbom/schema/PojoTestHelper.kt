@@ -38,7 +38,7 @@ object PojoTestHelper {
                             defaultValue: T,
                             nullable: Boolean,
                             validList: List<T>?,
-                            invalidList: List<T>?
+                            invalidList: List<T>?,
                         ): T {
                             Thread.currentThread().stackTrace[3].toString().let { i ->
                                 validList?.forEach { validValues += i to it }
@@ -65,7 +65,7 @@ object PojoTestHelper {
                             defaultValue: T,
                             nullable: Boolean,
                             validList: List<T>?,
-                            invalidList: List<T>?
+                            invalidList: List<T>?,
                         ): T {
                             Thread.currentThread().stackTrace[3].toString().let { i ->
                                 @Suppress("UNCHECKED_CAST")
@@ -85,7 +85,7 @@ object PojoTestHelper {
                                 defaultValue: T,
                                 nullable: Boolean,
                                 validList: List<T>?,
-                                invalidList: List<T>?
+                                invalidList: List<T>?,
                             ): T {
                                 Thread.currentThread().stackTrace[3].toString().let { i ->
                                     @Suppress("UNCHECKED_CAST")
@@ -114,7 +114,7 @@ object PojoTestHelper {
                             property: KProperty1<*, T>,
                             defaultValue: T,
                             validList: List<T>?,
-                            invalidList: List<T>?
+                            invalidList: List<T>?,
                         ): T {
                             validList?.forEach { validValues += property to it }
                             invalidList?.forEach { invalidValues += property to it }
@@ -138,7 +138,7 @@ object PojoTestHelper {
                             property: KProperty1<*, T>,
                             defaultValue: T,
                             validList: List<T>?,
-                            invalidList: List<T>?
+                            invalidList: List<T>?,
                         ): T {
                             @Suppress("UNCHECKED_CAST")
                             return if (property == validProperty) value as T else defaultValue
@@ -155,7 +155,7 @@ object PojoTestHelper {
                             property: KProperty1<*, T>,
                             defaultValue: T,
                             validList: List<T>?,
-                            invalidList: List<T>?
+                            invalidList: List<T>?,
                         ): T {
                             @Suppress("UNCHECKED_CAST")
                             return if (property == invalidProperty) value as T else defaultValue

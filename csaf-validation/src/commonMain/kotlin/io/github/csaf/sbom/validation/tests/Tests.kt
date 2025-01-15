@@ -85,17 +85,14 @@ val mandatoryTests =
         Test6130MixedIntegerAndSemanticVersioning,
         Test6131VersionRangeInProductVersion,
         Test6132FlagWithoutProductReference,
-        Test6133MultipleFlagsWithVEXJustificationCodesPerProduct
+        Test6133MultipleFlagsWithVEXJustificationCodesPerProduct,
     )
 
 /**
  * Optional tests as defined in
  * [Section 6.2](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#62-optional-tests).
  */
-val optionalTests =
-    listOf(
-        Test621UnusedDefinitionOfProductID,
-    )
+val optionalTests = listOf(Test621UnusedDefinitionOfProductID)
 
 /**
  * Informative tests as defined in
@@ -389,7 +386,7 @@ val test6110PropertiesMap =
         Csaf.CvssV3::modifiedConfidentialityImpact to
             CvssV3Calculation::modifiedConfidentialityImpact,
         Csaf.CvssV3::modifiedIntegrityImpact to CvssV3Calculation::modifiedIntegrityImpact,
-        Csaf.CvssV3::modifiedAvailabilityImpact to CvssV3Calculation::modifiedAvailabilityImpact
+        Csaf.CvssV3::modifiedAvailabilityImpact to CvssV3Calculation::modifiedAvailabilityImpact,
     )
 
 /**
@@ -588,7 +585,7 @@ object Test6116LatestDocumentVersion : Test {
             latestVersion.equalsVersion(
                 doc.document.tracking.version,
                 ignoreMetadata = true,
-                ignorePreRelease = doc.document.tracking.status == Csaf.Status.draft
+                ignorePreRelease = doc.document.tracking.status == Csaf.Status.draft,
             )
         ) {
             ValidationSuccessful
@@ -1279,7 +1276,7 @@ object Test6133MultipleFlagsWithVEXJustificationCodesPerProduct : Test {
                                 Label1.inline_mitigations_already_exist,
                                 Label1.vulnerable_code_cannot_be_controlled_by_adversary,
                                 Label1.vulnerable_code_not_in_execute_path,
-                                Label1.vulnerable_code_not_present
+                                Label1.vulnerable_code_not_present,
                             )
                     }
                     ?.flatMap { it.product_ids + it.group_ids.resolveProductIDs(groupMap) }

@@ -48,13 +48,13 @@ class CalculationTest {
         // https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector=(AV:N/AC:M/Au:N/C:C/I:C/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND)
         assertBaseScore(
             "AV:N/AC:M/Au:N/C:C/I:C/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND",
-            8.8
+            8.8,
         )
 
         // https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector=(AV:N/AC:M/Au:N/C:N/I:N/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND)
         assertBaseScore(
             "AV:N/AC:M/Au:N/C:N/I:N/A:N/E:POC/RL:W/RC:C/CDP:N/TD:M/CR:ND/IR:ND/AR:ND",
-            0.0
+            0.0,
         )
     }
 

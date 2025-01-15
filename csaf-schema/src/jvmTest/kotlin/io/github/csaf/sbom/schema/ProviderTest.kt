@@ -48,7 +48,7 @@ class ProviderTest {
                                                         JsonUri(
                                                             "example.com/csaf/feeds/categories.json"
                                                         )
-                                                    )
+                                                    ),
                                                 ),
                                             services =
                                                 valGen(
@@ -57,7 +57,7 @@ class ProviderTest {
                                                         JsonUri(
                                                             "example.com/csaf/feeds/services.json"
                                                         )
-                                                    )
+                                                    ),
                                                 ),
                                             feeds =
                                                 valGen(
@@ -69,13 +69,13 @@ class ProviderTest {
                                                                 JsonUri(
                                                                     "example.com/csaf/feeds/white/feed.json"
                                                                 ),
-                                                            summary = "White Advisories"
+                                                            summary = "White Advisories",
                                                         )
-                                                    )
-                                                )
-                                        )
+                                                    ),
+                                                ),
+                                        ),
                                 )
-                            )
+                            ),
                         ),
                     publisher =
                         valGen(
@@ -87,14 +87,14 @@ class ProviderTest {
                                 contact_details =
                                     valGen(
                                         Provider.Publisher::contact_details,
-                                        "security@example.com"
+                                        "security@example.com",
                                     ),
                                 issuing_authority =
                                     valGen(
                                         Provider.Publisher::issuing_authority,
-                                        "Very authoritative"
-                                    )
-                            )
+                                        "Very authoritative",
+                                    ),
+                            ),
                         ),
                     public_openpgp_keys =
                         listOf(
@@ -107,11 +107,11 @@ class ProviderTest {
                                         invalidList =
                                             listOf(
                                                 "12345678901234567890",
-                                                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                                            )
+                                                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                                            ),
                                     ),
                             )
-                        )
+                        ),
                 )
             }
         // One may use this code snippet to update the reference JSON in case of structure changes.
@@ -121,7 +121,7 @@ class ProviderTest {
         //        )
         assertEquals(
             PojoTestHelper.readFileFromResources("provider.json"),
-            Json.encodeToString(example)
+            Json.encodeToString(example),
         )
     }
 
@@ -138,7 +138,7 @@ class ProviderTest {
                             category = Provider.Category.vendor,
                             name = "Test Publisher",
                             namespace = JsonUri("example.com"),
-                        )
+                        ),
                 )
             }
         assertEquals("metadata_version not in enumerated values - abc", exception.message)

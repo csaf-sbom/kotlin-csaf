@@ -56,7 +56,7 @@ class RetrievedAggregatorTest {
                     it.httpResponse =
                         mockResponse(
                             mockRequest(Url("https://example.com/test-title.json")),
-                            HttpStatusCode.OK
+                            HttpStatusCode.OK,
                         )
                 }
             )
