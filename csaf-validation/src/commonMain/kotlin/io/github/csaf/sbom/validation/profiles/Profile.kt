@@ -72,5 +72,5 @@ val officialProfiles =
         SecurityIncidentResponse.category to SecurityIncidentResponse,
         InformationalAdvisory.category to InformationalAdvisory,
         SecurityAdvisory.category to SecurityAdvisory,
-        VEX.category to VEX
+        VEX.category to VEX,
     )

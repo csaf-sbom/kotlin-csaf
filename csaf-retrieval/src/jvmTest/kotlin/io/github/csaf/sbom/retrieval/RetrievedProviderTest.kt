@@ -45,7 +45,7 @@ class RetrievedProviderTest {
             }
         assertEquals(
             "Failed to resolve provider for broken-domain.com via .well-known, security.txt or DNS.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -65,7 +65,7 @@ class RetrievedProviderTest {
         assertEquals(
             2,
             documentIndexResults.size,
-            "Expected exactly 2 results: One index.txt content and one fetch error"
+            "Expected exactly 2 results: One index.txt content and one fetch error",
         )
         assertTrue(documentIndexResults[0].second.isSuccess)
         assertFalse(documentIndexResults[1].second.isSuccess)
@@ -88,7 +88,7 @@ class RetrievedProviderTest {
         // Check some random property on successful document
         assertEquals(
             "Bundesamt für Sicherheit in der Informationstechnik",
-            documentResults[0].getOrThrow().json.document.publisher.name
+            documentResults[0].getOrThrow().json.document.publisher.name,
         )
         // Check document validation error
         val validationException =
@@ -97,18 +97,18 @@ class RetrievedProviderTest {
             listOf(
                 "Filename \"bsi-2022_2-01.json\" does not match conformance, expected \"bsi-2022-0001.json\""
             ),
-            validationException.errors
+            validationException.errors,
         )
         // Check download error
         val fetchException = assertIs<Exception>(documentResults[2].exceptionOrNull()?.cause)
         assertEquals(
             "Could not retrieve https://$domain/directory/2024/does-not-exist.json: Not Found",
-            fetchException.message
+            fetchException.message,
         )
         // Check index error
         assertEquals(
             "Failed to fetch index.txt from directory at https://$domain/invalid-directory",
-            documentResults[3].exceptionOrNull()?.message
+            documentResults[3].exceptionOrNull()?.message,
         )
     }
 
@@ -120,19 +120,19 @@ class RetrievedProviderTest {
         assertEquals(4, urlResults.size, "Expected exactly 4 results")
         assertEquals(
             "https://example.com/directory/2022/bsi-2022-0001.json",
-            urlResults[0].getOrThrow()
+            urlResults[0].getOrThrow(),
         )
         assertEquals(
             "https://example.com/directory/2022/bsi-2022_2-01.json",
-            urlResults[1].getOrThrow()
+            urlResults[1].getOrThrow(),
         )
         assertEquals(
             "https://example.com/directory/2024/does-not-exist.json",
-            urlResults[2].getOrThrow()
+            urlResults[2].getOrThrow(),
         )
         assertEquals(
             "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
-            (assertThrows<Exception> { urlResults[3].getOrThrow() }).message
+            (assertThrows<Exception> { urlResults[3].getOrThrow() }).message,
         )
     }
 }

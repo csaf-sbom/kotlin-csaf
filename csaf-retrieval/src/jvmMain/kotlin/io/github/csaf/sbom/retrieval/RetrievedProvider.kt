@@ -64,7 +64,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     fun fetchDocumentIndices(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): ReceiveChannel<Pair<String, Result<String>>> {
         val directoryUrls =
             (json.distributions ?: emptySet()).mapNotNull { distribution ->
@@ -98,7 +98,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     fun fetchRolieFeeds(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>> {
         val feeds = json.distributions?.mapNotNull { it.rolie }?.flatMap { it.feeds } ?: listOf()
 
@@ -128,7 +128,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     suspend fun countExpectedDocuments(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): Int {
         return fetchAllDocumentUrls(loader, channelCapacity).toList().filter { it.isSuccess }.size
     }
@@ -144,7 +144,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchDocuments(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): ReceiveChannel<Result<RetrievedDocument>> {
         val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity)
         // This second channel collects up to `channelCapacity` Results concurrently, which
@@ -154,7 +154,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                 for (result in documentUrlChannel) {
                     result.fold(
                         { send(async { RetrievedDocument.from(it, loader, role) }) },
-                        { send(async { Result.failure(it) }) }
+                        { send(async { Result.failure(it) }) },
                     )
                 }
             }
@@ -178,7 +178,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchAllDocumentUrls(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): ReceiveChannel<Result<String>> {
         val urlResultChannel =
             ioScope.produce(capacity = channelCapacity) {
@@ -194,7 +194,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                             send(Result.success(it))
                         }
                     },
-                    { send(Result.failure(it)) }
+                    { send(Result.failure(it)) },
                 )
             }
         }
@@ -219,11 +219,11 @@ class RetrievedProvider(val json: Provider) : Validatable {
                         Result.failure(
                             Exception(
                                 "Failed to fetch index.txt from directory at $directoryUrl",
-                                e
+                                e,
                             )
                         )
                     )
-                }
+                },
             )
         }
     }
@@ -248,7 +248,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     send(
                         Result.failure(Exception("Failed to fetch ROLIE feed from ${feed.url}", e))
                     )
-                }
+                },
             )
         }
     }
@@ -266,7 +266,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     @JvmOverloads
     fun streamDocuments(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): Stream<ResultCompat<RetrievedDocument>> {
         val channel = fetchDocuments(loader, channelCapacity)
         val iterator =
@@ -279,7 +279,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
             }
         return StreamSupport.stream(
             Spliterators.spliteratorUnknownSize(iterator, Spliterator.NONNULL),
-            false
+            false,
         )
     }
 
@@ -295,7 +295,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
     @JvmOverloads
     fun countExpectedDocumentsBlocking(
         loader: CsafLoader = lazyLoader,
-        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY
+        channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ) = runBlocking { countExpectedDocuments(loader, channelCapacity) }
 
     companion object {
@@ -307,7 +307,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
         @JvmOverloads
         fun fromAsync(
             domain: String,
-            loader: CsafLoader = lazyLoader
+            loader: CsafLoader = lazyLoader,
         ): CompletableFuture<RetrievedProvider> {
             return ioScope.future { from(domain, loader).getOrThrow() }
         }
@@ -331,7 +331,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
          */
         suspend fun from(
             domain: String,
-            loader: CsafLoader = lazyLoader
+            loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
             val ctx = RetrievalContext()
             val mapAndValidateProvider = { p: Provider ->
@@ -374,7 +374,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     }
                     throw Exception(
                         "Failed to resolve provider for $domain via .well-known, security.txt or DNS.",
-                        it
+                        it,
                     )
                 }
         }

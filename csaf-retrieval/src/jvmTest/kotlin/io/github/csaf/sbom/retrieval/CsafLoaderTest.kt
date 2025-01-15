@@ -33,7 +33,7 @@ class CsafLoaderTest {
         val result = loader.fetchAggregator("https://example.com/example-01-aggregator.json")
         assertTrue(
             result.isSuccess,
-            "Failed to \"download\" example-01-aggregator.json from resources."
+            "Failed to \"download\" example-01-aggregator.json from resources.",
         )
 
         val lister = result.getOrNull()
@@ -41,13 +41,13 @@ class CsafLoaderTest {
         assertEquals(
             "Example CSAF Lister",
             lister.aggregator.name,
-            "The name field of the loaded aggregator does not contain the expected value."
+            "The name field of the loaded aggregator does not contain the expected value.",
         )
 
         val failedResult = loader.fetchAggregator("https://example.com/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
-            "\"Download\" of https://example.com/does-not-exist.json should produce a failed Result."
+            "\"Download\" of https://example.com/does-not-exist.json should produce a failed Result.",
         )
     }
 
@@ -56,7 +56,7 @@ class CsafLoaderTest {
         val result = loader.fetchProvider("https://example.com/example-01-provider-metadata.json")
         assertTrue(
             result.isSuccess,
-            "Failed to \"download\" example-01-aggregator.json from resources."
+            "Failed to \"download\" example-01-aggregator.json from resources.",
         )
 
         val provider = result.getOrNull()
@@ -64,13 +64,13 @@ class CsafLoaderTest {
         assertEquals(
             "Example Company ProductCERT",
             provider.publisher.name,
-            "The publisher name field of the loaded provider does not contain the expected value."
+            "The publisher name field of the loaded provider does not contain the expected value.",
         )
 
         val failedResult = loader.fetchProvider("https://example.com/does-not-exist.json")
         assertFalse(
             failedResult.isSuccess,
-            "\"Download\" of https://example.com/does-not-exist.json should produce a failed Result."
+            "\"Download\" of https://example.com/does-not-exist.json should produce a failed Result.",
         )
     }
 
@@ -81,16 +81,16 @@ class CsafLoaderTest {
         assertContentEquals(
             listOf(
                 "https://provider-with-securitytxt.com/broken-url/provider-metadata.json",
-                "https://provider-with-securitytxt.com/directory/provider-metadata.json"
+                "https://provider-with-securitytxt.com/directory/provider-metadata.json",
             ),
-            result.getOrThrow()
+            result.getOrThrow(),
         )
 
         // Test fallback location.
         val legacyResult = loader.fetchSecurityTxtCsafUrls("example.com")
         assertContentEquals(
             listOf("https://example.com/.well-known/csaf/provider-metadata.json"),
-            legacyResult.getOrThrow()
+            legacyResult.getOrThrow(),
         )
     }
 

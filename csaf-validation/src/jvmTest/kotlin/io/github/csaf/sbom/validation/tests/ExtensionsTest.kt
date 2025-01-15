@@ -46,7 +46,7 @@ class ExtensionsTest {
                                 )
                         )
                 )
-                .gatherProductDefinitions()
+                .gatherProductDefinitions(),
         )
     }
 
@@ -72,7 +72,7 @@ class ExtensionsTest {
                 "test-product-name",
                 "test-product-name",
             ),
-            goodCsaf().gatherProductReferences()
+            goodCsaf().gatherProductReferences(),
         )
         assertEquals(
             listOf(
@@ -86,17 +86,17 @@ class ExtensionsTest {
                 "linux-0.4",
                 "linux-0.1",
                 "test-product-name",
-                "test-product-name"
+                "test-product-name",
             ),
-            goodCsaf(productTree = null).gatherProductReferences()
+            goodCsaf(productTree = null).gatherProductReferences(),
         )
         assertEquals(
             listOf(),
             goodCsaf(
                     productTree = null,
-                    vulnerabilities = listOf(Csaf.Vulnerability(product_status = null))
+                    vulnerabilities = listOf(Csaf.Vulnerability(product_status = null)),
                 )
-                .gatherProductReferences()
+                .gatherProductReferences(),
         )
         assertEquals(
             listOf(),
@@ -111,7 +111,7 @@ class ExtensionsTest {
                                         Csaf.Remediation(
                                             product_ids = null,
                                             category = Csaf.Category5.no_fix_planned,
-                                            details = "deal with it"
+                                            details = "deal with it",
                                         )
                                     ),
                                 threats =
@@ -119,13 +119,13 @@ class ExtensionsTest {
                                         Csaf.Threat(
                                             product_ids = null,
                                             category = Csaf.Category7.exploit_status,
-                                            details = "will be exploited"
+                                            details = "will be exploited",
                                         )
-                                    )
+                                    ),
                             )
-                        )
+                        ),
                 )
-                .gatherProductReferences()
+                .gatherProductReferences(),
         )
     }
 
@@ -134,7 +134,7 @@ class ExtensionsTest {
         assertEquals(emptyList(), goodCsaf(productTree = null).gatherProductURLs())
         assertEquals(
             emptyList(),
-            goodCsaf(productTree = Csaf.ProductTree(full_product_names = null)).gatherProductURLs()
+            goodCsaf(productTree = Csaf.ProductTree(full_product_names = null)).gatherProductURLs(),
         )
         assertEquals(
             emptyList(),
@@ -146,7 +146,7 @@ class ExtensionsTest {
                                     Csaf.Product(
                                         name = "My product",
                                         product_id = "product1",
-                                        product_identification_helper = null
+                                        product_identification_helper = null,
                                     )
                                 ),
                             relationships =
@@ -156,16 +156,16 @@ class ExtensionsTest {
                                             Csaf.Product(
                                                 name = "My product",
                                                 product_id = "product1_on_the_rocks",
-                                                product_identification_helper = null
+                                                product_identification_helper = null,
                                             ),
                                         category = Csaf.Category4.installed_on,
                                         product_reference = "product1",
-                                        relates_to_product_reference = "rocks"
+                                        relates_to_product_reference = "rocks",
                                     )
-                                )
+                                ),
                         )
                 )
-                .gatherProductURLs()
+                .gatherProductURLs(),
         )
         assertEquals(
             emptyList(),
@@ -182,13 +182,13 @@ class ExtensionsTest {
                                                 name = "My product",
                                                 product_id = "product1",
                                                 product_identification_helper =
-                                                    Csaf.ProductIdentificationHelper(purl = null)
-                                            )
-                                    ),
+                                                    Csaf.ProductIdentificationHelper(purl = null),
+                                            ),
+                                    )
                                 )
                         )
                 )
-                .gatherProductURLs()
+                .gatherProductURLs(),
         )
         assertEquals(
             emptyList(),
@@ -200,12 +200,12 @@ class ExtensionsTest {
                                     Csaf.Branche(
                                         category = Csaf.Category3.product_name,
                                         name = "My product",
-                                        product = null
-                                    ),
+                                        product = null,
+                                    )
                                 )
                         )
                 )
-                .gatherProductURLs()
+                .gatherProductURLs(),
         )
         assertEquals(
             listOf("pkg:github/product/base@1.0.0"),
@@ -225,13 +225,13 @@ class ExtensionsTest {
                                                     Csaf.ProductIdentificationHelper(
                                                         purl =
                                                             JsonUri("pkg:github/product/base@1.0.0")
-                                                    )
-                                            )
-                                    ),
+                                                    ),
+                                            ),
+                                    )
                                 )
                         )
                 )
-                .gatherProductURLs()
+                .gatherProductURLs(),
         )
         assertEquals(
             listOf("pkg:github/product/rocks@1.0.0"),
@@ -251,16 +251,16 @@ class ExtensionsTest {
                                                             JsonUri(
                                                                 "pkg:github/product/rocks@1.0.0"
                                                             )
-                                                    )
+                                                    ),
                                             ),
                                         category = Csaf.Category4.installed_on,
                                         product_reference = "product1",
-                                        relates_to_product_reference = "rocks"
+                                        relates_to_product_reference = "rocks",
                                     )
                                 )
                         )
                 )
-                .gatherProductURLs()
+                .gatherProductURLs(),
         )
     }
 
@@ -270,7 +270,7 @@ class ExtensionsTest {
         assertEquals(
             emptyList(),
             goodCsaf(productTree = Csaf.ProductTree(full_product_names = null))
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             emptyList(),
@@ -282,7 +282,7 @@ class ExtensionsTest {
                                     Csaf.Product(
                                         name = "My product",
                                         product_id = "product1",
-                                        product_identification_helper = null
+                                        product_identification_helper = null,
                                     )
                                 ),
                             relationships =
@@ -292,16 +292,16 @@ class ExtensionsTest {
                                             Csaf.Product(
                                                 name = "My product",
                                                 product_id = "product1_on_the_rocks",
-                                                product_identification_helper = null
+                                                product_identification_helper = null,
                                             ),
                                         category = Csaf.Category4.installed_on,
                                         product_reference = "product1",
-                                        relates_to_product_reference = "rocks"
+                                        relates_to_product_reference = "rocks",
                                     )
-                                )
+                                ),
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             emptyList(),
@@ -318,13 +318,13 @@ class ExtensionsTest {
                                                 name = "My product",
                                                 product_id = "product1",
                                                 product_identification_helper =
-                                                    Csaf.ProductIdentificationHelper(hashes = null)
-                                            )
-                                    ),
+                                                    Csaf.ProductIdentificationHelper(hashes = null),
+                                            ),
+                                    )
                                 )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             emptyList(),
@@ -336,12 +336,12 @@ class ExtensionsTest {
                                     Csaf.Branche(
                                         category = Csaf.Category3.product_name,
                                         name = "My product",
-                                        product = null
-                                    ),
+                                        product = null,
+                                    )
                                 )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             emptyList(),
@@ -354,12 +354,12 @@ class ExtensionsTest {
                                         name = "My product",
                                         product_id = "product1",
                                         product_identification_helper =
-                                            Csaf.ProductIdentificationHelper(hashes = null)
+                                            Csaf.ProductIdentificationHelper(hashes = null),
                                     )
-                                ),
+                                )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             listOf(goodFileHashes()),
@@ -377,15 +377,15 @@ class ExtensionsTest {
                                                     listOf(
                                                         Csaf.Hashe(
                                                             file_hashes = goodFileHashes(),
-                                                            filename = "test.file"
+                                                            filename = "test.file",
                                                         )
                                                     )
-                                            )
+                                            ),
                                     )
-                                ),
+                                )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             listOf(goodFileHashes()),
@@ -407,16 +407,16 @@ class ExtensionsTest {
                                                             listOf(
                                                                 Csaf.Hashe(
                                                                     file_hashes = goodFileHashes(),
-                                                                    filename = "test.file"
+                                                                    filename = "test.file",
                                                                 )
                                                             )
-                                                    )
-                                            )
-                                    ),
+                                                    ),
+                                            ),
+                                    )
                                 )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
         assertEquals(
             listOf(goodFileHashes()),
@@ -436,19 +436,19 @@ class ExtensionsTest {
                                                             listOf(
                                                                 Csaf.Hashe(
                                                                     file_hashes = goodFileHashes(),
-                                                                    filename = "test.file"
+                                                                    filename = "test.file",
                                                                 )
                                                             )
-                                                    )
+                                                    ),
                                             ),
                                         category = Csaf.Category4.installed_on,
                                         product_reference = "product1",
-                                        relates_to_product_reference = "rocks"
+                                        relates_to_product_reference = "rocks",
                                     )
                                 )
                         )
                 )
-                .gatherFileHashLists()
+                .gatherFileHashLists(),
         )
     }
 
@@ -466,7 +466,7 @@ class ExtensionsTest {
                     vulnerabilities =
                         listOf(Csaf.Vulnerability(remediations = null, threats = null))
                 )
-                .gatherProductGroupReferences()
+                .gatherProductGroupReferences(),
         )
         assertEquals(
             emptySet(),
@@ -478,20 +478,20 @@ class ExtensionsTest {
                                     listOf(
                                         Csaf.Remediation(
                                             category = Csaf.Category5.no_fix_planned,
-                                            details = "deal with it"
+                                            details = "deal with it",
                                         )
                                     ),
                                 threats =
                                     listOf(
                                         Csaf.Threat(
                                             category = Csaf.Category7.exploit_status,
-                                            details = "will be exploited"
+                                            details = "will be exploited",
                                         )
-                                    )
+                                    ),
                             )
                         )
                 )
-                .gatherProductGroupReferences()
+                .gatherProductGroupReferences(),
         )
     }
 
@@ -501,7 +501,7 @@ class ExtensionsTest {
         assertEquals(
             mapOf(),
             goodCsaf(productTree = Csaf.ProductTree(product_groups = null))
-                .gatherProductIdsPerGroup()
+                .gatherProductIdsPerGroup(),
         )
         assertEquals(
             mapOf("group1" to setOf("product1", "product2")),
@@ -512,12 +512,12 @@ class ExtensionsTest {
                                 listOf(
                                     Csaf.ProductGroup(
                                         group_id = "group1",
-                                        product_ids = setOf("product1", "product2")
+                                        product_ids = setOf("product1", "product2"),
                                     )
                                 )
                         )
                 )
-                .gatherProductIdsPerGroup()
+                .gatherProductIdsPerGroup(),
         )
     }
 
@@ -526,11 +526,11 @@ class ExtensionsTest {
         assertEquals(null, null.resolveProductIDs(mapOf()))
         assertEquals(
             listOf("product1"),
-            setOf("group1").resolveProductIDs(mapOf("group1" to setOf("product1")))
+            setOf("group1").resolveProductIDs(mapOf("group1" to setOf("product1"))),
         )
         assertEquals(
             listOf(),
-            setOf("group2").resolveProductIDs(mapOf("group1" to setOf("product1")))
+            setOf("group2").resolveProductIDs(mapOf("group1" to setOf("product1"))),
         )
     }
 

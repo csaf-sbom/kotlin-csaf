@@ -21,6 +21,6 @@ interface TestValueSourceNew {
         defaultValue: T,
         nullable: Boolean = true,
         validList: List<T>? = null,
-        invalidList: List<T>? = null
+        invalidList: List<T>? = null,
     ): T
 }

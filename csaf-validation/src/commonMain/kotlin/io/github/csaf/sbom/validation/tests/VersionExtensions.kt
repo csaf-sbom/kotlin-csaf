@@ -68,7 +68,7 @@ fun String.compareVersionTo(version2: String): Int {
 fun String.equalsVersion(
     version2: String,
     ignoreMetadata: Boolean = true,
-    ignorePreRelease: Boolean = false
+    ignorePreRelease: Boolean = false,
 ): Boolean {
     val semver1 = SemVer.parseOrNull(this)
     val semver2 = SemVer.parseOrNull(version2)

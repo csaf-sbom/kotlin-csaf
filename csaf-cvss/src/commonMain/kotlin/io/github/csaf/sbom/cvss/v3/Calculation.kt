@@ -30,9 +30,7 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class CvssV3Calculation(
-    override val metrics: Map<String, String>,
-) : CvssCalculation {
+class CvssV3Calculation(override val metrics: Map<String, String>) : CvssCalculation {
     val version: String?
         get() {
             return metrics["CVSS"]
@@ -42,10 +40,7 @@ class CvssV3Calculation(
     val scope by
         requiredMetric(
             "S",
-            mapOf(
-                Scope.CHANGED to Pair("C", 1.0),
-                Scope.UNCHANGED to Pair("U", 0.0),
-            )
+            mapOf(Scope.CHANGED to Pair("C", 1.0), Scope.UNCHANGED to Pair("U", 0.0)),
         )
     val scopeChanged
         get() = scope.enumValue == Scope.CHANGED
@@ -57,7 +52,7 @@ class CvssV3Calculation(
                 ConfidentialityImpact1.HIGH to Pair("H", 0.56),
                 ConfidentialityImpact1.LOW to Pair("L", 0.22),
                 ConfidentialityImpact1.NONE to Pair("N", 0.00),
-            )
+            ),
         )
     val integrityImpact by
         requiredMetric(
@@ -66,7 +61,7 @@ class CvssV3Calculation(
                 ConfidentialityImpact1.HIGH to Pair("H", 0.56),
                 ConfidentialityImpact1.LOW to Pair("L", 0.22),
                 ConfidentialityImpact1.NONE to Pair("N", 0.00),
-            )
+            ),
         )
     val availabilityImpact by
         requiredMetric(
@@ -75,7 +70,7 @@ class CvssV3Calculation(
                 ConfidentialityImpact1.HIGH to Pair("H", 0.56),
                 ConfidentialityImpact1.LOW to Pair("L", 0.22),
                 ConfidentialityImpact1.NONE to Pair("N", 0.00),
-            )
+            ),
         )
     val attackVector by
         requiredMetric(
@@ -85,15 +80,12 @@ class CvssV3Calculation(
                 AttackVector.ADJACENT_NETWORK to Pair("A", 0.62),
                 AttackVector.LOCAL to Pair("L", 0.55),
                 AttackVector.PHYSICAL to Pair("P", 0.20),
-            )
+            ),
         )
     val attackComplexity by
         requiredMetric<AttackComplexity>(
             "AC",
-            mapOf(
-                AttackComplexity.LOW to Pair("L", 0.77),
-                AttackComplexity.HIGH to Pair("H", 0.44),
-            )
+            mapOf(AttackComplexity.LOW to Pair("L", 0.77), AttackComplexity.HIGH to Pair("H", 0.44)),
         )
     val privilegesRequired by
         requiredMetric<PrivilegesRequired>(
@@ -107,7 +99,7 @@ class CvssV3Calculation(
                             0.68
                         } else {
                             0.62
-                        }
+                        },
                     ),
                 PrivilegesRequired.HIGH to
                     Pair(
@@ -116,9 +108,9 @@ class CvssV3Calculation(
                             0.50
                         } else {
                             0.27
-                        }
+                        },
                     ),
-            )
+            ),
         )
     val userInteraction by
         requiredMetric<UserInteraction>(
@@ -126,7 +118,7 @@ class CvssV3Calculation(
             mapOf(
                 UserInteraction.NONE to Pair("N", 0.85),
                 UserInteraction.REQUIRED to Pair("R", 0.62),
-            )
+            ),
         )
 
     // Temporal
@@ -139,7 +131,7 @@ class CvssV3Calculation(
                 ExploitCodeMaturity.FUNCTIONAL to Pair("F", 0.97),
                 ExploitCodeMaturity.PROOF_OF_CONCEPT to Pair("P", 0.94),
                 ExploitCodeMaturity.UNPROVEN to Pair("U", 0.91),
-            )
+            ),
         )
     val remediationLevel by
         optionalMetric(
@@ -150,7 +142,7 @@ class CvssV3Calculation(
                 RemediationLevel1.WORKAROUND to Pair("W", 0.97),
                 RemediationLevel1.TEMPORARY_FIX to Pair("T", 0.96),
                 RemediationLevel1.OFFICIAL_FIX to Pair("O", 0.95),
-            )
+            ),
         )
     val reportConfidence by
         optionalMetric(
@@ -159,8 +151,8 @@ class CvssV3Calculation(
                 ReportConfidence1.NOT_DEFINED to Pair("X", 1.0),
                 ReportConfidence1.CONFIRMED to Pair("C", 1.0),
                 ReportConfidence1.REASONABLE to Pair("R", 0.96),
-                ReportConfidence1.UNKNOWN to Pair("U", 0.92)
-            )
+                ReportConfidence1.UNKNOWN to Pair("U", 0.92),
+            ),
         )
 
     // Environmental (additional properties)
@@ -171,8 +163,8 @@ class CvssV3Calculation(
                 ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.5),
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5)
-            )
+                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+            ),
         )
     val integrityRequirement by
         optionalMetric<ConfidentialityRequirement>(
@@ -181,8 +173,8 @@ class CvssV3Calculation(
                 ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.5),
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5)
-            )
+                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+            ),
         )
     val availabilityRequirement by
         optionalMetric<ConfidentialityRequirement>(
@@ -191,8 +183,8 @@ class CvssV3Calculation(
                 ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.5),
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5)
-            )
+                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+            ),
         )
 
     // Environmental (modified, delegates)
@@ -203,7 +195,7 @@ class CvssV3Calculation(
                 ModifiedScope.NOT_DEFINED to Pair("X", scope.numericalValue),
                 ModifiedScope.CHANGED to Pair("C", 1.0),
                 ModifiedScope.UNCHANGED to Pair("U", 0.0),
-            )
+            ),
         )
     val modifiedScopeChanged: Boolean
         get() {
@@ -223,7 +215,7 @@ class CvssV3Calculation(
                 ModifiedAttackVector.ADJACENT_NETWORK to Pair("A", 0.62),
                 ModifiedAttackVector.LOCAL to Pair("L", 0.55),
                 ModifiedAttackVector.PHYSICAL to Pair("P", 0.20),
-            )
+            ),
         )
     val modifiedAttackComplexity by
         optionalMetric(
@@ -232,7 +224,7 @@ class CvssV3Calculation(
                 ModifiedAttackComplexity.NOT_DEFINED to Pair("X", attackComplexity.numericalValue),
                 ModifiedAttackComplexity.LOW to Pair("L", 0.77),
                 ModifiedAttackComplexity.HIGH to Pair("H", 0.44),
-            )
+            ),
         )
     val modifiedPrivilegesRequired by
         optionalMetric(
@@ -248,7 +240,7 @@ class CvssV3Calculation(
                             0.68
                         } else {
                             0.62
-                        }
+                        },
                     ),
                 ModifiedPrivilegesRequired.HIGH to
                     Pair(
@@ -257,9 +249,9 @@ class CvssV3Calculation(
                             0.50
                         } else {
                             0.27
-                        }
+                        },
                     ),
-            )
+            ),
         )
     val modifiedUserInteraction by
         optionalMetric(
@@ -268,7 +260,7 @@ class CvssV3Calculation(
                 ModifiedUserInteraction.NOT_DEFINED to Pair("X", userInteraction.numericalValue),
                 ModifiedUserInteraction.NONE to Pair("N", 0.85),
                 ModifiedUserInteraction.REQUIRED to Pair("R", 0.62),
-            )
+            ),
         )
     val modifiedConfidentialityImpact by
         optionalMetric(
@@ -279,7 +271,7 @@ class CvssV3Calculation(
                 ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
                 ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
                 ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
-            )
+            ),
         )
     val modifiedIntegrityImpact by
         optionalMetric(
@@ -290,7 +282,7 @@ class CvssV3Calculation(
                 ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
                 ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
                 ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
-            )
+            ),
         )
     val modifiedAvailabilityImpact by
         optionalMetric(
@@ -301,7 +293,7 @@ class CvssV3Calculation(
                 ModifiedConfidentialityImpact.HIGH to Pair("H", 0.56),
                 ModifiedConfidentialityImpact.LOW to Pair("L", 0.22),
                 ModifiedConfidentialityImpact.NONE to Pair("N", 0.00),
-            )
+            ),
         )
 
     // Calculated scores
@@ -367,7 +359,7 @@ fun CvssV3Calculation.calculateModifiedImpact(): Double {
                 (1 - modifiedConfidentialityImpact * confidentialityRequirement) *
                     (1 - modifiedIntegrityImpact * integrityRequirement) *
                     (1 - modifiedAvailabilityImpact * availabilityRequirement)),
-            0.915
+            0.915,
         )
     return if (!modifiedScopeChanged) {
         6.42 * iscModified

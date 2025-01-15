@@ -35,7 +35,7 @@ fun mockEngine() = MockEngine { request ->
         respond(
             content = response.readText(),
             status = HttpStatusCode.OK,
-            headers = headersOf(HttpHeaders.ContentType, "application/json")
+            headers = headersOf(HttpHeaders.ContentType, "application/json"),
         )
     }
 }
