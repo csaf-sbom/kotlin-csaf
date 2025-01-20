@@ -31,13 +31,9 @@ class CsafTest {
         val file = Path("src/jvmTest/resources/csaf-strict-test.json")
         val ex =
             assertFailsWith<SerializationException> { Json.decodeFromString<Csaf>(file.readText()) }
-        val msg = ex.message
-        assertNotNull(msg)
-        assertTrue(
-            msg.contains(
-                "Unexpected JSON token at offset 5: Encountered an unknown key 'this_property_does_not_exist' at path"
-            )
-        )
+        val msg = assertNotNull(ex.message)
+        assertTrue(msg.contains("Encountered an unknown key 'this_property_does_not_exist'"))
+        assertTrue(msg.contains("at offset 5"))
     }
 
     @Test
