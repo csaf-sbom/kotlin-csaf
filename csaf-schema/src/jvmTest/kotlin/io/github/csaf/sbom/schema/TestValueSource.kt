@@ -23,6 +23,6 @@ interface TestValueSource {
         property: KProperty1<*, T>,
         defaultValue: T,
         validList: List<T>? = null,
-        invalidList: List<T>? = null
+        invalidList: List<T>? = null,
     ): T
 }

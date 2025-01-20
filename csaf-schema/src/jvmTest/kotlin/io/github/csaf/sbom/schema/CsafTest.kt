@@ -40,11 +40,7 @@ class CsafTest {
     fun testFailCVSSVector() {
         val exception =
             assertFailsWith<IllegalArgumentException> {
-                Csaf.CvssV2(
-                    version = "2.0",
-                    vectorString = "not-a-vector",
-                    baseScore = 1.0,
-                )
+                Csaf.CvssV2(version = "2.0", vectorString = "not-a-vector", baseScore = 1.0)
             }
         assertContains(exception.message.toString(), "vectorString does not match pattern")
     }
@@ -55,7 +51,7 @@ class CsafTest {
             assertFailsWith<IllegalArgumentException> { Csaf.Vulnerability(cve = "CVE1234") }
         assertContains(
             exception.message.toString(),
-            "cve does not match pattern ^CVE-[0-9]{4}-[0-9]{4,}\$"
+            "cve does not match pattern ^CVE-[0-9]{4}-[0-9]{4,}\$",
         )
     }
 
@@ -71,14 +67,7 @@ class CsafTest {
                     revision_history = listOf(),
                     status = Csaf.Status.final,
                     version = "1",
-                    generator =
-                        Csaf.Generator(
-                            engine =
-                                Csaf.Engine(
-                                    name = "test",
-                                    version = "1.0",
-                                )
-                        )
+                    generator = Csaf.Generator(engine = Csaf.Engine(name = "test", version = "1.0")),
                 )
             }
         assertEquals("revision_history length < minimum 1 - 0", exception.message)
@@ -89,14 +78,9 @@ class CsafTest {
         val branch =
             Csaf.Branche(
                 branches =
-                    listOf(
-                        Csaf.Branche(
-                            category = Csaf.Category3.vendor,
-                            name = "My Sub Vendor",
-                        )
-                    ),
+                    listOf(Csaf.Branche(category = Csaf.Category3.vendor, name = "My Sub Vendor")),
                 category = Csaf.Category3.vendor,
-                name = "My Vendor"
+                name = "My Vendor",
             )
         assertNotNull(branch)
     }
@@ -118,7 +102,7 @@ class CsafTest {
                                             names =
                                                 valGen(
                                                     listOf("Max Muster"),
-                                                    invalidList = listOf(listOf(""))
+                                                    invalidList = listOf(listOf("")),
                                                 ),
                                             organization = valGen("Organization"),
                                             summary = valGen("Some summary"),
@@ -147,7 +131,7 @@ class CsafTest {
                                                 engine =
                                                     Csaf.Engine(
                                                         name = valGen("csaf-exporter", false),
-                                                        version = valGen("1.0")
+                                                        version = valGen("1.0"),
                                                     )
                                             )
                                         ),
@@ -163,21 +147,21 @@ class CsafTest {
                                                         valGen(
                                                             "1.0.0-alpha1",
                                                             false,
-                                                            invalidList = listOf("x", "00")
+                                                            invalidList = listOf("x", "00"),
                                                         ),
                                                     summary =
                                                         valGen("Initial and final release", false),
-                                                    legacy_version = valGen("1.0")
+                                                    legacy_version = valGen("1.0"),
                                                 )
                                             ),
-                                            false
+                                            false,
                                         ),
                                     status = Csaf.Status.final,
                                     version =
                                         valGen(
                                             "1.0.0-alpha1",
                                             false,
-                                            invalidList = listOf("x", "00")
+                                            invalidList = listOf("x", "00"),
                                         ),
                                 ),
                             distribution =
@@ -193,7 +177,7 @@ class CsafTest {
                                         category = Csaf.Category.legal_disclaimer,
                                         text = "Something very legal",
                                         audience = "all",
-                                        title = "Disclaimer"
+                                        title = "Disclaimer",
                                     )
                                 ),
                             references =
@@ -204,9 +188,7 @@ class CsafTest {
                                     )
                                 ),
                             aggregate_severity =
-                                Csaf.AggregateSeverity(
-                                    text = valGen("I don't know that", false),
-                                )
+                                Csaf.AggregateSeverity(text = valGen("I don't know that", false)),
                         ),
                     product_tree =
                         Csaf.ProductTree(
@@ -235,7 +217,7 @@ class CsafTest {
                                                                             "fa65e4c5ad0e5f7a94337910847bd10f7af10c74"
                                                                     )
                                                                 ),
-                                                            filename = "file.txt"
+                                                            filename = "file.txt",
                                                         )
                                                     ),
                                                 sbom_urls =
@@ -258,7 +240,7 @@ class CsafTest {
                                                                 ),
                                                         )
                                                     ),
-                                            )
+                                            ),
                                     )
                                 ),
                             relationships =
@@ -270,10 +252,10 @@ class CsafTest {
                                                 name = "Linux",
                                                 product_id = "linux",
                                                 product_identification_helper =
-                                                    Csaf.ProductIdentificationHelper()
+                                                    Csaf.ProductIdentificationHelper(),
                                             ),
                                         product_reference = "linux",
-                                        relates_to_product_reference = "linux"
+                                        relates_to_product_reference = "linux",
                                     )
                                 ),
                             product_groups =
@@ -282,9 +264,9 @@ class CsafTest {
                                         group_id = "test-group-id",
                                         product_ids =
                                             setOf("test-product-name", "test-other-product-name"),
-                                        summary = "Test Group"
+                                        summary = "Test Group",
                                     )
-                                )
+                                ),
                         ),
                     vulnerabilities =
                         listOf(
@@ -294,14 +276,10 @@ class CsafTest {
                                         Csaf.Acknowledgment(
                                             names = listOf("hacker-dude"),
                                             organization = "hacker-organization",
-                                            summary = "very nice work"
+                                            summary = "very nice work",
                                         )
                                     ),
-                                cwe =
-                                    Csaf.Cwe(
-                                        id = "CWE-123",
-                                        name = "Test Cwe",
-                                    ),
+                                cwe = Csaf.Cwe(id = "CWE-123", name = "Test Cwe"),
                                 notes =
                                     listOf(
                                         Csaf.Note(
@@ -356,7 +334,7 @@ class CsafTest {
                                                         Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                                     temporalScore = 9.0,
                                                     environmentalScore = 9.0,
-                                                )
+                                                ),
                                         )
                                     ),
                                 involvements =
@@ -364,7 +342,7 @@ class CsafTest {
                                         Csaf.Involvement(
                                             party = Csaf.Party.vendor,
                                             summary = "We are the vendor",
-                                            status = Csaf.Status1.completed
+                                            status = Csaf.Status1.completed,
                                         )
                                     ),
                                 product_status =
@@ -386,13 +364,13 @@ class CsafTest {
                                             restart_required =
                                                 Csaf.RestartRequired(
                                                     category = Csaf.Category6.machine,
-                                                    details = "just restart your machine"
+                                                    details = "just restart your machine",
                                                 ),
                                             group_ids = setOf("test-group-id"),
                                             product_ids =
                                                 setOf(
                                                     "test-product-name",
-                                                    "test-other-product-name"
+                                                    "test-other-product-name",
                                                 ),
                                             entitlements = listOf("not-sure-what-this-is"),
                                         )
@@ -402,7 +380,7 @@ class CsafTest {
                                         Csaf.Reference(
                                             category = Csaf.Category2.external,
                                             summary = "Additional reference",
-                                            url = JsonUri("https://example.com/reference")
+                                            url = JsonUri("https://example.com/reference"),
                                         )
                                     ),
                                 threats =
@@ -413,9 +391,9 @@ class CsafTest {
                                             group_ids = setOf("some-group"),
                                             product_ids = setOf("some-product"),
                                         )
-                                    )
+                                    ),
                             )
-                        )
+                        ),
                 )
             )
         }

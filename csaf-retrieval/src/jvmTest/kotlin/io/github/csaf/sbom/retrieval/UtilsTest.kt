@@ -31,12 +31,12 @@ class UtilsTest {
                 arrivalList += it
                 it * 10
             },
-            "Async mapping failed or did not preserve element order."
+            "Async mapping failed or did not preserve element order.",
         )
         assertContentEquals(
             listOf(0, 100, 200),
             arrivalList,
-            "Async mappings did not return in expected order."
+            "Async mappings did not return in expected order.",
         )
     }
 
@@ -48,7 +48,7 @@ class UtilsTest {
                     delay(1000)
                     "Success"
                 }
-                .getOrNull()
+                .getOrNull(),
         )
         val throwable = assertFails {
             Result.of {

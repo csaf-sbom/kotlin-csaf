@@ -30,7 +30,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 AccessVector.LOCAL to Pair("L", 0.395),
                 AccessVector.ADJACENT_NETWORK to Pair("A", 0.646),
                 AccessVector.NETWORK to Pair("N", 1.0),
-            )
+            ),
         )
     val accessComplexity by
         requiredMetric(
@@ -39,7 +39,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 AccessComplexity.HIGH to Pair("H", 0.35),
                 AccessComplexity.MEDIUM to Pair("M", 0.61),
                 AccessComplexity.LOW to Pair("L", 0.71),
-            )
+            ),
         )
     val authentication by
         requiredMetric(
@@ -48,7 +48,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 Authentication.MULTIPLE to Pair("M", 0.45),
                 Authentication.SINGLE to Pair("S", 0.56),
                 Authentication.NONE to Pair("N", 0.704),
-            )
+            ),
         )
     val confidentialityImpact by
         requiredMetric(
@@ -57,7 +57,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityImpact.NONE to Pair("N", 0.0),
                 ConfidentialityImpact.PARTIAL to Pair("P", 0.275),
                 ConfidentialityImpact.COMPLETE to Pair("C", 0.660),
-            )
+            ),
         )
     val integrityImpact by
         requiredMetric(
@@ -66,7 +66,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityImpact.NONE to Pair("N", 0.0),
                 ConfidentialityImpact.PARTIAL to Pair("P", 0.275),
                 ConfidentialityImpact.COMPLETE to Pair("C", 0.660),
-            )
+            ),
         )
     val availabilityImpact by
         requiredMetric(
@@ -75,7 +75,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityImpact.NONE to Pair("N", 0.0),
                 ConfidentialityImpact.PARTIAL to Pair("P", 0.275),
                 ConfidentialityImpact.COMPLETE to Pair("C", 0.660),
-            )
+            ),
         )
 
     // Temporal
@@ -88,7 +88,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 Exploitability.FUNCTIONAL to Pair("F", 0.95),
                 Exploitability.HIGH to Pair("H", 1.0),
                 Exploitability.NOT_DEFINED to Pair("ND", 1.0),
-            )
+            ),
         )
     val remediationLevel by
         optionalMetric(
@@ -98,8 +98,8 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 RemediationLevel.TEMPORARY_FIX to Pair("TF", 0.90),
                 RemediationLevel.WORKAROUND to Pair("W", 0.95),
                 RemediationLevel.UNAVAILABLE to Pair("U", 1.0),
-                RemediationLevel.NOT_DEFINED to Pair("ND", 1.0)
-            )
+                RemediationLevel.NOT_DEFINED to Pair("ND", 1.0),
+            ),
         )
     val reportConfidence by
         optionalMetric(
@@ -108,8 +108,8 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ReportConfidence.UNCONFIRMED to Pair("UC", 0.90),
                 ReportConfidence.UNCORROBORATED to Pair("UR", 0.95),
                 ReportConfidence.CONFIRMED to Pair("C", 1.0),
-                ReportConfidence.NOT_DEFINED to Pair("ND", 1.0)
-            )
+                ReportConfidence.NOT_DEFINED to Pair("ND", 1.0),
+            ),
         )
 
     // Environmental
@@ -123,7 +123,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 CollateralDamagePotential.MEDIUM_HIGH to Pair("MH", 0.4),
                 CollateralDamagePotential.HIGH to Pair("H", 0.5),
                 CollateralDamagePotential.NOT_DEFINED to Pair("ND", 0.0),
-            )
+            ),
         )
     val targetDistribution by
         optionalMetric(
@@ -134,7 +134,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 TargetDistribution.MEDIUM to Pair("M", 0.75),
                 TargetDistribution.HIGH to Pair("H", 1.0),
                 TargetDistribution.NOT_DEFINED to Pair("ND", 1.0),
-            )
+            ),
         )
     val confidentialityRequirement by
         optionalMetric(
@@ -144,7 +144,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.51),
                 ConfidentialityRequirement.NOT_DEFINED to Pair("ND", 1.0),
-            )
+            ),
         )
     val integrityRequirement by
         optionalMetric(
@@ -154,7 +154,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.51),
                 ConfidentialityRequirement.NOT_DEFINED to Pair("ND", 1.0),
-            )
+            ),
         )
     val availabilityRequirement by
         optionalMetric(
@@ -164,7 +164,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                 ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
                 ConfidentialityRequirement.HIGH to Pair("H", 1.51),
                 ConfidentialityRequirement.NOT_DEFINED to Pair("ND", 1.0),
-            )
+            ),
         )
 
     // Calculated scores
@@ -210,7 +210,7 @@ class CvssV2Calculation(override val metrics: Map<String, String>) : CvssCalcula
                     (1.0 -
                         (1.0 - confidentialityImpact * confidentialityRequirement) *
                             (1.0 - integrityImpact * integrityRequirement) *
-                            (1.0 - availabilityImpact * availabilityRequirement))
+                            (1.0 - availabilityImpact * availabilityRequirement)),
             )
         val adjustedBaseScore = baseScoreForImpact(adjustedImpact)
         val adjustedTemporal =

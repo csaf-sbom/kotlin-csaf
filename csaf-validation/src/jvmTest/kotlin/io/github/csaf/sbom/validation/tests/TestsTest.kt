@@ -61,7 +61,7 @@ class TestsTest {
 
         assertTrue(
             missing.isEmpty(),
-            "The following test cases were not included in the unit test: ${missing.joinToString(", ")}"
+            "The following test cases were not included in the unit test: ${missing.joinToString(", ")}",
         )
     }
 
@@ -71,7 +71,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are not defined: CSAFPID-9080700,CSAFPID-9080701",
-            test.test(mandatoryTest("6-1-01-01"))
+            test.test(mandatoryTest("6-1-01-01")),
         )
     }
 
@@ -81,7 +81,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are duplicate: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-02-01"))
+            test.test(mandatoryTest("6-1-02-01")),
         )
     }
 
@@ -91,7 +91,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are defined in circles: CSAFPID-9080701",
-            test.test(mandatoryTest("6-1-03-01"))
+            test.test(mandatoryTest("6-1-03-01")),
         )
         assertValidationSuccessful(test.test(goodCsaf(productTree = null)))
         assertValidationSuccessful(test.test(goodCsaf(productTree = Csaf.ProductTree())))
@@ -103,7 +103,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are not defined: CSAFGID-1020301",
-            test.test(mandatoryTest("6-1-04-01"))
+            test.test(mandatoryTest("6-1-04-01")),
         )
     }
 
@@ -113,7 +113,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are duplicate: CSAFGID-1020300",
-            test.test(mandatoryTest("6-1-05-01"))
+            test.test(mandatoryTest("6-1-05-01")),
         )
     }
 
@@ -124,23 +124,23 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following IDs have contradicting statuses: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-06-01"))
+            test.test(mandatoryTest("6-1-06-01")),
         )
         assertValidationFailed(
             "The following IDs have contradicting statuses: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-06-02"))
+            test.test(mandatoryTest("6-1-06-02")),
         )
         assertValidationFailed(
             "The following IDs have contradicting statuses: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-06-03"))
+            test.test(mandatoryTest("6-1-06-03")),
         )
         assertValidationFailed(
             "The following IDs have contradicting statuses: CSAFPID-9080700,CSAFPID-9080701",
-            test.test(mandatoryTest("6-1-06-04"))
+            test.test(mandatoryTest("6-1-06-04")),
         )
         assertValidationFailed(
             "The following IDs have contradicting statuses: CSAFPID-9080702,CSAFPID-9080700,CSAFPID-9080701",
-            test.test(mandatoryTest("6-1-06-05"))
+            test.test(mandatoryTest("6-1-06-05")),
         )
 
         // good examples
@@ -162,7 +162,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following IDs have multiple scores: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-07-01"))
+            test.test(mandatoryTest("6-1-07-01")),
         )
 
         assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
@@ -180,15 +180,15 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV3', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v3",
-            test.test(mandatoryTest("6-1-08-01"))
+            test.test(mandatoryTest("6-1-08-01")),
         )
         assertValidationFailed(
             "Field 'baseSeverity' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV3', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v3",
-            test.test(mandatoryTest("6-1-08-02"))
+            test.test(mandatoryTest("6-1-08-02")),
         )
         assertValidationFailed(
             "Field 'version' is required for type with serial name 'io.github.csaf.sbom.schema.generated.Csaf.CvssV2', but it was missing at path: \$.vulnerabilities[0].scores[0].cvss_v2",
-            test.test(mandatoryTest("6-1-08-03"))
+            test.test(mandatoryTest("6-1-08-03")),
         )
 
         // good examples
@@ -205,7 +205,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following properties are invalid: baseScore: 10.0 != 6.5, baseSeverity: LOW != MEDIUM",
-            test.test(mandatoryTest("6-1-09-01"))
+            test.test(mandatoryTest("6-1-09-01")),
         )
 
         // good examples
@@ -222,7 +222,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following properties are inconsistent: attackVector: LOCAL != NETWORK, scope: CHANGED != UNCHANGED, availabilityImpact: LOW != HIGH",
-            test.test(mandatoryTest("6-1-10-01"))
+            test.test(mandatoryTest("6-1-10-01")),
         )
 
         // good examples
@@ -239,7 +239,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "Invalid CWE entries: Improper Input Validation is not the correct name for CWE-79",
-            test.test(mandatoryTest("6-1-11-01"))
+            test.test(mandatoryTest("6-1-11-01")),
         )
         assertValidationFailed(
             "Invalid CWE entries: CWE-12345 is invalid",
@@ -250,7 +250,7 @@ class TestsTest {
                             Csaf.Vulnerability(cwe = Csaf.Cwe(id = "CWE-12345", name = "Some name"))
                         )
                 )
-            )
+            ),
         )
 
         // good examples
@@ -268,7 +268,7 @@ class TestsTest {
                                     Csaf.Cwe(
                                         id = "CWE-79",
                                         name =
-                                            "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                                            "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
                                     )
                             )
                         )
@@ -284,15 +284,15 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following languages are not valid: EZ",
-            test.test(mandatoryTest("6-1-12-01"))
+            test.test(mandatoryTest("6-1-12-01")),
         )
         assertValidationFailed(
             "The following languages are not valid: EZ",
-            (test.test(goodCsaf(sourceLang = "EZ")))
+            (test.test(goodCsaf(sourceLang = "EZ"))),
         )
         assertValidationFailed(
             "The following languages are not valid: EN-ezzz",
-            (test.test(goodCsaf(sourceLang = "EN-ezzz")))
+            (test.test(goodCsaf(sourceLang = "EN-ezzz"))),
         )
 
         // good examples
@@ -308,7 +308,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "Invalid PURLs: The PackageURL name specified is invalid",
-            test.test(mandatoryTest("6-1-13-01"))
+            test.test(mandatoryTest("6-1-13-01")),
         )
 
         // good examples
@@ -328,7 +328,7 @@ class TestsTest {
                                                     JsonUri(
                                                         "pkg:github/package-url/purl-spec@244fd47e07d1004f0aed9c"
                                                     )
-                                            )
+                                            ),
                                     )
                                 )
                         )
@@ -344,35 +344,35 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-01"))
+            test.test(mandatoryTest("6-1-14-01")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-02"))
+            test.test(mandatoryTest("6-1-14-02")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-03"))
+            test.test(mandatoryTest("6-1-14-03")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-04"))
+            test.test(mandatoryTest("6-1-14-04")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-05"))
+            test.test(mandatoryTest("6-1-14-05")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-06"))
+            test.test(mandatoryTest("6-1-14-06")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-07"))
+            test.test(mandatoryTest("6-1-14-07")),
         )
         assertValidationFailed(
             "The revision history is not sorted by ascending date",
-            test.test(mandatoryTest("6-1-14-08"))
+            test.test(mandatoryTest("6-1-14-08")),
         )
 
         // good examples
@@ -394,11 +394,11 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The publisher is a translator, but the source language is not present",
-            test.test(mandatoryTest("6-1-15-01"))
+            test.test(mandatoryTest("6-1-15-01")),
         )
         assertValidationFailed(
             "The publisher is a translator, but the source language is not present",
-            test.test(mandatoryTest("6-1-15-02"))
+            test.test(mandatoryTest("6-1-15-02")),
         )
 
         // good examples
@@ -413,35 +413,35 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The latest version should be 2 but is 1",
-            test.test(mandatoryTest("6-1-16-01"))
+            test.test(mandatoryTest("6-1-16-01")),
         )
         assertValidationFailed(
             "The latest version should be 2 but is 1",
-            test.test(mandatoryTest("6-1-16-02"))
+            test.test(mandatoryTest("6-1-16-02")),
         )
         assertValidationFailed(
             "The latest version should be 2 but is 1",
-            test.test(mandatoryTest("6-1-16-03"))
+            test.test(mandatoryTest("6-1-16-03")),
         )
         assertValidationFailed(
             "The latest version should be 2.0.0 but is 1.0.0",
-            test.test(mandatoryTest("6-1-16-04"))
+            test.test(mandatoryTest("6-1-16-04")),
         )
         assertValidationFailed(
             "The latest version should be 2.0.0 but is 1.0.0",
-            test.test(mandatoryTest("6-1-16-05"))
+            test.test(mandatoryTest("6-1-16-05")),
         )
         assertValidationFailed(
             "The latest version should be 10 but is 9",
-            test.test(mandatoryTest("6-1-16-06"))
+            test.test(mandatoryTest("6-1-16-06")),
         )
         assertValidationFailed(
             "The latest version should be 1.10.0 but is 1.9.0",
-            test.test(mandatoryTest("6-1-16-07"))
+            test.test(mandatoryTest("6-1-16-07")),
         )
         assertValidationFailed(
             "The latest version should be 2 but is 1",
-            test.test(mandatoryTest("6-1-16-08"))
+            test.test(mandatoryTest("6-1-16-08")),
         )
 
         // good examples
@@ -464,7 +464,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The latest version is a pre-release or \"zero\" version (0.9.5) but the document status is final",
-            test.test(mandatoryTest("6-1-17-01"))
+            test.test(mandatoryTest("6-1-17-01")),
         )
 
         // good examples
@@ -486,9 +486,9 @@ class TestsTest {
                                                 date = epoch(),
                                                 number = "1.2.0-alpha1",
                                                 summary = "test",
-                                            ),
+                                            )
                                         ),
-                                    status = Csaf.Status.draft
+                                    status = Csaf.Status.draft,
                                 ),
                             category = "csaf_base",
                             csaf_version = "2.0",
@@ -520,9 +520,9 @@ class TestsTest {
                                                 date = epoch(),
                                                 number = "0",
                                                 summary = "test",
-                                            ),
+                                            )
                                         ),
-                                    status = Csaf.Status.draft
+                                    status = Csaf.Status.draft,
                                 ),
                             category = "csaf_base",
                             csaf_version = "2.0",
@@ -546,7 +546,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The document is final but it contains the following revisions: 0",
-            test.test(mandatoryTest("6-1-18-01"))
+            test.test(mandatoryTest("6-1-18-01")),
         )
         assertValidationFailed(
             "The document is final but it contains the following revisions: 0.9.0",
@@ -573,7 +573,7 @@ class TestsTest {
                                                 summary = "test",
                                             ),
                                         ),
-                                    status = Csaf.Status.final
+                                    status = Csaf.Status.final,
                                 ),
                             category = "csaf_base",
                             csaf_version = "2.0",
@@ -586,7 +586,7 @@ class TestsTest {
                             title = "My Title",
                         )
                 )
-            )
+            ),
         )
 
         // good examples
@@ -614,7 +614,7 @@ class TestsTest {
                                                 summary = "test",
                                             ),
                                         ),
-                                    status = Csaf.Status.final
+                                    status = Csaf.Status.final,
                                 ),
                             category = "csaf_base",
                             csaf_version = "2.0",
@@ -638,11 +638,11 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The document contains the following pre-release revisions: 1.0.0-rc",
-            test.test(mandatoryTest("6-1-19-01"))
+            test.test(mandatoryTest("6-1-19-01")),
         )
         assertValidationFailed(
             "The document contains the following pre-release revisions: 1.0.0-rc",
-            test.test(mandatoryTest("6-1-19-02"))
+            test.test(mandatoryTest("6-1-19-02")),
         )
 
         // good examples
@@ -670,7 +670,7 @@ class TestsTest {
                                                 summary = "test",
                                             ),
                                         ),
-                                    status = Csaf.Status.final
+                                    status = Csaf.Status.final,
                                 ),
                             category = "csaf_base",
                             csaf_version = "2.0",
@@ -694,7 +694,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The latest version is a pre-release (1.0.0-alpha) but the document status is interim",
-            test.test(mandatoryTest("6-1-20-01"))
+            test.test(mandatoryTest("6-1-20-01")),
         )
     }
 
@@ -705,11 +705,11 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following versions are missing: 2",
-            test.test(mandatoryTest("6-1-21-01"))
+            test.test(mandatoryTest("6-1-21-01")),
         )
         assertValidationFailed(
             "Start version 2 must be either 0 or 1 (or a major version of it)",
-            test.test(mandatoryTest("6-1-21-02"))
+            test.test(mandatoryTest("6-1-21-02")),
         )
 
         // good examples
@@ -725,7 +725,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following versions in the revision history are duplicate: 1",
-            test.test(mandatoryTest("6-1-22-01"))
+            test.test(mandatoryTest("6-1-22-01")),
         )
     }
 
@@ -736,7 +736,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following CVE identifiers are duplicate: CVE-2017-0145",
-            test.test(mandatoryTest("6-1-23-01"))
+            test.test(mandatoryTest("6-1-23-01")),
         )
 
         // good examples
@@ -750,11 +750,11 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00:00Z)",
-            test.test(mandatoryTest("6-1-24-01"))
+            test.test(mandatoryTest("6-1-24-01")),
         )
         assertValidationFailed(
             "The following party/date pairs are duplicate: (vendor, 2021-04-23T10:00:00Z)",
-            test.test(mandatoryTest("6-1-24-02"))
+            test.test(mandatoryTest("6-1-24-02")),
         )
 
         // good examples
@@ -770,7 +770,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following hash algorithms are duplicate: sha256",
-            test.test(mandatoryTest("6-1-25-01"))
+            test.test(mandatoryTest("6-1-25-01")),
         )
     }
 
@@ -781,7 +781,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The value Security_Incident_Response conflicts with the name of an official profile",
-            test.test(mandatoryTest("6-1-26-01"))
+            test.test(mandatoryTest("6-1-26-01")),
         )
     }
 
@@ -792,11 +792,11 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The document notes do not contain an item which has a category of description, details, general or summary",
-            test.test(mandatoryTest("6-1-27-01-01"))
+            test.test(mandatoryTest("6-1-27-01-01")),
         )
         assertValidationFailed(
             "The document notes do not contain an item which has a category of description, details, general or summary",
-            test.test(goodInformationalCsaf(notes = null))
+            test.test(goodInformationalCsaf(notes = null)),
         )
     }
 
@@ -807,15 +807,15 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The document references do not contain any item which has the category external",
-            test.test(mandatoryTest("6-1-27-02-01"))
+            test.test(mandatoryTest("6-1-27-02-01")),
         )
         assertValidationFailed(
             "The document references do not contain any item which has the category external",
-            test.test(goodInformationalCsaf(references = null))
+            test.test(goodInformationalCsaf(references = null)),
         )
         assertValidationFailed(
             "The document references do not contain any item which has the category external",
-            test.test(goodSecurityIncidentResponseCsaf(references = null))
+            test.test(goodSecurityIncidentResponseCsaf(references = null)),
         )
 
         // good examples
@@ -829,7 +829,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The element /vulnerabilities exists",
-            test.test(mandatoryTest("6-1-27-03-01"))
+            test.test(mandatoryTest("6-1-27-03-01")),
         )
     }
 
@@ -840,7 +840,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The element /product_tree does not exist",
-            test.test(mandatoryTest("6-1-27-04-01"))
+            test.test(mandatoryTest("6-1-27-04-01")),
         )
     }
 
@@ -851,7 +851,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The vulnerability item has no notes element",
-            test.test(mandatoryTest("6-1-27-05-01"))
+            test.test(mandatoryTest("6-1-27-05-01")),
         )
 
         // good examples
@@ -865,7 +865,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The vulnerability item has no product_status element",
-            test.test(mandatoryTest("6-1-27-06-01"))
+            test.test(mandatoryTest("6-1-27-06-01")),
         )
         assertValidationSuccessful(test.test(goodSecurityAdvisoryCsaf(vulnerabilities = null)))
     }
@@ -877,7 +877,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
-            test.test(mandatoryTest("6-1-27-07-01"))
+            test.test(mandatoryTest("6-1-27-07-01")),
         )
         assertValidationFailed(
             "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
@@ -891,18 +891,18 @@ class TestsTest {
                                         fixed = null,
                                         known_affected = null,
                                         known_not_affected = null,
-                                        under_investigation = null
+                                        under_investigation = null,
                                     )
                             )
                         )
                 )
-            )
+            ),
         )
         assertValidationFailed(
             "None of the elements fixed, known_affected, known_not_affected, or under_investigation is present in product_status",
             test.test(
                 goodVexCsaf(vulnerabilities = listOf(Csaf.Vulnerability(product_status = null)))
-            )
+            ),
         )
 
         // good examples
@@ -918,7 +918,7 @@ class TestsTest {
                                         fixed = setOf("fixed"),
                                         known_affected = null,
                                         known_not_affected = null,
-                                        under_investigation = null
+                                        under_investigation = null,
                                     )
                             )
                         )
@@ -936,7 +936,7 @@ class TestsTest {
                                         fixed = null,
                                         known_affected = setOf("fixed"),
                                         known_not_affected = null,
-                                        under_investigation = null
+                                        under_investigation = null,
                                     )
                             )
                         )
@@ -954,7 +954,7 @@ class TestsTest {
                                         fixed = null,
                                         known_affected = null,
                                         known_not_affected = setOf("fixed"),
-                                        under_investigation = null
+                                        under_investigation = null,
                                     )
                             )
                         )
@@ -972,7 +972,7 @@ class TestsTest {
                                         fixed = null,
                                         known_affected = null,
                                         known_not_affected = null,
-                                        under_investigation = setOf("fixed")
+                                        under_investigation = setOf("fixed"),
                                     )
                             )
                         )
@@ -988,7 +988,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "None of the elements cve or ids is present",
-            test.test(mandatoryTest("6-1-27-08-01"))
+            test.test(mandatoryTest("6-1-27-08-01")),
         )
 
         // good examples
@@ -1007,7 +1007,7 @@ class TestsTest {
                         listOf(
                             Csaf.Vulnerability(
                                 ids = setOf(Csaf.Id(system_name = "what", text = "is this")),
-                                cve = null
+                                cve = null,
                             )
                         )
                 )
@@ -1022,27 +1022,27 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080702",
-            test.test(mandatoryTest("6-1-27-09-01"))
+            test.test(mandatoryTest("6-1-27-09-01")),
         )
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080702",
-            test.test(mandatoryTest("6-1-27-09-02"))
+            test.test(mandatoryTest("6-1-27-09-02")),
         )
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-27-09-03"))
+            test.test(mandatoryTest("6-1-27-09-03")),
         )
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-27-09-04"))
+            test.test(mandatoryTest("6-1-27-09-04")),
         )
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-27-09-05"))
+            test.test(mandatoryTest("6-1-27-09-05")),
         )
         assertValidationFailed(
             "Missing impact statement for product IDs: CSAFPID-9080701",
-            test.test(mandatoryTest("6-1-27-09-06"))
+            test.test(mandatoryTest("6-1-27-09-06")),
         )
 
         // good examples
@@ -1065,7 +1065,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "Missing action statement for product IDs: CSAFPID-9080702",
-            test.test(mandatoryTest("6-1-27-10-01"))
+            test.test(mandatoryTest("6-1-27-10-01")),
         )
 
         // good examples
@@ -1084,7 +1084,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The element /vulnerabilities does not exist",
-            test.test(mandatoryTest("6-1-27-11-01"))
+            test.test(mandatoryTest("6-1-27-11-01")),
         )
     }
 
@@ -1095,7 +1095,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The document language and the source language have the same value: en-US",
-            test.test(mandatoryTest("6-1-28-01"))
+            test.test(mandatoryTest("6-1-28-01")),
         )
 
         // good examples
@@ -1109,7 +1109,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The given remediation does not specify to which products it should be applied",
-            test.test(mandatoryTest("6-1-29-01"))
+            test.test(mandatoryTest("6-1-29-01")),
         )
 
         // good examples
@@ -1167,7 +1167,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following versions are invalid because of a mix of integer and semantic versioning: 2, 2",
-            test.test(mandatoryTest("6-1-30-01"))
+            test.test(mandatoryTest("6-1-30-01")),
         )
         assertValidationFailed(
             "The following versions are invalid because of a mix of integer and semantic versioning: 1.0.0",
@@ -1180,7 +1180,7 @@ class TestsTest {
                                     Csaf.RevisionHistory(
                                         date = epoch(),
                                         number = "2",
-                                        summary = "test"
+                                        summary = "test",
                                     )
                                 ),
                             current_release_date = epoch(),
@@ -1190,7 +1190,7 @@ class TestsTest {
                             version = "1.0.0",
                         )
                 )
-            )
+            ),
         )
         // good examples
         assertValidationSuccessful(test.test(mandatoryTest("6-1-30-11")))
@@ -1203,39 +1203,39 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: prior to 4.2",
-            test.test(mandatoryTest("6-1-31-01"))
+            test.test(mandatoryTest("6-1-31-01")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: <4.2",
-            test.test(mandatoryTest("6-1-31-02"))
+            test.test(mandatoryTest("6-1-31-02")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: <=4.1",
-            test.test(mandatoryTest("6-1-31-03"))
+            test.test(mandatoryTest("6-1-31-03")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: <= 4.1",
-            test.test(mandatoryTest("6-1-31-04"))
+            test.test(mandatoryTest("6-1-31-04")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: 4.1 and earlier",
-            test.test(mandatoryTest("6-1-31-05"))
+            test.test(mandatoryTest("6-1-31-05")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: all",
-            test.test(mandatoryTest("6-1-31-06"))
+            test.test(mandatoryTest("6-1-31-06")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: before 4.2",
-            test.test(mandatoryTest("6-1-31-07"))
+            test.test(mandatoryTest("6-1-31-07")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: 4.2 and later",
-            test.test(mandatoryTest("6-1-31-08"))
+            test.test(mandatoryTest("6-1-31-08")),
         )
         assertValidationFailed(
             "The following product versions are invalid and contain version ranges: 3.X versions",
-            test.test(mandatoryTest("6-1-31-09"))
+            test.test(mandatoryTest("6-1-31-09")),
         )
 
         // good examples
@@ -1251,7 +1251,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following flags are missing products or groups: component_not_present",
-            test.test(mandatoryTest("6-1-32-01"))
+            test.test(mandatoryTest("6-1-32-01")),
         )
 
         // good examples
@@ -1309,7 +1309,7 @@ class TestsTest {
         // failing examples
         assertValidationFailed(
             "The following product IDs are part of multiple flags: CSAFPID-9080700",
-            test.test(mandatoryTest("6-1-33-01"))
+            test.test(mandatoryTest("6-1-33-01")),
         )
 
         // good examples
@@ -1328,7 +1328,7 @@ class TestsTest {
                                         Csaf.Flag(
                                             label = Csaf.Label1.component_not_present,
                                             product_ids = null,
-                                            group_ids = null
+                                            group_ids = null,
                                         )
                                     )
                             )
@@ -1344,7 +1344,7 @@ class TestsTest {
 
         assertValidationFailed(
             "The following IDs are not used: CSAFPID-9080700",
-            test.test(optionalTest("6-2-01-01"))
+            test.test(optionalTest("6-2-01-01")),
         )
 
         // good examples
@@ -1359,7 +1359,7 @@ class TestsTest {
                 goodInformationalCsaf(),
                 goodVexCsaf(),
                 goodSecurityAdvisoryCsaf(),
-                goodSecurityIncidentResponseCsaf()
+                goodSecurityIncidentResponseCsaf(),
             )
         val tests = mandatoryTests + optionalTests + informativeTests
 

@@ -33,11 +33,11 @@ class MetricValue<PropertyEnum : Enum<PropertyEnum>>(
 internal open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
     val shortName: String,
     val required: Boolean = false,
-    val mapOf: Map<PropertyEnum, Pair<String, Double>>
+    val mapOf: Map<PropertyEnum, Pair<String, Double>>,
 ) {
     open operator fun getValue(
         thisRef: CvssCalculation,
-        property: KProperty<*>
+        property: KProperty<*>,
     ): MetricValue<PropertyEnum> {
         val entry = metricEntry(thisRef, property)
 
@@ -46,7 +46,7 @@ internal open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
 
     protected fun metricEntry(
         thisRef: CvssCalculation,
-        property: KProperty<*>
+        property: KProperty<*>,
     ): Map.Entry<PropertyEnum, Pair<String, Double>> {
         // First, find out the short name
         var stringValue = thisRef.metrics[shortName]

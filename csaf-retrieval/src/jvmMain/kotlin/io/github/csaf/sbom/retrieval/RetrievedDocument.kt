@@ -47,7 +47,7 @@ data class RetrievedDocument(val json: Csaf) {
         suspend fun from(
             documentUrl: String,
             loader: CsafLoader,
-            providerRole: Role
+            providerRole: Role,
         ): Result<RetrievedDocument> {
             val ctx = RetrievalContext()
             return loader

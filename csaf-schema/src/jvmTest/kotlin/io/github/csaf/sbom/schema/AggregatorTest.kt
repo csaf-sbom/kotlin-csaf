@@ -38,12 +38,12 @@ class AggregatorTest {
                             contact_details =
                                 valGen(
                                     Aggregator.Aggregator::contact_details,
-                                    "security@example.com"
+                                    "security@example.com",
                                 ),
                             issuing_authority =
                                 valGen(
                                     Aggregator.Aggregator::issuing_authority,
-                                    "Very authoritative"
+                                    "Very authoritative",
                                 ),
                         ),
                     aggregator_version =
@@ -63,7 +63,7 @@ class AggregatorTest {
                                                     name = "Test Aggregator",
                                                     namespace = JsonUri("example.com"),
                                                 ),
-                                            url = JsonUri("example.com/publisher.json")
+                                            url = JsonUri("example.com/publisher.json"),
                                         ),
                                     update_interval = valGen(CsafPublisher::update_interval, "5m"),
                                     mirrors =
@@ -71,10 +71,10 @@ class AggregatorTest {
                                             CsafPublisher::mirrors,
                                             setOf(
                                                 JsonUri("https://mirror.example.com/publisher.json")
-                                            )
-                                        )
-                                ),
-                            )
+                                            ),
+                                        ),
+                                )
+                            ),
                         ),
                     csaf_providers =
                         valGen(
@@ -93,25 +93,25 @@ class AggregatorTest {
                                                     contact_details =
                                                         valGen(
                                                             Publisher::contact_details,
-                                                            "security@example.com"
+                                                            "security@example.com",
                                                         ),
                                                     issuing_authority =
                                                         valGen(
                                                             Publisher::issuing_authority,
-                                                            "Very authoritative"
+                                                            "Very authoritative",
                                                         ),
                                                 ),
-                                            url = JsonUri("https://example.com/provider.json")
+                                            url = JsonUri("https://example.com/provider.json"),
                                         ),
                                     mirrors =
                                         valGen(
                                             CsafProvider::mirrors,
                                             setOf(
                                                 JsonUri("https://mirror.example.com/provider.json")
-                                            )
-                                        )
-                                ),
-                            )
+                                            ),
+                                        ),
+                                )
+                            ),
                         ),
                     last_updated = epoch(),
                 )
@@ -123,7 +123,7 @@ class AggregatorTest {
         //        )
         assertEquals(
             PojoTestHelper.readFileFromResources("aggregator.json"),
-            Json.encodeToString(example)
+            Json.encodeToString(example),
         )
     }
 }

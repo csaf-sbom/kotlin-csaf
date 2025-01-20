@@ -50,7 +50,7 @@ fun goodTracking(): Tracking =
                     date = epoch(),
                     number = "1.0.0",
                     summary = "Initial and final release",
-                    legacy_version = "1.0"
+                    legacy_version = "1.0",
                 )
             ),
         status = Csaf.Status.draft,
@@ -64,59 +64,35 @@ fun goodProductTree(): Csaf.ProductTree =
                 Csaf.Branche(
                     category = Csaf.Category3.vendor,
                     name = "Linux Vendor",
-                    product =
-                        Csaf.Product(
-                            name = "Linux",
-                            product_id = "linux-all",
-                        ),
+                    product = Csaf.Product(name = "Linux", product_id = "linux-all"),
                     branches =
                         listOf(
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product =
-                                    Csaf.Product(
-                                        name = "Linux 0.1",
-                                        product_id = "linux-0.1",
-                                    )
+                                product = Csaf.Product(name = "Linux 0.1", product_id = "linux-0.1"),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product =
-                                    Csaf.Product(
-                                        name = "Linux 0.2",
-                                        product_id = "linux-0.2",
-                                    )
+                                product = Csaf.Product(name = "Linux 0.2", product_id = "linux-0.2"),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product =
-                                    Csaf.Product(
-                                        name = "Linux 0.3",
-                                        product_id = "linux-0.3",
-                                    )
+                                product = Csaf.Product(name = "Linux 0.3", product_id = "linux-0.3"),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product =
-                                    Csaf.Product(
-                                        name = "Linux 0.4",
-                                        product_id = "linux-0.4",
-                                    )
+                                product = Csaf.Product(name = "Linux 0.4", product_id = "linux-0.4"),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product =
-                                    Csaf.Product(
-                                        name = "Linux 0.5",
-                                        product_id = "linux-0.5",
-                                    )
-                            )
-                        )
+                                product = Csaf.Product(name = "Linux 0.5", product_id = "linux-0.5"),
+                            ),
+                        ),
                 )
             ),
         full_product_names =
@@ -137,7 +113,7 @@ fun goodProductTree(): Csaf.ProductTree =
                                                         "fa65e4c5ad0e5f7a94337910847bd10f7af10c74"
                                                 )
                                             ),
-                                        filename = "file.txt"
+                                        filename = "file.txt",
                                     )
                                 ),
                             sbom_urls = listOf(JsonUri("https://example.com/sboms/my-product")),
@@ -151,7 +127,7 @@ fun goodProductTree(): Csaf.ProductTree =
                                         uri = JsonUri("https://example.com/my-extension"),
                                     )
                                 ),
-                        )
+                        ),
                 )
             ),
         relationships =
@@ -162,7 +138,7 @@ fun goodProductTree(): Csaf.ProductTree =
                         Csaf.Product(
                             name = "LinuxProduct",
                             product_id = "linux-product",
-                            product_identification_helper = Csaf.ProductIdentificationHelper()
+                            product_identification_helper = Csaf.ProductIdentificationHelper(),
                         ),
                     product_reference = "test-product-name",
                     relates_to_product_reference = "linux-all",
@@ -173,9 +149,9 @@ fun goodProductTree(): Csaf.ProductTree =
                 Csaf.ProductGroup(
                     group_id = "some-group",
                     product_ids = setOf("test-product-name", "linux-all", "linux-product"),
-                    summary = "Test Group"
+                    summary = "Test Group",
                 )
-            )
+            ),
     )
 
 fun goodVulnerabilities() =
@@ -186,17 +162,14 @@ fun goodVulnerabilities() =
                     Csaf.Acknowledgment(
                         names = listOf("hacker-dude"),
                         organization = "hacker-organization",
-                        summary = "very nice work"
+                        summary = "very nice work",
                     )
                 ),
             cwe = null,
             cve = "CVE-1234-4000",
             notes =
                 listOf(
-                    Csaf.Note(
-                        category = Csaf.Category.description,
-                        text = "This is really bad",
-                    )
+                    Csaf.Note(category = Csaf.Category.description, text = "This is really bad")
                 ),
             title = "A serious vulnerability in our product",
             flags =
@@ -237,7 +210,7 @@ fun goodVulnerabilities() =
                                     Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                 temporalScore = 9.0,
                                 environmentalScore = 9.0,
-                            )
+                            ),
                     )
                 ),
             involvements =
@@ -245,7 +218,7 @@ fun goodVulnerabilities() =
                     Csaf.Involvement(
                         party = Csaf.Party.vendor,
                         summary = "We are the vendor",
-                        status = Csaf.Status1.completed
+                        status = Csaf.Status1.completed,
                     )
                 ),
             product_status =
@@ -267,7 +240,7 @@ fun goodVulnerabilities() =
                         restart_required =
                             Csaf.RestartRequired(
                                 category = Csaf.Category6.machine,
-                                details = "just restart your machine"
+                                details = "just restart your machine",
                             ),
                         group_ids = setOf("some-group"),
                         product_ids = setOf("linux-0.1"),
@@ -279,7 +252,7 @@ fun goodVulnerabilities() =
                     Csaf.Reference(
                         category = Csaf.Category2.external,
                         summary = "Additional reference",
-                        url = JsonUri("https://example.com/reference")
+                        url = JsonUri("https://example.com/reference"),
                     )
                 ),
             threats =
@@ -290,7 +263,7 @@ fun goodVulnerabilities() =
                         group_ids = setOf("some-group"),
                         product_ids = setOf("test-product-name"),
                     )
-                )
+                ),
         )
     )
 
@@ -300,7 +273,7 @@ fun goodCsaf(
     productTree: Csaf.ProductTree? = goodProductTree(),
     vulnerabilities: List<Csaf.Vulnerability>? = goodVulnerabilities(),
     lang: String? = "en",
-    sourceLang: String? = null
+    sourceLang: String? = null,
 ): Csaf =
     Csaf(
         document =
@@ -328,7 +301,7 @@ fun goodCsaf(
                             category = Csaf.Category.legal_disclaimer,
                             text = "Something very legal",
                             audience = "all",
-                            title = "Disclaimer"
+                            title = "Disclaimer",
                         )
                     ),
                 references =
@@ -338,11 +311,8 @@ fun goodCsaf(
                             url = JsonUri("https://example.com/advisory"),
                         )
                     ),
-                aggregate_severity =
-                    Csaf.AggregateSeverity(
-                        text = "I don't know that",
-                    )
+                aggregate_severity = Csaf.AggregateSeverity(text = "I don't know that"),
             ),
         product_tree = productTree,
-        vulnerabilities = vulnerabilities
+        vulnerabilities = vulnerabilities,
     )
