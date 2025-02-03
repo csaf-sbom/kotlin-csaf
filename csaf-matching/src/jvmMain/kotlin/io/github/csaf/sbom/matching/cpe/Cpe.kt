@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, The Authors. All rights reserved.
+ * Copyright (c) 2025, The Authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,11 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching
+package io.github.csaf.sbom.matching.cpe
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import protobom.protobom.Document
+import us.springett.parsers.cpe.CpeParser
+import us.springett.parsers.cpe.ICpe
 
-class TestMatcher {
-    @Test
-    fun testMatch() {
-        val sbom = Document()
-        val matcher = Matcher(listOf(goodCsaf()))
-        val results = matcher.match(sbom, 0f)
-        assertEquals(1, results.size)
-        assertEquals(Match(goodCsaf(), 0f), results.first())
-    }
-}
+actual typealias Cpe = ICpe
+
+actual fun parseCpe(cpe: String): Cpe = CpeParser.parse(cpe)

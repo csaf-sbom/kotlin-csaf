@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, The Authors. All rights reserved.
+ * Copyright (c) 2025, The Authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
  */
 package io.github.csaf.sbom.matching
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import protobom.protobom.Document
+import io.github.csaf.sbom.schema.generated.Csaf
 
-class TestMatcher {
-    @Test
-    fun testMatch() {
-        val sbom = Document()
-        val matcher = Matcher(listOf(goodCsaf()))
-        val results = matcher.match(sbom, 0f)
-        assertEquals(1, results.size)
-        assertEquals(Match(goodCsaf(), 0f), results.first())
+/**
+ * A data class representing a CSAF-SBOM-match with associated score in [0.0; 1.0].
+ *
+ * @property csaf The matched CSAF document.
+ * @property score The matching score in the interval [0.0; 1.0].
+ * @constructor Creates CSAF-SBOM-match with given score.
+ */
+data class Match(val csaf: Csaf, val score: Float) {
+    init {
+        require(score in 0.0..1.0) { "Score must be in the interval [0.0; 1.0]." }
     }
 }

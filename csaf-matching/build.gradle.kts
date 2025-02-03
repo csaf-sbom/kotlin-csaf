@@ -71,5 +71,11 @@ kotlin {
                 implementation(libs.mockk)
             }
         }
+        jvmMain {
+            dependencies {
+                implementation(libs.purl)
+                implementation(libs.cpe)
+            }
+        }
     }
 }

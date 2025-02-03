@@ -13,6 +13,7 @@ kover = "0.9.1"
 mockk = "1.13.16"
 publish = "0.30.0"
 purl = "1.5.0"
+cpe = "2.1.0"
 semver = "2.0.0"
 slf4j = "2.0.16"
 spotless = "7.0.2"
@@ -32,6 +33,7 @@ ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref =
 ktor-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 purl = { group = "com.github.package-url", name = "packageurl-java", version.ref = "purl" }
+cpe = { group = "us.springett", name = "cpe-parser", version.ref = "cpe" }
 semver = { group = "net.swiftzer.semver", name = "semver", version.ref = "semver" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version.ref = "slf4j" }
