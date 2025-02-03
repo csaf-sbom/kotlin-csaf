@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, The Authors. All rights reserved.
+ * Copyright (c) 2025, The Authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,35 +14,33 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.schema
+package io.github.csaf.sbom.matching
 
-import java.net.URI
-import kotlinx.serialization.Serializable
+/**
+ * A wrapper class for usage of immutable objects as Keys in [HashMap]s/[HashSet]s. The wrapper
+ * calls hashCode() of the wrapped object only once and caches its result. This is valid for
+ * immutable objects and speeds up [HashMap]s/[HashSet]s operations considerably.
+ *
+ * @property o The wrapped immutable object
+ * @constructor Create empty Hash csaf
+ */
+class FastHash<T>(val o: T) {
+    private val hash = o.hashCode()
 
-@Serializable(UriSerializer::class)
-actual class JsonUri(private var value: URI) {
-    actual constructor(s: String) : this(URI.create(s))
-
-    actual companion object {
-        actual fun create(s: String): JsonUri {
-            return JsonUri(URI.create(s))
-        }
-    }
-
-    override fun toString(): String {
-        return value.toString()
+    override fun hashCode(): Int {
+        return hash
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as JsonUri
+        other as FastHash<T>
 
-        return value == other.value
+        return o == other.o
     }
 
-    override fun hashCode(): Int {
-        return value.hashCode()
+    override fun toString(): String {
+        return o.toString()
     }
 }

@@ -70,12 +70,28 @@ fun goodProductTree(): Csaf.ProductTree =
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.1", product_id = "linux-0.1"),
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.1",
+                                        product_id = "linux-0.1",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(
+                                                cpe = "cpe:/a:vendor:linux:0.1::ab1"
+                                            ),
+                                    ),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
                                 name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.2", product_id = "linux-0.2"),
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux 0.2",
+                                        product_id = "linux-0.2",
+                                        product_identification_helper =
+                                            Csaf.ProductIdentificationHelper(
+                                                purl = JsonUri("pkg:rpm/vendor/linux@0.2?arch=src")
+                                            ),
+                                    ),
                             ),
                             Csaf.Branche(
                                 category = Csaf.Category3.vendor,
