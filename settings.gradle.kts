@@ -21,6 +21,8 @@ kover {
         excludedClasses.add("io.github.csaf.sbom.schema.generated.*")
         excludedClasses.add("io.github.csaf.sbom.validation.generated.*")
         excludedClasses.add("io.github.csaf.sbom.validation.tests.CWE*")
+        excludedClasses.add("com.google.protobuf.*")
+        excludedClasses.add("protobom.protobom.*")
 
         // Ignore main classes, since they are for demo only - might be removed in the future
         excludedClasses.add("io.github.csaf.sbom.retrieval.demo.*")
