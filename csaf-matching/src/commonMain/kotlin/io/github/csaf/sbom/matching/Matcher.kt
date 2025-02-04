@@ -39,7 +39,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
      * relevant information for comparison from the given CSAF documents for faster matching.
      */
     init {
-        require(threshold in 0.0f..1.0f)
+        require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
         docs.forEach { doc ->
             // Cache all canonicalized PURLs
             doc.product_tree
@@ -51,7 +51,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
                 .forEach {
                     purlMap.computeIfAbsent(it) { hashSetOf<FastHash<Csaf>>() }.add(FastHash(doc))
                 }
-            // Cache all CPEs, star
+            // Cache all CPEs, start with full product names
             doc.product_tree?.full_product_names?.forEach {
                 it.product_identification_helper?.cpe?.let {
                     cpeMap
@@ -59,6 +59,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
                         .add(FastHash(doc))
                 }
             }
+            // Collect more CPEs from product tree (branches)
             doc.product_tree
                 .mapBranchesNotNull {
                     it.product?.product_identification_helper?.cpe?.let { parseCpe(it) }
@@ -79,6 +80,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
      * @return A list of CSAF documents matching the given SBOM, along with resp. match scores.
      */
     fun match(sbom: Document, threshold: Float = this.threshold): List<Match> {
+        require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
         val matches = hashMapOf<FastHash<Csaf>, Float>()
         // If given threshold is 0.0, all documents will be "matched".
         if (threshold == 0.0f) {
