@@ -59,13 +59,11 @@ fun goodTracking(): Tracking =
 
 fun goodProductTree(
     branches: List<Csaf.Branche>? = goodLinuxVendorBranches(),
-    fullProductNames: List<Csaf.Product>? = goodFullProductNames(),
     relationships: List<Csaf.Relationship>? = goodRelationships(),
     productGroups: List<Csaf.ProductGroup>? = goodProductGroups(),
 ): Csaf.ProductTree =
     Csaf.ProductTree(
         branches = branches,
-        full_product_names = fullProductNames,
         relationships = relationships,
         product_groups = productGroups,
     )
@@ -107,6 +105,12 @@ fun goodLinuxVendorBranches() =
                     Csaf.Branche(
                         category = Csaf.Category3.vendor,
                         name = "Linux Vendor",
+                        product =
+                            Csaf.Product(name = "Linux 0.2.1", product_id = "linux-0.2.1"),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
                         branches =
                             listOf(
                                 Csaf.Branche(
@@ -128,44 +132,6 @@ fun goodLinuxVendorBranches() =
                         product = Csaf.Product(name = "Linux 0.5", product_id = "linux-0.5"),
                     ),
                 ),
-        )
-    )
-
-fun goodProductIdentificationHelper(
-    cpe: String? = "cpe:2.3:o:vendor:product:-:*:*:*:*:*:*:*"
-): Csaf.ProductIdentificationHelper =
-    Csaf.ProductIdentificationHelper(
-        cpe = cpe,
-        hashes =
-            listOf(
-                Csaf.Hashe(
-                    file_hashes =
-                        listOf(Csaf.FileHashe(value = "fa65e4c5ad0e5f7a94337910847bd10f7af10c74")),
-                    filename = "file.txt",
-                )
-            ),
-        sbom_urls = listOf(JsonUri("https://example.com/sboms/my-product")),
-        skus = listOf("123"),
-        model_numbers = setOf("123"),
-        serial_numbers = setOf("123"),
-        x_generic_uris =
-            listOf(
-                Csaf.XGenericUri(
-                    namespace = JsonUri("https://example.com"),
-                    uri = JsonUri("https://example.com/my-extension"),
-                )
-            ),
-    )
-
-fun goodFullProductNames(
-    productIdentificationHelper: Csaf.ProductIdentificationHelper? =
-        goodProductIdentificationHelper()
-) =
-    listOf(
-        Csaf.Product(
-            name = "Test Product Name",
-            product_id = "test-product-name",
-            product_identification_helper = productIdentificationHelper,
         )
     )
 
@@ -193,7 +159,30 @@ fun goodProductGroups() =
         )
     )
 
-fun goodVulnerabilities() =
+fun goodProductStatus(
+    firstAffected: Set<String>? = setOf("linux-0.1"),
+    firstFixed: Set<String>? = setOf("linux-0.5"),
+    knownAffected: Set<String>? = setOf("linux-0.1", "linux-0.2", "linux-0.2.1"),
+    knownNotAffected: Set<String>? = setOf("linux-0.3"),
+    lastAffected: Set<String>? = setOf("linux-0.2"),
+    recommended: Set<String>? = setOf("linux-0.5"),
+    fixed: Set<String>? = setOf("linux-0.5"),
+    underInvestigation: Set<String>? = setOf("linux-0.4"),
+) =
+    Csaf.ProductStatus(
+        first_affected = firstAffected,
+        first_fixed = firstFixed,
+        known_affected = knownAffected,
+        known_not_affected = knownNotAffected,
+        last_affected = lastAffected,
+        recommended = recommended,
+        fixed = fixed,
+        under_investigation = underInvestigation,
+    )
+
+fun goodVulnerabilities(
+    productStatus: Csaf.ProductStatus? = goodProductStatus(),
+) =
     listOf(
         Csaf.Vulnerability(
             acknowledgments =
@@ -260,17 +249,7 @@ fun goodVulnerabilities() =
                         status = Csaf.Status1.completed,
                     )
                 ),
-            product_status =
-                Csaf.ProductStatus(
-                    first_affected = setOf("linux-0.1"),
-                    first_fixed = setOf("linux-0.5"),
-                    known_affected = setOf("linux-0.1"),
-                    known_not_affected = setOf("linux-0.3"),
-                    last_affected = setOf("linux-0.2"),
-                    recommended = setOf("linux-0.5"),
-                    fixed = setOf("linux-0.5"),
-                    under_investigation = setOf("linux-0.4"),
-                ),
+            product_status = productStatus,
             remediations =
                 listOf(
                     Csaf.Remediation(
