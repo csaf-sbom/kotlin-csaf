@@ -141,7 +141,8 @@ class RetrievedProviderTest {
     @Test
     fun testFetchAllDocumentUrls() = runTest {
         val provider = RetrievedProvider.from("example.com").getOrThrow()
-        provider.fetchAllDocumentUrls().toList().let { urlResults ->
+        val resultList = provider.fetchAllDocumentUrls().toList()
+        resultList.let { urlResults ->
             assertEquals(4, urlResults.size, "Expected exactly 4 results")
             assertEquals(
                 "https://example.com/directory/2022/bsi-2022-0001.json",
@@ -160,18 +161,26 @@ class RetrievedProviderTest {
                 (assertThrows<Exception> { urlResults[3].getOrThrow() }).message,
             )
         }
+        // Distant past must result in the same behavior as "null", except for some error messages.
+        val distantPastResultList =
+            provider.fetchAllDocumentUrls(startingFrom = Instant.DISTANT_PAST).toList()
+        assertContentEquals(resultList.subList(0, 3), distantPastResultList.subList(0, 3))
+        assertEquals(
+            "Failed to fetch changes.csv from directory at https://example.com/invalid-directory",
+            (assertThrows<Exception> { distantPastResultList[3].getOrThrow() }).message,
+        )
         provider
             .fetchAllDocumentUrls(startingFrom = Instant.parse("2022-02-01T00:00:00Z"))
             .toList()
-            .let { urlResults ->
-                assertEquals(2, urlResults.size, "Expected exactly 4 results")
+            .let { results ->
+                assertEquals(2, results.size, "Expected exactly 4 results")
                 assertEquals(
                     "https://example.com/directory/2022/bsi-2022_2-01.json",
-                    urlResults[0].getOrThrow(),
+                    results[0].getOrThrow(),
                 )
                 assertEquals(
                     "Failed to fetch changes.csv from directory at https://example.com/invalid-directory",
-                    (assertThrows<Exception> { urlResults[1].getOrThrow() }).message,
+                    (assertThrows<Exception> { results[1].getOrThrow() }).message,
                 )
             }
     }

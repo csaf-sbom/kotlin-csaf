@@ -17,6 +17,7 @@
 package io.github.csaf.sbom.retrieval;
 
 import io.github.csaf.sbom.validation.ValidationException;
+import kotlinx.datetime.Instant;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
@@ -47,8 +48,9 @@ public class RetrievedProviderJavaTest {
                 //"Expected 3 documents"
         );
         final var documentResults = provider.streamDocuments().toList();
-        final var documentResultsExplicit = providerExplicit.streamDocuments(loader, DEFAULT_CHANNEL_CAPACITY).toList();
-        final var documentResultsExplicitSlow = providerExplicit.streamDocuments(loader, 1).toList();
+        final var distantPast = Instant.Companion.getDISTANT_PAST();
+        final var documentResultsExplicit = providerExplicit.streamDocuments(distantPast, loader, DEFAULT_CHANNEL_CAPACITY).toList();
+        final var documentResultsExplicitSlow = providerExplicit.streamDocuments(distantPast, loader, 1).toList();
         assertEquals(
                 4,
                 documentResults.size(),

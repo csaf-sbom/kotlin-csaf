@@ -139,8 +139,12 @@ class RetrievedProvider(val json: Provider) : Validatable {
     suspend fun countExpectedDocuments(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        startingFrom: Instant? = null,
     ): Int {
-        return fetchAllDocumentUrls(loader, channelCapacity).toList().filter { it.isSuccess }.size
+        return fetchAllDocumentUrls(loader, channelCapacity, startingFrom)
+            .toList()
+            .filter { it.isSuccess }
+            .size
     }
 
     /**
@@ -155,8 +159,9 @@ class RetrievedProvider(val json: Provider) : Validatable {
     fun fetchDocuments(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        startingFrom: Instant? = null,
     ): ReceiveChannel<Result<RetrievedDocument>> {
-        val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity)
+        val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity, startingFrom)
         // This second channel collects up to `channelCapacity` Results concurrently, which
         // represent CSAF Documents or errors from fetching or validation.
         val documentJobChannel =
@@ -318,10 +323,11 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     @JvmOverloads
     fun streamDocuments(
+        startingFrom: Instant? = null,
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): Stream<ResultCompat<RetrievedDocument>> {
-        val channel = fetchDocuments(loader, channelCapacity)
+        val channel = fetchDocuments(loader, channelCapacity, startingFrom)
         val iterator =
             object : Iterator<ResultCompat<RetrievedDocument>> {
                 val channelIterator = channel.iterator()
@@ -347,9 +353,10 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     @JvmOverloads
     fun countExpectedDocumentsBlocking(
+        startingFrom: Instant? = null,
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
-    ) = runBlocking { countExpectedDocuments(loader, channelCapacity) }
+    ) = runBlocking { countExpectedDocuments(loader, channelCapacity, startingFrom) }
 
     companion object {
         const val DEFAULT_CHANNEL_CAPACITY = 256
