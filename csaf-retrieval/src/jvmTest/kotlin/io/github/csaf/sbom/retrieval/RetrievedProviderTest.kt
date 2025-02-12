@@ -20,6 +20,7 @@ import io.github.csaf.sbom.validation.ValidationException
 import kotlin.test.*
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.assertThrows
 
 class RetrievedProviderTest {
@@ -69,6 +70,31 @@ class RetrievedProviderTest {
         )
         assertTrue(documentIndexResults[0].second.isSuccess)
         assertFalse(documentIndexResults[1].second.isSuccess)
+        val expectedContent = getResourceUrl("example.com/directory/index.txt")?.readText()
+        assertEquals(
+            expectedContent,
+            documentIndexResults[0].second.getOrThrow(),
+            "Expected index.txt content to match",
+        )
+    }
+
+    @Test
+    fun testFetchDocumentChangesCsv() = runTest {
+        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val documentIndexResults = provider.fetchDocumentIndices(useChangesCsv = true).toList()
+        assertEquals(
+            2,
+            documentIndexResults.size,
+            "Expected exactly 2 results: One changes.csv content and one fetch error",
+        )
+        assertTrue(documentIndexResults[0].second.isSuccess)
+        assertFalse(documentIndexResults[1].second.isSuccess)
+        val expectedContent = getResourceUrl("example.com/directory/changes.csv")?.readText()
+        assertEquals(
+            expectedContent,
+            documentIndexResults[0].second.getOrThrow(),
+            "Expected changes.csv content to match",
+        )
     }
 
     @Test
@@ -115,24 +141,38 @@ class RetrievedProviderTest {
     @Test
     fun testFetchAllDocumentUrls() = runTest {
         val provider = RetrievedProvider.from("example.com").getOrThrow()
-        val urlResults = provider.fetchAllDocumentUrls().toList()
-
-        assertEquals(4, urlResults.size, "Expected exactly 4 results")
-        assertEquals(
-            "https://example.com/directory/2022/bsi-2022-0001.json",
-            urlResults[0].getOrThrow(),
-        )
-        assertEquals(
-            "https://example.com/directory/2022/bsi-2022_2-01.json",
-            urlResults[1].getOrThrow(),
-        )
-        assertEquals(
-            "https://example.com/directory/2024/does-not-exist.json",
-            urlResults[2].getOrThrow(),
-        )
-        assertEquals(
-            "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
-            (assertThrows<Exception> { urlResults[3].getOrThrow() }).message,
-        )
+        provider.fetchAllDocumentUrls().toList().let { urlResults ->
+            assertEquals(4, urlResults.size, "Expected exactly 4 results")
+            assertEquals(
+                "https://example.com/directory/2022/bsi-2022-0001.json",
+                urlResults[0].getOrThrow(),
+            )
+            assertEquals(
+                "https://example.com/directory/2022/bsi-2022_2-01.json",
+                urlResults[1].getOrThrow(),
+            )
+            assertEquals(
+                "https://example.com/directory/2024/does-not-exist.json",
+                urlResults[2].getOrThrow(),
+            )
+            assertEquals(
+                "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
+                (assertThrows<Exception> { urlResults[3].getOrThrow() }).message,
+            )
+        }
+        provider
+            .fetchAllDocumentUrls(startingFrom = Instant.parse("2022-02-01T00:00:00Z"))
+            .toList()
+            .let { urlResults ->
+                assertEquals(2, urlResults.size, "Expected exactly 4 results")
+                assertEquals(
+                    "https://example.com/directory/2022/bsi-2022_2-01.json",
+                    urlResults[0].getOrThrow(),
+                )
+                assertEquals(
+                    "Failed to fetch changes.csv from directory at https://example.com/invalid-directory",
+                    (assertThrows<Exception> { urlResults[1].getOrThrow() }).message,
+                )
+            }
     }
 }

@@ -14,7 +14,7 @@
         "term": "csaf"
       }
     ],
-    "updated": "2021-01-01T12:00:00.000Z",
+    "updated": "2022-01-01T12:00:00.000Z",
     "entry": [
       {
         "id": "2020-ESA-001",
@@ -33,14 +33,44 @@
             "href": "https://example.com/directory/2022/bsi-2022-0001.json.asc"
           }
         ],
-        "published": "2021-01-01T11:00:00.000Z",
-        "updated": "2021-01-01T12:00:00.000Z",
+        "published": "2022-01-01T11:00:00.000Z",
+        "updated": "2022-01-01T12:00:00.000Z",
         "summary": {
           "content": "Vulnerabilities fixed in ABC 0.0.1"
         },
         "content": {
           "type": "application/json",
           "src": "https://example.com/directory/2022/bsi-2022-0001.json"
+        },
+        "format": {
+          "schema": "https://docs.oasis-open.org/csaf/csaf/v2.0/csaf_json_schema.json",
+          "version": "2.0"
+        }
+      },{
+        "id": "2020-ESA-002",
+        "title": "Example Security Advisory 002",
+        "link": [
+          {
+            "rel": "self",
+            "href": "https://example.com/directory/2022/bsi-2022_2-01.json"
+          },
+          {
+            "rel": "hash",
+            "href": "https://example.com/directory/2022/bsi-2022_2-01.json.sha512"
+          },
+          {
+            "rel": "signature",
+            "href": "https://example.com/directory/2022/bsi-2022_2-01.json.asc"
+          }
+        ],
+        "published": "2025-01-01T11:00:00.000Z",
+        "updated": "2025-01-01T12:00:00.000Z",
+        "summary": {
+          "content": "Vulnerabilities fixed in ABC 0.0.1"
+        },
+        "content": {
+          "type": "application/json",
+          "src": "https://example.com/directory/2022/bsi-2022_2-01.json"
         },
         "format": {
           "schema": "https://docs.oasis-open.org/csaf/csaf/v2.0/csaf_json_schema.json",

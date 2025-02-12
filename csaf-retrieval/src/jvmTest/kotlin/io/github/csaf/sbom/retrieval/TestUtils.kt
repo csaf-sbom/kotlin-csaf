@@ -18,6 +18,9 @@ package io.github.csaf.sbom.retrieval
 
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
+import java.net.URL
+
+fun Any.getResourceUrl(resourcePath: String): URL? = javaClass.classLoader.getResource(resourcePath)
 
 fun mockEngine() = MockEngine { request ->
     val host = request.url.host
@@ -26,8 +29,7 @@ fun mockEngine() = MockEngine { request ->
             // A little trick to serve the metadata JSON on the DNS path
             if (it == "") "index.json" else it
         }
-    val resourcePath = ("$host/$file").trimStart('/')
-    val response = javaClass.classLoader.getResource(resourcePath)
+    val response = getResourceUrl(("$host/$file").trimStart('/'))
 
     if (response == null) {
         respond(content = "Not Found", status = HttpStatusCode.NotFound)

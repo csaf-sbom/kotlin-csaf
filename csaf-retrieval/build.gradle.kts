@@ -21,6 +21,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlinx.json)
                 implementation(libs.kotlin.logging)
+                implementation(libs.kotlin.csv)
             }
         }
         jvmMain {
