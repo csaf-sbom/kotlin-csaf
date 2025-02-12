@@ -29,10 +29,7 @@ class MatcherTest {
     @Test
     fun `test Matcher initialization with valid threshold`() {
         val goodCsafDocs =
-            listOf(
-                goodCsaf(productTree = null),
-                goodCsaf(productTree = goodProductTree(fullProductNames = null)),
-            )
+            listOf(goodCsaf(productTree = null), goodCsaf(productTree = goodProductTree()))
         val matcher = Matcher(goodCsafDocs, threshold = 0.5f)
         assertNotNull(matcher)
         assertEquals(0.5f, matcher.threshold)
@@ -45,8 +42,8 @@ class MatcherTest {
         assertThrows<IllegalArgumentException> { Matcher(listOf(csafDoc), threshold = -0.1f) }
         assertThrows<IllegalArgumentException> { Matcher(listOf(csafDoc), threshold = 1.1f) }
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
-        assertThrows<IllegalArgumentException> { matcher.match(Document(), threshold = -0.1f) }
-        assertThrows<IllegalArgumentException> { matcher.match(Document(), threshold = 1.1f) }
+        assertThrows<IllegalArgumentException> { matcher.matchAll(Document(), threshold = -0.1f) }
+        assertThrows<IllegalArgumentException> { matcher.matchAll(Document(), threshold = 1.1f) }
     }
 
     @Test
@@ -72,41 +69,29 @@ class MatcherTest {
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         assertFalse(matcher.cpeMap.isEmpty())
-        assertEquals(2, matcher.cpeMap.size)
+        assertEquals(1, matcher.cpeMap.size)
     }
 
     @Test
-    fun `test match returns all documents for threshold 0`() {
+    fun `test matchAll returns all documents for threshold 0`() {
         val matcher =
             Matcher(
                 listOf(
+                    goodCsaf(productTree = goodProductTree(), vulnerabilities = null),
                     goodCsaf(
-                        productTree =
-                            goodProductTree(
-                                fullProductNames =
-                                    goodFullProductNames(productIdentificationHelper = null)
-                            )
-                    ),
-                    goodCsaf(
-                        productTree =
-                            goodProductTree(
-                                fullProductNames =
-                                    goodFullProductNames(
-                                        productIdentificationHelper =
-                                            goodProductIdentificationHelper(cpe = null)
-                                    )
-                            )
+                        productTree = goodProductTree(relationships = null),
+                        vulnerabilities = goodVulnerabilities(productStatus = null),
                     ),
                 ),
                 threshold = 0.5f,
             )
-        val result = matcher.match(Document(), threshold = 0.0f)
+        val result = matcher.matchAll(Document(), threshold = 0.0f)
 
         assertEquals(2, result.size)
     }
 
     @Test
-    fun `test match processes valid PURLs correctly`() {
+    fun `test matchAll processes valid PURLs correctly`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -126,74 +111,69 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.match(sbomWithPurl)
+        val result = matcher.matchAll(sbomWithPurl)
         assertEquals(1, result.size)
         assertEquals(1.0f, result.first().score)
     }
 
     @Test
-    fun `test match processes valid CPEs correctly`() {
+    fun `test matchAll and match process valid CPEs correctly`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
-        val sbomWithCPE =
-            Document(
-                nodeList =
-                    NodeList(
-                        listOf(
-                            Node(
-                                identifiers =
-                                    mapOf(
-                                        SoftwareIdentifierType.CPE22.value to
-                                            "cpe:/a:vendor:linux:0.1::ab1"
-                                    )
-                            )
-                        )
-                    )
+        val sbomNodeWithCPE =
+            Node(
+                identifiers =
+                    mapOf(SoftwareIdentifierType.CPE22.value to "cpe:/a:vendor:linux:0.1::ab1")
             )
+        val sbomWithCPE = Document(nodeList = NodeList(listOf(sbomNodeWithCPE)))
 
-        val result = matcher.match(sbomWithCPE)
-        assertEquals(1, result.size)
-        assertEquals(1.0f, result.first().score)
+        val resultNode = matcher.match(sbomNodeWithCPE)
+        assertEquals(1, resultNode.size)
+        assertEquals(1.0f, resultNode.first().score)
+
+        val resultAll = matcher.matchAll(sbomWithCPE)
+        assertEquals(1, resultAll.size)
+        assertEquals(1.0f, resultAll.first().score)
     }
 
     @Test
-    fun `test match does not add unknown identifiers`() {
+    fun `test matchAll does not add unknown identifiers`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithUnknownId =
             Document(nodeList = NodeList(listOf(Node(identifiers = mapOf(999 to "value")))))
 
-        val result = matcher.match(sbomWithUnknownId)
+        val result = matcher.matchAll(sbomWithUnknownId)
         assertEquals(0, result.size)
     }
 
     @Test
-    fun `test match handles null nodeList`() {
+    fun `test matchAll handles null nodeList`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithoutNodeList = Document(nodeList = null)
-        val result = matcher.match(sbomWithoutNodeList)
+        val result = matcher.matchAll(sbomWithoutNodeList)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test match handles null identifiers inside nodes`() {
+    fun `test matchAll handles null identifiers inside nodes`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithNullIdentifiers =
             Document(nodeList = NodeList(listOf(Node(identifiers = emptyMap()))))
-        val result = matcher.match(sbomWithNullIdentifiers)
+        val result = matcher.matchAll(sbomWithNullIdentifiers)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test match handles missing matching PURLs in sbom`() {
+    fun `test matchAll handles missing matching PURLs in sbom`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -213,13 +193,13 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.match(sbomWithDifferentPurl)
+        val result = matcher.matchAll(sbomWithDifferentPurl)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test match handles missing matching CPEs in sbom`() {
+    fun `test matchAll handles missing matching CPEs in sbom`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -239,7 +219,7 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.match(sbomWithDifferentCpe)
+        val result = matcher.matchAll(sbomWithDifferentCpe)
 
         assertTrue(result.isEmpty())
     }

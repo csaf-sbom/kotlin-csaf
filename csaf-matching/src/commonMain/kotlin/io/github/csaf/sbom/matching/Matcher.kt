@@ -22,6 +22,8 @@ import io.github.csaf.sbom.matching.purl.Purl
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.mapBranchesNotNull
 import protobom.protobom.Document
+import protobom.protobom.Node
+import protobom.protobom.NodeList
 import protobom.protobom.SoftwareIdentifierType
 
 /**
@@ -41,68 +43,87 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
     init {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
         docs.forEach { doc ->
-            // Cache all canonicalized PURLs
-            doc.product_tree
-                .mapBranchesNotNull {
-                    it.product?.product_identification_helper?.purl?.let {
-                        Purl(it.toString()).canonicalize()
+            val affectedProducts =
+                (doc.vulnerabilities ?: emptyList())
+                    .mapNotNull { it.product_status?.known_affected }
+                    .flatten()
+            if (affectedProducts.isNotEmpty()) {
+                doc.product_tree.mapBranchesNotNull({
+                    it.product != null && it.product!!.product_id in affectedProducts
+                }) {
+                    it.product!!.product_identification_helper?.let {
+                        it.cpe?.let {
+                            cpeMap
+                                .computeIfAbsent(parseCpe(it)) { hashSetOf<FastHash<Csaf>>() }
+                                .add(FastHash(doc))
+                        }
+                        it.purl?.let {
+                            purlMap
+                                .computeIfAbsent(Purl(it.toString()).canonicalize()) {
+                                    hashSetOf<FastHash<Csaf>>()
+                                }
+                                .add(FastHash(doc))
+                        }
                     }
                 }
-                .forEach {
-                    purlMap.computeIfAbsent(it) { hashSetOf<FastHash<Csaf>>() }.add(FastHash(doc))
-                }
-            // Cache all CPEs, start with full product names
-            doc.product_tree?.full_product_names?.forEach {
-                it.product_identification_helper?.cpe?.let {
-                    cpeMap
-                        .computeIfAbsent(parseCpe(it)) { hashSetOf<FastHash<Csaf>>() }
-                        .add(FastHash(doc))
-                }
             }
-            // Collect more CPEs from product tree (branches)
-            doc.product_tree
-                .mapBranchesNotNull {
-                    it.product?.product_identification_helper?.cpe?.let { parseCpe(it) }
-                }
-                .forEach {
-                    cpeMap.computeIfAbsent(it) { hashSetOf<FastHash<Csaf>>() }.add(FastHash(doc))
-                }
         }
     }
+
+    /**
+     * Matches the provided SBOM node with the CSAF documents and determines whether they meet
+     * specific criteria.
+     *
+     * @param sbomNode The SBOM node represented by a protobom.protobom.Node instance.
+     * @param threshold The minimum threshold required for a match to be included, defaults to the
+     *   value of this [Matcher].
+     * @return A list of CSAF documents matching the given node, along with resp. match scores.
+     */
+    fun match(sbomNode: Node, threshold: Float = this.threshold) =
+        match(listOf(sbomNode), threshold)
 
     /**
      * Matches the provided SBOM document with the CSAF documents and determines whether they meet
      * specific criteria.
      *
-     * @param sbom The SBOM document represented by a protobom.protobom.Document instance.
+     * @param sbomDocument The SBOM document represented by a protobom.protobom.Document instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
-     * @return A list of CSAF documents matching the given SBOM, along with resp. match scores.
+     * @return A list of CSAF documents matching the given document, along with resp. match scores.
      */
-    fun match(sbom: Document, threshold: Float = this.threshold): List<Match> {
+    fun matchAll(sbomDocument: Document, threshold: Float = this.threshold): List<Match> =
+        match((sbomDocument.nodeList ?: NodeList()).nodes, threshold)
+
+    /**
+     * Matches the provided SBOM nodes with the CSAF documents and determines whether they meet
+     * specific criteria.
+     *
+     * @param nodes A list of SBOM nodes represented by protobom.protobom.Node instances.
+     * @param threshold The minimum threshold required for a match to be included.
+     * @return A list of CSAF documents matching the given nodes, along with resp. match scores.
+     */
+    private fun match(nodes: List<Node>, threshold: Float): List<Match> {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
         val matches = hashMapOf<FastHash<Csaf>, Float>()
         // If given threshold is 0.0, all documents will be "matched".
         if (threshold == 0.0f) {
             docs.forEach { matches[FastHash(it)] = 0.0f }
         }
-        sbom.nodeList?.let { nl ->
-            nl.nodes.forEach {
-                it.identifiers.forEach { (identifier, value) ->
-                    when (identifier) {
-                        // We consider PURL matches as perfect match (score 1.0).
-                        SoftwareIdentifierType.PURL.value -> {
-                            val cPurl = Purl(value).canonicalize()
-                            purlMap[cPurl]?.let { it.map { matches[it] = 1.0f } }
-                        }
-                        // We consider CPE matches as perfect match (score 1.0).
-                        SoftwareIdentifierType.CPE22.value,
-                        SoftwareIdentifierType.CPE23.value -> {
-                            val cCpe = parseCpe(value)
-                            cpeMap.forEach { (cpe, csafSet) ->
-                                if (cpe.matches(cCpe)) {
-                                    csafSet.map { matches[it] = 1.0f }
-                                }
+        nodes.forEach { sbomNode ->
+            sbomNode.identifiers.forEach { (identifier, value) ->
+                when (identifier) {
+                    // We consider PURL matches as perfect match (score 1.0).
+                    SoftwareIdentifierType.PURL.value -> {
+                        val cPurl = Purl(value).canonicalize()
+                        purlMap[cPurl]?.let { it.map { matches[it] = 1.0f } }
+                    }
+                    // We consider CPE matches as perfect match (score 1.0).
+                    SoftwareIdentifierType.CPE22.value,
+                    SoftwareIdentifierType.CPE23.value -> {
+                        val nodeCpe = parseCpe(value)
+                        cpeMap.forEach { (cpe, csafSet) ->
+                            if (cpe.matches(nodeCpe)) {
+                                csafSet.map { matches[it] = 1.0f }
                             }
                         }
                     }
