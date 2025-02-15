@@ -32,7 +32,7 @@ class RetrievedDocumentTest {
         String validJson = new String(Objects.requireNonNull(
                 getClass().getClassLoader().getResourceAsStream("example.com/directory/2022/bsi-2022-0001.json")
         ).readAllBytes());
-        final var result = RetrievedDocument.Companion.fromJson(validJson);
+        final var result = RetrievedDocument.Companion.fromJson(validJson, "example.com/directory/2022/bsi-2022-0001.json");
         assertTrue(result.isSuccess(), "Parsing should succeed for valid CSAF JSON");
         assertNotNull(result.getOrNull(), "The RetrievedDocument should not be null");
     }
@@ -40,7 +40,7 @@ class RetrievedDocumentTest {
     @Test
     void failWithInvalidJson() {
         final var invalidJson = "{ \"invalid\": true, }"; // Malformed JSON
-        final var result = RetrievedDocument.Companion.fromJson(invalidJson);
+        final var result = RetrievedDocument.Companion.fromJson(invalidJson, "not-a-real-file.json");
         assertTrue(result.isFailure(), "Parsing should fail for invalid JSON");
         assertNotNull(result.exceptionOrNull(), "A failure result should contain an exception");
     }
@@ -50,7 +50,7 @@ class RetrievedDocumentTest {
         final var validJson = Objects.requireNonNull(
                 getClass().getClassLoader().getResourceAsStream("example.com/directory/2022/bsi-2022-0001.json")
         );
-        final var result = RetrievedDocument.Companion.fromJson(validJson);
+        final var result = RetrievedDocument.Companion.fromJson(validJson, "example.com/directory/2022/bsi-2022-0001.json");
         assertTrue(result.isSuccess(), "Parsing should succeed for valid CSAF JSON");
         assertNotNull(result.getOrNull(), "The RetrievedDocument should not be null");
     }
@@ -58,7 +58,7 @@ class RetrievedDocumentTest {
     @Test
     void failWithInvalidJsonStream() {
         final var invalidJson = new ByteArrayInputStream("{ \"invalid\": true, }".getBytes(StandardCharsets.UTF_8));
-        final var result = RetrievedDocument.Companion.fromJson(invalidJson);
+        final var result = RetrievedDocument.Companion.fromJson(invalidJson, "not-a-real-file.json");
         assertTrue(result.isFailure(), "Parsing should fail for invalid JSON");
         assertNotNull(result.exceptionOrNull(), "A failure result should contain an exception");
     }
