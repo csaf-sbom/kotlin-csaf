@@ -20,6 +20,11 @@ import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.retrieval.roles.CSAFAggregatorRole
 import io.github.csaf.sbom.retrieval.roles.CSAFListerRole
 import io.github.csaf.sbom.schema.generated.Aggregator
+import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.future.future
 
 /**
  * This class represents a wrapper around a [Aggregator] document, that provides functionality for
@@ -85,6 +90,17 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
     }
 
     companion object {
+        private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+        @JvmStatic
+        @JvmOverloads
+        fun fromAsync(
+            domain: String,
+            loader: CsafLoader = lazyLoader,
+        ): CompletableFuture<RetrievedAggregator> {
+            return ioScope.future { from(domain, loader).getOrThrow() }
+        }
+
         /**
          * Retrieves an [Aggregator] from a given [url].
          *
