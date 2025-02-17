@@ -402,11 +402,10 @@ class RetrievedProvider(val json: Provider, val ctx: RetrievalContext) : Validat
             domain: String,
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
-            val ctx = RetrievalContext()
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
 
-            return fromURL(wellKnownPath)
+            return fromURL(wellKnownPath, loader)
                 .recoverCatching {
                     log.info(it) {
                         "Failed to fetch and validate provider via .well-known, trying security.txt..."
@@ -414,7 +413,7 @@ class RetrievedProvider(val json: Provider, val ctx: RetrievalContext) : Validat
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
-                        fromURL(entry).getOrNull()
+                        fromURL(entry, loader).getOrNull()
                     }
                 }
                 .recoverCatching {
@@ -424,7 +423,7 @@ class RetrievedProvider(val json: Provider, val ctx: RetrievalContext) : Validat
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
-                    fromURL("https://csaf.data.security.$domain").getOrThrow()
+                    fromURL("https://csaf.data.security.$domain", loader).getOrThrow()
                 }
                 .recoverCatching {
                     log.info(it) {
