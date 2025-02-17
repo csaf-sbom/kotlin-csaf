@@ -39,7 +39,7 @@ public class RetrievedProviderJavaTest {
 
     @Test
     public void testFromUrlAsync() throws InterruptedException, ExecutionException {
-        final var providerByDomain = RetrievedProvider.fromAsync("example.com").get().toString();
+        final var providerByDomain = RetrievedProvider.fromDomainAsync("example.com").get().toString();
         final var providerByUrl = RetrievedProvider.fromUrlAsync(
                 "https://example.com/.well-known/csaf/provider-metadata.json"
         ).get().toString();
@@ -48,8 +48,8 @@ public class RetrievedProviderJavaTest {
 
     @Test
     public void testFromAsync() throws InterruptedException, ExecutionException {
-        final var provider = RetrievedProvider.fromAsync("example.com").get();
-        final var providerExplicit = RetrievedProvider.fromAsync("example.com", loader).get();
+        final var provider = RetrievedProvider.fromDomainAsync("example.com").get();
+        final var providerExplicit = RetrievedProvider.fromDomainAsync("example.com", loader).get();
         final var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
         assertEquals(
                 3,

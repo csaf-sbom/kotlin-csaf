@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     runBlocking {
         // Create a new "RetrievedProvider" from a domain. This will automatically discover a
         // suitable provider-metadata.json
-        RetrievedProvider.from(args[0])
+        RetrievedProvider.fromDomain(args[0])
             .onSuccess { provider ->
                 println("Discovered provider-metadata.json @ ${provider.json.canonical_url}")
                 println("Expected documents: ${provider.countExpectedDocuments()}")

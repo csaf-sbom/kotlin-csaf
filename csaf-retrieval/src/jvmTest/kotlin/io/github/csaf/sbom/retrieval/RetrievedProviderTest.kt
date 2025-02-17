@@ -42,7 +42,7 @@ class RetrievedProviderTest {
     fun testRetrievedProviderBrokenDomain() {
         val exception =
             assertFailsWith<Exception> {
-                runTest { RetrievedProvider.from("broken-domain.com").getOrThrow() }
+                runTest { RetrievedProvider.fromDomain("broken-domain.com").getOrThrow() }
             }
         assertEquals(
             "Failed to resolve provider for broken-domain.com via .well-known, security.txt or DNS.",
@@ -52,7 +52,7 @@ class RetrievedProviderTest {
 
     @Test
     fun testRetrievedProviderEmptyIndex() = runTest {
-        val provider = RetrievedProvider.from("no-distributions.com").getOrThrow()
+        val provider = RetrievedProvider.fromDomain("no-distributions.com").getOrThrow()
         val expectedDocumentCount = provider.countExpectedDocuments()
         assertEquals(0, expectedDocumentCount)
         val documentResults = provider.fetchDocuments().toList()
@@ -61,7 +61,7 @@ class RetrievedProviderTest {
 
     @Test
     fun testFetchDocumentIndices() = runTest {
-        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val provider = RetrievedProvider.fromDomain("example.com").getOrThrow()
         val documentIndexResults = provider.fetchDocumentIndices().toList()
         assertEquals(
             2,
@@ -80,7 +80,7 @@ class RetrievedProviderTest {
 
     @Test
     fun testFetchDocumentChangesCsv() = runTest {
-        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val provider = RetrievedProvider.fromDomain("example.com").getOrThrow()
         val documentIndexResults = provider.fetchDocumentIndices(useChangesCsv = true).toList()
         assertEquals(
             2,
@@ -99,14 +99,14 @@ class RetrievedProviderTest {
 
     @Test
     fun testFetchRolieFeeds() = runTest {
-        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val provider = RetrievedProvider.fromDomain("example.com").getOrThrow()
         val rolieFeedsResults = provider.fetchRolieFeeds().toList()
         assertEquals(1, rolieFeedsResults.size, "Expected exactly 1 result: One parsed ROLIE feed")
         assertTrue(rolieFeedsResults[0].second.isSuccess)
     }
 
     private suspend fun providerTest(domain: String, numResults: Int = 5) {
-        val provider = RetrievedProvider.from(domain).getOrThrow()
+        val provider = RetrievedProvider.fromDomain(domain).getOrThrow()
         val expectedDocumentCount = provider.countExpectedDocuments()
         assertEquals(3, expectedDocumentCount, "Expected 3 documents")
         val documentResults = provider.fetchDocuments().toList()
@@ -140,7 +140,7 @@ class RetrievedProviderTest {
 
     @Test
     fun testProviderByUrl() = runTest {
-        val providerByDomain = RetrievedProvider.from("example.com").getOrThrow().toString()
+        val providerByDomain = RetrievedProvider.fromDomain("example.com").getOrThrow().toString()
         val providerByUrl =
             RetrievedProvider.fromUrl("https://example.com/.well-known/csaf/provider-metadata.json")
                 .getOrThrow()
@@ -158,7 +158,7 @@ class RetrievedProviderTest {
 
     @Test
     fun testFetchAllDocumentUrls() = runTest {
-        val provider = RetrievedProvider.from("example.com").getOrThrow()
+        val provider = RetrievedProvider.fromDomain("example.com").getOrThrow()
         val resultList = provider.fetchAllDocumentUrls().toList()
         resultList.let { urlResults ->
             assertEquals(4, urlResults.size, "Expected exactly 4 results")

@@ -374,8 +374,8 @@ data class RetrievedProvider(val json: Provider) : Validatable {
          */
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(domain: String, loader: CsafLoader = lazyLoader) =
-            ioScope.future { from(domain, loader).getOrThrow() }
+        fun fromDomainAsync(domain: String, loader: CsafLoader = lazyLoader) =
+            ioScope.future { fromDomain(domain, loader).getOrThrow() }
 
         /**
          * Creates a [RetrievedProvider] from a provider-metadata.json document (represented by the
@@ -394,7 +394,7 @@ data class RetrievedProvider(val json: Provider) : Validatable {
          * resolution of `security.txt` in that case is useless **unless** we want to change our API
          * such that it may resolve multiple `Provider`s for an input domain.
          */
-        suspend fun from(
+        suspend fun fromDomain(
             domain: String,
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
