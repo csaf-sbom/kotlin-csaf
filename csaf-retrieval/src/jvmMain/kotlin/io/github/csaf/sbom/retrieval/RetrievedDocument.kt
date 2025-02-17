@@ -29,7 +29,12 @@ import kotlinx.serialization.json.decodeFromStream
  * This class represents a wrapper around a [Csaf] document, that provides functionality for
  * fetching a document from a location, including validation according to the specification.
  */
-data class RetrievedDocument(val json: Csaf) {
+data class RetrievedDocument(
+    /** The parsed [Csaf] document */
+    val json: Csaf,
+    /** The URL where the document was retrieved from. */
+    val url: String,
+) {
 
     companion object {
         /**
@@ -53,7 +58,7 @@ data class RetrievedDocument(val json: Csaf) {
             return loader
                 .fetchDocument(documentUrl, ctx)
                 .mapCatching {
-                    RetrievedDocument(it).also { _ ->
+                    RetrievedDocument(it, documentUrl).also { _ ->
                         providerRole.checkDocument(ctx).let { vr ->
                             if (vr is ValidationFailed) {
                                 throw vr.toException()
@@ -70,11 +75,12 @@ data class RetrievedDocument(val json: Csaf) {
          * Load [RetrievedDocument] from JSON string.
          *
          * @param json JSON String to parse.
+         * @param url URL where the document was originally located.
          * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
          */
-        fun fromJson(json: String): ResultCompat<RetrievedDocument> {
+        fun fromJson(json: String, url: String): ResultCompat<RetrievedDocument> {
             return try {
-                ResultCompat.success(RetrievedDocument(Json.decodeFromString<Csaf>(json)))
+                ResultCompat.success(RetrievedDocument(Json.decodeFromString<Csaf>(json), url))
             } catch (t: Throwable) {
                 ResultCompat.failure(t)
             }
@@ -84,12 +90,13 @@ data class RetrievedDocument(val json: Csaf) {
          * Load [RetrievedDocument] from JSON-yielding InputStream.
          *
          * @param stream InputStream yielding JSON to parse.
+         * @param url URL where the document was originally located.
          * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
          */
         @OptIn(ExperimentalSerializationApi::class)
-        fun fromJson(stream: InputStream): ResultCompat<RetrievedDocument> {
+        fun fromJson(stream: InputStream, url: String): ResultCompat<RetrievedDocument> {
             return try {
-                ResultCompat.success(RetrievedDocument(Json.decodeFromStream<Csaf>(stream)))
+                ResultCompat.success(RetrievedDocument(Json.decodeFromStream<Csaf>(stream), url))
             } catch (t: Throwable) {
                 ResultCompat.failure(t)
             }
