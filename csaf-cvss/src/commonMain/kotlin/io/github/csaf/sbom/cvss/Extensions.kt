@@ -18,6 +18,7 @@ package io.github.csaf.sbom.cvss
 
 import io.github.csaf.sbom.schema.generated.Csaf.BaseSeverity
 
+@Suppress("KotlinConstantConditions")
 fun Double.toSeverity(): BaseSeverity {
     return when {
         this == 0.0 -> BaseSeverity.NONE
