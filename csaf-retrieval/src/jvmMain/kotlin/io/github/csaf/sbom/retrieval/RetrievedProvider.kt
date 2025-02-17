@@ -40,7 +40,7 @@ import kotlinx.datetime.Instant
  * to retrieve its documents.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class RetrievedProvider(val json: Provider) : Validatable {
+data class RetrievedProvider(val json: Provider) : Validatable {
 
     /**
      * The role of this [RetrievedProvider] (publisher, provider, trusted provider), required for
@@ -363,18 +363,23 @@ class RetrievedProvider(val json: Provider) : Validatable {
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         private val log = KotlinLogging.logger {}
 
+        /**
+         * Asynchronously retrieves a [RetrievedProvider] based on the given domain.
+         *
+         * @param domain The domain name to evaluate in order to construct a [RetrievedProvider].
+         * @param loader The instance of [CsafLoader] used for fetching necessary online resources.
+         *   Defaults to [lazyLoader].
+         * @return A future that resolves to a [RetrievedProvider] or an error if the operation
+         *   fails.
+         */
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(
-            domain: String,
-            loader: CsafLoader = lazyLoader,
-        ): CompletableFuture<RetrievedProvider> {
-            return ioScope.future { from(domain, loader).getOrThrow() }
-        }
+        fun fromDomainAsync(domain: String, loader: CsafLoader = lazyLoader) =
+            ioScope.future { fromDomain(domain, loader).getOrThrow() }
 
         /**
-         * Retrieves one or more provider-metadata.json documents (represented by the [Provider]
-         * data class) from a domain according to the
+         * Creates a [RetrievedProvider] from a provider-metadata.json document (represented by the
+         * [Provider] data class) from a domain according to the
          * [retrieval rules](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#731-finding-provider-metadatajson).
          *
          * [CSAF standard section
@@ -389,20 +394,14 @@ class RetrievedProvider(val json: Provider) : Validatable {
          * resolution of `security.txt` in that case is useless **unless** we want to change our API
          * such that it may resolve multiple `Provider`s for an input domain.
          */
-        suspend fun from(
+        suspend fun fromDomain(
             domain: String,
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
             val ctx = RetrievalContext()
-            val mapAndValidateProvider = { p: Provider ->
-                // TODO: Add some more logging when any implemented tests can fail
-                RetrievedProvider(p).also { it.validate(ctx) }
-            }
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
-            return loader
-                .fetchProvider(wellKnownPath, ctx)
-                .mapCatching(mapAndValidateProvider)
+            return fromUrlWithContext(wellKnownPath, ctx, loader)
                 .recoverCatching {
                     log.info(it) {
                         "Failed to fetch and validate provider via .well-known, trying security.txt..."
@@ -410,10 +409,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
                     loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
-                        loader
-                            .fetchProvider(entry, ctx)
-                            .mapCatching(mapAndValidateProvider)
-                            .getOrNull()
+                        fromUrlWithContext(entry, ctx, loader).getOrNull()
                     }
                 }
                 .recoverCatching {
@@ -423,9 +419,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
-                    loader
-                        .fetchProvider("https://csaf.data.security.$domain", ctx)
-                        .mapCatching(mapAndValidateProvider)
+                    fromUrlWithContext("https://csaf.data.security.$domain", ctx, loader)
                         .getOrThrow()
                 }
                 .recoverCatching {
@@ -437,6 +431,53 @@ class RetrievedProvider(val json: Provider) : Validatable {
                         it,
                     )
                 }
+        }
+
+        /**
+         * Asynchronously constructs a [RetrievedProvider] from a JSON found at the specified URL.
+         * The result is wrapped into a [CompletableFuture].
+         *
+         * @param url The URL of the resource to fetch.
+         * @param loader An instance of [CsafLoader] used to retrieve the provider. Defaults to
+         *   [lazyLoader].
+         * @return A future that resolves to a [RetrievedProvider] or an error if the operation
+         *   fails.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun fromUrlAsync(url: String, loader: CsafLoader = lazyLoader) =
+            ioScope.future { fromUrl(url, loader).getOrThrow() }
+
+        /**
+         * Constructs a [RetrievedProvider] from a JSON found at the specified URL.
+         *
+         * @param url The URL of the provider JSON to fetch.
+         * @param loader An instance of [CsafLoader] used to retrieve the provider. Defaults to
+         *   [lazyLoader].
+         * @return A [Result] containing the retrieved [RetrievedProvider] or an error if the
+         *   operation fails.
+         */
+        suspend fun fromUrl(url: String, loader: CsafLoader = lazyLoader) =
+            fromUrlWithContext(url, RetrievalContext(), loader)
+
+        /**
+         * Constructs a [RetrievedProvider] from a JSON found at the specified URL, using a
+         * pre-existing [RetrievalContext].
+         *
+         * @param url The URL of the provider JSON to fetch.
+         * @param ctx The [RetrievalContext] to use.
+         * @param loader An instance of [CsafLoader] used to retrieve the provider.
+         * @return A [Result] containing the retrieved [RetrievedProvider] or an error if the
+         *   operation fails.
+         */
+        private suspend fun fromUrlWithContext(
+            url: String,
+            ctx: RetrievalContext,
+            loader: CsafLoader,
+        ): Result<RetrievedProvider> {
+            return loader.fetchProvider(url, ctx).mapCatching {
+                RetrievedProvider(it).also { it.validate(ctx) }
+            }
         }
     }
 }

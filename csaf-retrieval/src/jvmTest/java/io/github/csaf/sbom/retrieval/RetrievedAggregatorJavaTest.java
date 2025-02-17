@@ -18,9 +18,11 @@ package io.github.csaf.sbom.retrieval;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests the functionality of <code>{@link RetrievedAggregator}</code> in Java.
@@ -35,8 +37,39 @@ public class RetrievedAggregatorJavaTest {
     }
 
     @Test
-    public void testRetrievedAggregatorJava() throws InterruptedException, ExecutionException {
-        final var aggregator = RetrievedAggregator.fromAsync("https://example.com/example-01-lister.json").get();
-        assertNotNull(aggregator);
+    public void testFetchProvidersAsync() throws ExecutionException, InterruptedException {
+        final RetrievedAggregator aggregator =
+                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+        CompletableFuture<List<ResultCompat<RetrievedProvider>>> providersFuture = aggregator.fetchProvidersAsync();
+        assertNotNull(providersFuture);
+        List<ResultCompat<RetrievedProvider>> providers = providersFuture.get();
+        assertNotNull(providers);
+        assertFalse(providers.isEmpty(), "Providers list should not be empty");
+    }
+
+    @Test
+    public void testFetchPublishersAsync() throws ExecutionException, InterruptedException {
+        final RetrievedAggregator aggregator =
+                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+        CompletableFuture<List<ResultCompat<RetrievedProvider>>> publishersFuture = aggregator.fetchPublishersAsync();
+        assertNotNull(publishersFuture);
+        List<ResultCompat<RetrievedProvider>> publishers = publishersFuture.get();
+        assertNotNull(publishers);
+        assertFalse(publishers.isEmpty(), "Publishers list should not be empty for this test data");
+    }
+
+    @Test
+    public void testFetchAllAsync() throws ExecutionException, InterruptedException {
+        final RetrievedAggregator aggregator =
+                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+        CompletableFuture<List<ResultCompat<RetrievedProvider>>> allFuture = aggregator.fetchAllAsync();
+        assertNotNull(allFuture);
+        List<ResultCompat<RetrievedProvider>> allResults = allFuture.get();
+        assertNotNull(allResults);
+        assertFalse(allResults.isEmpty(), "Combined result should not be empty");
+        long successCount = allResults.stream().filter(ResultCompat::isSuccess).count();
+        long failureCount = allResults.size() - successCount;
+        assertEquals(2, successCount, "Number of successful results is incorrect");
+        assertEquals(2, failureCount, "Number of failed results is incorrect");
     }
 }
