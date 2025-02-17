@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
 import io.github.csaf.sbom.retrieval.roles.CSAFProviderRole
 import io.github.csaf.sbom.retrieval.roles.CSAFPublisherRole
@@ -31,6 +32,7 @@ import java.util.stream.StreamSupport
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.future.future
+import kotlinx.datetime.Instant
 
 /**
  * This class represents a "retrieved" provider (i.e., the roles "publisher", "provider" and
@@ -53,18 +55,20 @@ class RetrievedProvider(val json: Provider) : Validatable {
             }
 
     /**
-     * This function fetches all directory indices referenced by this provider and sends them to a
-     * [ReceiveChannel].
+     * This function fetches all directory indices or changes.csv files referenced by this provider
+     * and sends them to a [ReceiveChannel].
      *
      * @param loader The instance of [CsafLoader] used for fetching of online resources.
      * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
      *   to [DEFAULT_CHANNEL_CAPACITY].
-     * @return A [ReceiveChannel] containing the fetched [Result]s, representing index contents or
-     *   fetch errors.
+     * @param useChangesCsv Load changes.csv files instead of index.txt ones.
+     * @return A [ReceiveChannel] containing the fetched [Result]s, representing index contents,
+     *   changes.csv contents or fetch errors.
      */
     fun fetchDocumentIndices(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        useChangesCsv: Boolean = false,
     ): ReceiveChannel<Pair<String, Result<String>>> {
         val directoryUrls =
             (json.distributions ?: emptySet()).mapNotNull { distribution ->
@@ -75,7 +79,13 @@ class RetrievedProvider(val json: Provider) : Validatable {
         val indexChannel =
             ioScope.produce(capacity = channelCapacity) {
                 for (directoryUrl in directoryUrls) {
-                    send(directoryUrl to async { loader.fetchText("$directoryUrl/index.txt") })
+                    val indexFile =
+                        if (useChangesCsv) {
+                            "$directoryUrl/changes.csv"
+                        } else {
+                            "$directoryUrl/index.txt"
+                        }
+                    send(directoryUrl to async { loader.fetchText(indexFile) })
                 }
             }
         // This terminal channel is a simple "rendezvous channel" for awaiting the Results.
@@ -129,8 +139,12 @@ class RetrievedProvider(val json: Provider) : Validatable {
     suspend fun countExpectedDocuments(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        startingFrom: Instant? = null,
     ): Int {
-        return fetchAllDocumentUrls(loader, channelCapacity).toList().filter { it.isSuccess }.size
+        return fetchAllDocumentUrls(loader, channelCapacity, startingFrom)
+            .toList()
+            .filter { it.isSuccess }
+            .size
     }
 
     /**
@@ -145,8 +159,9 @@ class RetrievedProvider(val json: Provider) : Validatable {
     fun fetchDocuments(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        startingFrom: Instant? = null,
     ): ReceiveChannel<Result<RetrievedDocument>> {
-        val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity)
+        val documentUrlChannel = fetchAllDocumentUrls(loader, channelCapacity, startingFrom)
         // This second channel collects up to `channelCapacity` Results concurrently, which
         // represent CSAF Documents or errors from fetching or validation.
         val documentJobChannel =
@@ -173,17 +188,26 @@ class RetrievedProvider(val json: Provider) : Validatable {
      * @param loader The instance of [CsafLoader] used for fetching of online resources.
      * @param channelCapacity The capacity of the channels used to buffer parallel fetches. Defaults
      *   to [DEFAULT_CHANNEL_CAPACITY].
+     * @param startingFrom Optional [Instant] associated with the oldest CSAF document URLs to be
+     *   retrieved. If omitted, all document URLs will be fetched.
      * @return
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchAllDocumentUrls(
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
+        startingFrom: Instant? = null,
     ): ReceiveChannel<Result<String>> {
         val urlResultChannel =
             ioScope.produce(capacity = channelCapacity) {
-                fetchDocumentUrlsFromIndices(fetchDocumentIndices(loader, channelCapacity))
-                fetchDocumentUrlsFromRolieFeeds(fetchRolieFeeds(loader, channelCapacity))
+                fetchDocumentUrlsFromIndices(
+                    fetchDocumentIndices(loader, channelCapacity, startingFrom != null),
+                    startingFrom,
+                )
+                fetchDocumentUrlsFromRolieFeeds(
+                    fetchRolieFeeds(loader, channelCapacity),
+                    startingFrom,
+                )
             }
         return ioScope.produce {
             val seenUrls = mutableSetOf<String>()
@@ -201,24 +225,53 @@ class RetrievedProvider(val json: Provider) : Validatable {
     }
 
     /**
-     * Sends the URLs obtained from the [indexChannel] to the given [ProducerScope].
+     * Sends the URLs obtained from the [indexChannel] to the given [SendChannel]. Assumes CSV input
+     * from a changes.csv if [startingFrom] is set, line-separated plain text input from index.txt
+     * files otherwise.
      *
      * @param indexChannel The source channel providing directory index data.
-     * @receiver urlChannel The target channel where URLs are sent to.
+     * @param startingFrom Optional [Instant] associated with the oldest CSAF document URLs to be
+     *   retrieved from CSV. If null, all document URLs will be fetched (plain index.txt is assumed
+     *   in that case).
+     * @receiver The target channel where URLs are sent to.
      */
     private suspend fun SendChannel<Result<String>>.fetchDocumentUrlsFromIndices(
-        indexChannel: ReceiveChannel<Pair<String, Result<String>>>
+        indexChannel: ReceiveChannel<Pair<String, Result<String>>>,
+        startingFrom: Instant?,
     ) {
         for ((directoryUrl, indexResult) in indexChannel) {
             indexResult.fold(
                 { index ->
-                    index.lines().map { line -> send(Result.success("$directoryUrl/$line")) }
+                    if (startingFrom != null) {
+                        for (line in
+                            csvReader {
+                                    skipEmptyLine = true
+                                    skipMissMatchedRow = true
+                                }
+                                .readAll(index)) {
+                            val (relativePath, timestamp) = line
+                            val lastUpdated = Instant.parse(timestamp)
+                            if (lastUpdated >= startingFrom) {
+                                send(Result.success("$directoryUrl/$relativePath"))
+                            }
+                        }
+                    } else {
+                        index.lines().forEach { line ->
+                            send(Result.success("$directoryUrl/$line"))
+                        }
+                    }
                 },
                 { e ->
+                    val fileName =
+                        if (startingFrom != null) {
+                            "changes.csv"
+                        } else {
+                            "index.txt"
+                        }
                     send(
                         Result.failure(
                             Exception(
-                                "Failed to fetch index.txt from directory at $directoryUrl",
+                                "Failed to fetch $fileName from directory at $directoryUrl",
                                 e,
                             )
                         )
@@ -229,19 +282,24 @@ class RetrievedProvider(val json: Provider) : Validatable {
     }
 
     /**
-     * Sends the URLs obtained from the [rolieChannel] feeds to the given [ProducerScope].
+     * Sends the URLs obtained from the [rolieChannel] feeds to the given [SendChannel].
      *
      * @param rolieChannel The source channel providing ROLIE feed data.
-     * @receiver urlChannel The target channel where URLs are sent to.
+     * @param startingFrom Optional [Instant] associated with the oldest CSAF document URLs to be
+     *   retrieved. If null, all document URLs will be fetched.
+     * @receiver The target channel where URLs are sent to.
      */
     private suspend fun SendChannel<Result<String>>.fetchDocumentUrlsFromRolieFeeds(
-        rolieChannel: ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>>
+        rolieChannel: ReceiveChannel<Pair<Feed, Result<ROLIEFeed>>>,
+        startingFrom: Instant?,
     ) {
         for ((feed, rolieResult) in rolieChannel) {
             rolieResult.fold(
                 { rolie ->
                     rolie.feed.entry.map { entry ->
-                        send(Result.success(entry.content.src.toString()))
+                        if (startingFrom == null || entry.updated > startingFrom) {
+                            send(Result.success(entry.content.src.toString()))
+                        }
                     }
                 },
                 { e ->
@@ -265,10 +323,11 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     @JvmOverloads
     fun streamDocuments(
+        startingFrom: Instant? = null,
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
     ): Stream<ResultCompat<RetrievedDocument>> {
-        val channel = fetchDocuments(loader, channelCapacity)
+        val channel = fetchDocuments(loader, channelCapacity, startingFrom)
         val iterator =
             object : Iterator<ResultCompat<RetrievedDocument>> {
                 val channelIterator = channel.iterator()
@@ -294,9 +353,10 @@ class RetrievedProvider(val json: Provider) : Validatable {
      */
     @JvmOverloads
     fun countExpectedDocumentsBlocking(
+        startingFrom: Instant? = null,
         loader: CsafLoader = lazyLoader,
         channelCapacity: Int = DEFAULT_CHANNEL_CAPACITY,
-    ) = runBlocking { countExpectedDocuments(loader, channelCapacity) }
+    ) = runBlocking { countExpectedDocuments(loader, channelCapacity, startingFrom) }
 
     companion object {
         const val DEFAULT_CHANNEL_CAPACITY = 256
