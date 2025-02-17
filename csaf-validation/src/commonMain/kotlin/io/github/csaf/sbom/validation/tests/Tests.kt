@@ -356,7 +356,11 @@ object Test619InvalidCVSSComputation : Test {
         } else {
             ValidationFailed(
                 listOf(
-                    "The following properties are invalid: ${invalids.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
+                    "The following properties are invalid: ${
+                        invalids.joinToString(", ") {
+                            "${it.first}: ${it.second.first} != ${it.second.second}"
+                        }
+                    }"
                 )
             )
         }
@@ -423,7 +427,11 @@ object Test6110InconsistentCVSS : Test {
         } else {
             ValidationFailed(
                 listOf(
-                    "The following properties are inconsistent: ${inconsistencies.map{ "${it.first}: ${it.second.first} != ${it.second.second}"}.joinToString(", ")}"
+                    "The following properties are inconsistent: ${
+                        inconsistencies.joinToString(", ") {
+                            "${it.first}: ${it.second.first} != ${it.second.second}"
+                        }
+                    }"
                 )
             )
         }
@@ -643,7 +651,9 @@ object Test6118ReleasedRevisionHistory : Test {
         } else {
             ValidationFailed(
                 listOf(
-                    "The document is ${doc.document.tracking.status} but it contains the following revisions: ${zeroVersions.map { it.number }.joinToString(", ")}"
+                    "The document is ${doc.document.tracking.status} but it contains the following revisions: ${
+                        zeroVersions.joinToString(", ") { it.number }
+                    }"
                 )
             )
         }
@@ -666,7 +676,9 @@ object Test6119RevisionHistoryEntriesForPreReleaseVersions : Test {
         } else {
             ValidationFailed(
                 listOf(
-                    "The document contains the following pre-release revisions: ${preReleaseVersions.map { it.number }.joinToString(", ")}"
+                    "The document contains the following pre-release revisions: ${
+                        preReleaseVersions.joinToString(", ") { it.number }
+                    }"
                 )
             )
         }

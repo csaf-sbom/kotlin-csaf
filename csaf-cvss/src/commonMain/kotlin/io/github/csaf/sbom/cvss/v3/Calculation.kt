@@ -160,30 +160,30 @@ class CvssV3Calculation(override val metrics: Map<String, String>) : CvssCalcula
         optionalMetric(
             "CR",
             mapOf(
-                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
-                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
-                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+                ConfidentialityRequirement1.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement1.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement1.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement1.LOW to Pair("L", 0.5),
             ),
         )
     val integrityRequirement by
-        optionalMetric<ConfidentialityRequirement>(
+        optionalMetric<ConfidentialityRequirement1>(
             "IR",
             mapOf(
-                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
-                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
-                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+                ConfidentialityRequirement1.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement1.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement1.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement1.LOW to Pair("L", 0.5),
             ),
         )
     val availabilityRequirement by
-        optionalMetric<ConfidentialityRequirement>(
+        optionalMetric<ConfidentialityRequirement1>(
             "AR",
             mapOf(
-                ConfidentialityRequirement.NOT_DEFINED to Pair("X", 1.0),
-                ConfidentialityRequirement.HIGH to Pair("H", 1.5),
-                ConfidentialityRequirement.MEDIUM to Pair("M", 1.0),
-                ConfidentialityRequirement.LOW to Pair("L", 0.5),
+                ConfidentialityRequirement1.NOT_DEFINED to Pair("X", 1.0),
+                ConfidentialityRequirement1.HIGH to Pair("H", 1.5),
+                ConfidentialityRequirement1.MEDIUM to Pair("M", 1.0),
+                ConfidentialityRequirement1.LOW to Pair("L", 0.5),
             ),
         )
 
