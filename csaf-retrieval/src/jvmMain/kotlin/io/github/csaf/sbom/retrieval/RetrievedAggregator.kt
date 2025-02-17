@@ -57,7 +57,7 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
         return json.csaf_providers.map { providerMeta ->
             val ctx = RetrievalContext()
             loader.fetchProvider(providerMeta.metadata.url.toString(), ctx).mapCatching { p ->
-                RetrievedProvider(p).also { it.validate(ctx) }
+                RetrievedProvider(p, ctx).also { it.validate(ctx) }
             }
         }
     }
@@ -73,7 +73,7 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
         return (json.csaf_publishers ?: emptyList()).map { publisherMeta ->
             val ctx = RetrievalContext()
             loader.fetchProvider(publisherMeta.metadata.url.toString(), ctx).mapCatching { p ->
-                RetrievedProvider(p).also { it.validate(ctx) }
+                RetrievedProvider(p, ctx).also { it.validate(ctx) }
             }
         }
     }
