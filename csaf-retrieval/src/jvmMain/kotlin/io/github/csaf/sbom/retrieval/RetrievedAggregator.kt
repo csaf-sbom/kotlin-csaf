@@ -33,7 +33,7 @@ import kotlinx.coroutines.future.future
  *
  * This class is not yet complete.
  */
-class RetrievedAggregator(val json: Aggregator) : Validatable {
+data class RetrievedAggregator(val json: Aggregator) : Validatable {
 
     /**
      * The role of this [RetrievedAggregator] (lister, aggregator), required for checking the
@@ -88,6 +88,48 @@ class RetrievedAggregator(val json: Aggregator) : Validatable {
     suspend fun fetchAll(loader: CsafLoader = lazyLoader): List<Result<RetrievedProvider>> {
         return fetchProviders(loader) + fetchPublishers(loader)
     }
+
+    /**
+     * Fetches a list of CSAF providers asynchronously, allowing Java invocation. Converts the
+     * results into [ResultCompat] for Java compatibility.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A [CompletableFuture] that resolves to a list of [ResultCompat] objects.
+     */
+    @JvmOverloads
+    fun fetchProvidersAsync(
+        loader: CsafLoader = lazyLoader
+    ): CompletableFuture<List<ResultCompat<RetrievedProvider>>> =
+        ioScope.future { fetchProviders(loader).map { ResultCompat(it) } }
+
+    /**
+     * Fetches a list of CSAF publishers asynchronously, allowing Java invocation. Converts the
+     * results into [ResultCompat] for Java compatibility.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A [CompletableFuture] that resolves to a list of [ResultCompat] objects.
+     */
+    @JvmOverloads
+    fun fetchPublishersAsync(
+        loader: CsafLoader = lazyLoader
+    ): CompletableFuture<List<ResultCompat<RetrievedProvider>>> =
+        ioScope.future { fetchPublishers(loader).map { ResultCompat(it) } }
+
+    /**
+     * Fetches all providers and publishers asynchronously, allowing Java invocation. Converts the
+     * results into [ResultCompat] for Java compatibility.
+     *
+     * @param loader An optional [CsafLoader] instance to use for fetching data. Defaults to
+     *   [lazyLoader].
+     * @return A [CompletableFuture] that resolves to a list of [ResultCompat] objects.
+     */
+    @JvmOverloads
+    fun fetchAllAsync(
+        loader: CsafLoader = lazyLoader
+    ): CompletableFuture<List<ResultCompat<RetrievedProvider>>> =
+        ioScope.future { fetchAll(loader).map { ResultCompat(it) } }
 
     companion object {
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())

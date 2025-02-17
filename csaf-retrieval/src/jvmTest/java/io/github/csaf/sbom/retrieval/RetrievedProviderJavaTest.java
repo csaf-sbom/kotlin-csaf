@@ -38,19 +38,36 @@ public class RetrievedProviderJavaTest {
     }
 
     @Test
-    public void testRetrievedProviderJava() throws InterruptedException, ExecutionException {
+    public void testFromUrlAsync() throws InterruptedException, ExecutionException {
+        final var providerByDomain = RetrievedProvider.fromAsync("example.com").get().toString();
+        final var providerByUrl = RetrievedProvider.fromUrlAsync(
+                "https://example.com/.well-known/csaf/provider-metadata.json"
+        ).get().toString();
+        assertEquals(providerByDomain, providerByUrl, "Retrieved providers via domain and URL should be equal");
+    }
+
+    @Test
+    public void testFromAsync() throws InterruptedException, ExecutionException {
         final var provider = RetrievedProvider.fromAsync("example.com").get();
         final var providerExplicit = RetrievedProvider.fromAsync("example.com", loader).get();
         final var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
         assertEquals(
                 3,
-                expectedDocumentCount
-                //"Expected 3 documents"
+                expectedDocumentCount,
+                "Expected a count of 3 available documents"
         );
         final var documentResults = provider.streamDocuments().toList();
         final var distantPast = Instant.Companion.getDISTANT_PAST();
-        final var documentResultsExplicit = providerExplicit.streamDocuments(distantPast, loader, DEFAULT_CHANNEL_CAPACITY).toList();
-        final var documentResultsExplicitSlow = providerExplicit.streamDocuments(distantPast, loader, 1).toList();
+        final var documentResultsExplicit = providerExplicit.streamDocuments(
+                distantPast,
+                loader,
+                DEFAULT_CHANNEL_CAPACITY
+        ).toList();
+        final var documentResultsExplicitSlow = providerExplicit.streamDocuments(
+                distantPast,
+                loader,
+                1
+        ).toList();
         assertEquals(
                 4,
                 documentResults.size(),

@@ -139,6 +139,24 @@ class RetrievedProviderTest {
     }
 
     @Test
+    fun testProviderByUrl() = runTest {
+        val providerByDomain = RetrievedProvider.from("example.com").getOrThrow().toString()
+        val providerByUrl =
+            RetrievedProvider.fromUrl("https://example.com/.well-known/csaf/provider-metadata.json")
+                .getOrThrow()
+                .toString()
+        assertEquals(
+            providerByDomain,
+            providerByUrl,
+            "Retrieved providers via domain and URL should be equal",
+        )
+        val invalidProviderUrl = "https://does-not-exist.com/provider-metadata.json"
+        val invalidProviderByUrl = RetrievedProvider.fromUrl(invalidProviderUrl)
+        val fetchException = assertIs<Exception>(invalidProviderByUrl.exceptionOrNull())
+        assertEquals("Could not retrieve $invalidProviderUrl: Not Found", fetchException.message)
+    }
+
+    @Test
     fun testFetchAllDocumentUrls() = runTest {
         val provider = RetrievedProvider.from("example.com").getOrThrow()
         val resultList = provider.fetchAllDocumentUrls().toList()
