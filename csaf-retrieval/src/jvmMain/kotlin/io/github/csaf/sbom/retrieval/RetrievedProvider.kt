@@ -365,11 +365,20 @@ class RetrievedProvider(val json: Provider) : Validatable {
 
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(
+        fun fromDomainAsync(
             domain: String,
             loader: CsafLoader = lazyLoader,
         ): CompletableFuture<RetrievedProvider> {
-            return ioScope.future { from(domain, loader).getOrThrow() }
+            return ioScope.future { fromDomain(domain, loader).getOrThrow() }
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun fromURLAsync(
+            domain: String,
+            loader: CsafLoader = lazyLoader,
+        ): CompletableFuture<RetrievedProvider> {
+            return ioScope.future { fromURL(domain, loader).getOrThrow() }
         }
 
         /**
@@ -389,7 +398,7 @@ class RetrievedProvider(val json: Provider) : Validatable {
          * resolution of `security.txt` in that case is useless **unless** we want to change our API
          * such that it may resolve multiple `Provider`s for an input domain.
          */
-        suspend fun from(
+        suspend fun fromDomain(
             domain: String,
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
@@ -437,6 +446,21 @@ class RetrievedProvider(val json: Provider) : Validatable {
                         it,
                     )
                 }
+        }
+
+        /**
+         * Retrieves a [RetrievedProvider] from a given [metadataURL] that holds a JSON structure
+         * describing the provider metadata according to the requirements of
+         * [Section 7.1.1](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#717-requirement-7-provider-metadatajson).
+         */
+        suspend fun fromURL(
+            metadataURL: String,
+            loader: CsafLoader = lazyLoader,
+        ): Result<RetrievedProvider> {
+            val ctx = RetrievalContext()
+            return loader.fetchProvider(metadataURL, ctx).mapCatching {
+                RetrievedProvider(it).also { it.validate(ctx) }
+            }
         }
     }
 }

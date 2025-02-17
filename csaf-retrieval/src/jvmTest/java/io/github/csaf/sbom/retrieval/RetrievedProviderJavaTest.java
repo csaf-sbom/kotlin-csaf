@@ -39,13 +39,13 @@ public class RetrievedProviderJavaTest {
 
     @Test
     public void testRetrievedProviderJava() throws InterruptedException, ExecutionException {
-        final var provider = RetrievedProvider.fromAsync("example.com").get();
-        final var providerExplicit = RetrievedProvider.fromAsync("example.com", loader).get();
+        final var provider = RetrievedProvider.fromDomainAsync("example.com").get();
+        final var providerExplicit = RetrievedProvider.fromDomainAsync("example.com", loader).get();
         final var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
         assertEquals(
                 3,
-                expectedDocumentCount
-                //"Expected 3 documents"
+                expectedDocumentCount,
+                "Expected 3 documents"
         );
         final var documentResults = provider.streamDocuments().toList();
         final var distantPast = Instant.Companion.getDISTANT_PAST();
@@ -97,6 +97,25 @@ public class RetrievedProviderJavaTest {
         assertEquals(
                 "Failed to fetch index.txt from directory at https://example.com/invalid-directory",
                 indexError.getMessage()
+        );
+    }
+
+    @Test
+    public void testRetrievedProviderURLJava() throws InterruptedException, ExecutionException {
+        final var provider = RetrievedProvider.fromURLAsync("https://example.com/.well-known/csaf/provider-metadata.json").get();
+        var expectedDocumentCount = provider.countExpectedDocumentsBlocking();
+        assertEquals(
+                3,
+                expectedDocumentCount,
+                "Expected 3 documents"
+        );
+
+        final var providerExplicit = RetrievedProvider.fromDomainAsync("example.com", loader).get();
+        expectedDocumentCount = providerExplicit.countExpectedDocumentsBlocking();
+        assertEquals(
+                3,
+                expectedDocumentCount,
+                "Expected 3 documents"
         );
     }
 }
