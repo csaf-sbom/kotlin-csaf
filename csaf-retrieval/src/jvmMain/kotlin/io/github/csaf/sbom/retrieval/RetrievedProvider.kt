@@ -168,7 +168,7 @@ data class RetrievedProvider(val json: Provider) : Validatable {
             ioScope.produce<Deferred<Result<RetrievedDocument>>>(capacity = channelCapacity) {
                 for (result in documentUrlChannel) {
                     result.fold(
-                        { send(async { RetrievedDocument.from(it, loader, role) }) },
+                        { send(async { RetrievedDocument.fromUrl(it, loader, role) }) },
                         { send(async { Result.failure(it) }) },
                     )
                 }

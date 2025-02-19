@@ -16,11 +16,18 @@
  */
 package io.github.csaf.sbom.retrieval
 
+import io.github.csaf.sbom.retrieval.CsafLoader.Companion.lazyLoader
+import io.github.csaf.sbom.retrieval.roles.CSAFPublisherRole
 import io.github.csaf.sbom.retrieval.roles.CSAFTrustedProviderRole
 import io.github.csaf.sbom.retrieval.roles.Role
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.ValidationFailed
 import java.io.InputStream
+import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.future.future
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -37,9 +44,11 @@ data class RetrievedDocument(
 ) {
 
     companion object {
+        private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
         /**
-         * Retrieves a specific CSAF document from a [documentUrl]. The document will be validated
-         * according to [providerRole].
+         * Retrieves a specific CSAF document from a given URL, validating it according to the
+         * provided role.
          *
          * @param documentUrl The URL where to retrieve the document from.
          * @param loader An instance of [CsafLoader].
@@ -49,7 +58,7 @@ data class RetrievedDocument(
          * @return An instance of [RetrievedDocument], wrapped in a [Result] monad, if successful. A
          *   failed [Result] wrapping the thrown [Throwable] in case of an error.
          */
-        suspend fun from(
+        suspend fun fromUrl(
             documentUrl: String,
             loader: CsafLoader,
             providerRole: Role,
@@ -72,12 +81,33 @@ data class RetrievedDocument(
         }
 
         /**
+         * Retrieves a specific CSAF document asynchronously from a given URL, validating it
+         * according to the provided role.
+         *
+         * @param documentUrl The URL from which the CSAF document will be retrieved.
+         * @param loader An instance of [CsafLoader] used for HTTP data retrieval and processing.
+         * @param providerRole An instance of [Role], specifying the validation role to be applied
+         *   to the retrieved document.
+         * @return An instance of [RetrievedDocument], wrapped in a [CompletableFuture] upon
+         *   success. In case of an error, the future wraps the thrown [Exception].
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun fromUrlAsync(
+            documentUrl: String,
+            loader: CsafLoader = lazyLoader,
+            providerRole: Role = CSAFPublisherRole,
+        ): CompletableFuture<RetrievedDocument> =
+            ioScope.future { fromUrl(documentUrl, loader, providerRole).getOrThrow() }
+
+        /**
          * Load [RetrievedDocument] from JSON string.
          *
          * @param json JSON String to parse.
          * @param url URL where the document was originally located.
          * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
          */
+        @JvmStatic
         fun fromJson(json: String, url: String): ResultCompat<RetrievedDocument> {
             return try {
                 ResultCompat.success(RetrievedDocument(Json.decodeFromString<Csaf>(json), url))
@@ -94,6 +124,7 @@ data class RetrievedDocument(
          * @return The result of the CSAF parsing, wrapped in a [ResultCompat] monad.
          */
         @OptIn(ExperimentalSerializationApi::class)
+        @JvmStatic
         fun fromJson(stream: InputStream, url: String): ResultCompat<RetrievedDocument> {
             return try {
                 ResultCompat.success(RetrievedDocument(Json.decodeFromStream<Csaf>(stream), url))
