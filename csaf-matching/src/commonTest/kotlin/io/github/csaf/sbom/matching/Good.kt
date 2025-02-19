@@ -57,104 +57,129 @@ fun goodTracking(): Tracking =
         version = "1.0.0",
     )
 
-fun goodProductTree(): Csaf.ProductTree =
+fun goodProductTree(
+    branches: List<Csaf.Branche>? = goodLinuxVendorBranches(),
+    relationships: List<Csaf.Relationship>? = goodRelationships(),
+    productGroups: List<Csaf.ProductGroup>? = goodProductGroups(),
+): Csaf.ProductTree =
     Csaf.ProductTree(
-        branches =
-            listOf(
-                Csaf.Branche(
-                    category = Csaf.Category3.vendor,
-                    name = "Linux Vendor",
-                    product = Csaf.Product(name = "Linux", product_id = "linux-all"),
-                    branches =
-                        listOf(
-                            Csaf.Branche(
-                                category = Csaf.Category3.vendor,
-                                name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.1", product_id = "linux-0.1"),
-                            ),
-                            Csaf.Branche(
-                                category = Csaf.Category3.vendor,
-                                name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.2", product_id = "linux-0.2"),
-                            ),
-                            Csaf.Branche(
-                                category = Csaf.Category3.vendor,
-                                name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.3", product_id = "linux-0.3"),
-                            ),
-                            Csaf.Branche(
-                                category = Csaf.Category3.vendor,
-                                name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.4", product_id = "linux-0.4"),
-                            ),
-                            Csaf.Branche(
-                                category = Csaf.Category3.vendor,
-                                name = "Linux Vendor",
-                                product = Csaf.Product(name = "Linux 0.5", product_id = "linux-0.5"),
-                            ),
-                        ),
-                )
-            ),
-        full_product_names =
-            listOf(
-                Csaf.Product(
-                    name = "Test Product Name",
-                    product_id = "test-product-name",
-                    product_identification_helper =
-                        Csaf.ProductIdentificationHelper(
-                            cpe = "cpe:2.3:o:vendor:product:-:*:*:*:*:*:*:*",
-                            hashes =
-                                listOf(
-                                    Csaf.Hashe(
-                                        file_hashes =
-                                            listOf(
-                                                Csaf.FileHashe(
-                                                    value =
-                                                        "fa65e4c5ad0e5f7a94337910847bd10f7af10c74"
-                                                )
-                                            ),
-                                        filename = "file.txt",
-                                    )
-                                ),
-                            sbom_urls = listOf(JsonUri("https://example.com/sboms/my-product")),
-                            skus = listOf("123"),
-                            model_numbers = setOf("123"),
-                            serial_numbers = setOf("123"),
-                            x_generic_uris =
-                                listOf(
-                                    Csaf.XGenericUri(
-                                        namespace = JsonUri("https://example.com"),
-                                        uri = JsonUri("https://example.com/my-extension"),
-                                    )
-                                ),
-                        ),
-                )
-            ),
-        relationships =
-            listOf(
-                Csaf.Relationship(
-                    category = Csaf.Category4.installed_on,
-                    full_product_name =
-                        Csaf.Product(
-                            name = "LinuxProduct",
-                            product_id = "linux-product",
-                            product_identification_helper = Csaf.ProductIdentificationHelper(),
-                        ),
-                    product_reference = "test-product-name",
-                    relates_to_product_reference = "linux-all",
-                )
-            ),
-        product_groups =
-            listOf(
-                Csaf.ProductGroup(
-                    group_id = "some-group",
-                    product_ids = setOf("test-product-name", "linux-all", "linux-product"),
-                    summary = "Test Group",
-                )
-            ),
+        branches = branches,
+        relationships = relationships,
+        product_groups = productGroups,
     )
 
-fun goodVulnerabilities() =
+fun goodLinuxVendorBranches() =
+    listOf(
+        Csaf.Branche(
+            category = Csaf.Category3.vendor,
+            name = "Linux Vendor",
+            product = Csaf.Product(name = "Linux", product_id = "linux-all"),
+            branches =
+                listOf(
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        product =
+                            Csaf.Product(
+                                name = "Linux 0.1",
+                                product_id = "linux-0.1",
+                                product_identification_helper =
+                                    Csaf.ProductIdentificationHelper(
+                                        cpe = "cpe:/a:vendor:linux:0.1::ab1"
+                                    ),
+                            ),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        product =
+                            Csaf.Product(
+                                name = "Linux 0.2",
+                                product_id = "linux-0.2",
+                                product_identification_helper =
+                                    Csaf.ProductIdentificationHelper(
+                                        purl = JsonUri("pkg:rpm/vendor/linux@0.2?arch=src")
+                                    ),
+                            ),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        product = Csaf.Product(name = "Linux 0.2.1", product_id = "linux-0.2.1"),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        branches =
+                            listOf(
+                                Csaf.Branche(
+                                    category = Csaf.Category3.product_name,
+                                    name = "Linux Products",
+                                    product =
+                                        Csaf.Product(name = "Linux 0.3", product_id = "linux-0.3"),
+                                )
+                            ),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        product = Csaf.Product(name = "Linux 0.4", product_id = "linux-0.4"),
+                    ),
+                    Csaf.Branche(
+                        category = Csaf.Category3.vendor,
+                        name = "Linux Vendor",
+                        product = Csaf.Product(name = "Linux 0.5", product_id = "linux-0.5"),
+                    ),
+                ),
+        )
+    )
+
+fun goodRelationships() =
+    listOf(
+        Csaf.Relationship(
+            category = Csaf.Category4.installed_on,
+            full_product_name =
+                Csaf.Product(
+                    name = "LinuxProduct",
+                    product_id = "linux-product",
+                    product_identification_helper = Csaf.ProductIdentificationHelper(),
+                ),
+            product_reference = "test-product-name",
+            relates_to_product_reference = "linux-all",
+        )
+    )
+
+fun goodProductGroups() =
+    listOf(
+        Csaf.ProductGroup(
+            group_id = "some-group",
+            product_ids = setOf("test-product-name", "linux-all", "linux-product"),
+            summary = "Test Group",
+        )
+    )
+
+fun goodProductStatus(
+    firstAffected: Set<String>? = setOf("linux-0.1"),
+    firstFixed: Set<String>? = setOf("linux-0.5"),
+    knownAffected: Set<String>? = setOf("linux-0.1", "linux-0.2", "linux-0.2.1"),
+    knownNotAffected: Set<String>? = setOf("linux-0.3"),
+    lastAffected: Set<String>? = setOf("linux-0.2"),
+    recommended: Set<String>? = setOf("linux-0.5"),
+    fixed: Set<String>? = setOf("linux-0.5"),
+    underInvestigation: Set<String>? = setOf("linux-0.4"),
+) =
+    Csaf.ProductStatus(
+        first_affected = firstAffected,
+        first_fixed = firstFixed,
+        known_affected = knownAffected,
+        known_not_affected = knownNotAffected,
+        last_affected = lastAffected,
+        recommended = recommended,
+        fixed = fixed,
+        under_investigation = underInvestigation,
+    )
+
+fun goodVulnerabilities(productStatus: Csaf.ProductStatus? = goodProductStatus()) =
     listOf(
         Csaf.Vulnerability(
             acknowledgments =
@@ -221,17 +246,7 @@ fun goodVulnerabilities() =
                         status = Csaf.Status1.completed,
                     )
                 ),
-            product_status =
-                Csaf.ProductStatus(
-                    first_affected = setOf("linux-0.1"),
-                    first_fixed = setOf("linux-0.5"),
-                    known_affected = setOf("linux-0.1"),
-                    known_not_affected = setOf("linux-0.3"),
-                    last_affected = setOf("linux-0.2"),
-                    recommended = setOf("linux-0.5"),
-                    fixed = setOf("linux-0.5"),
-                    under_investigation = setOf("linux-0.4"),
-                ),
+            product_status = productStatus,
             remediations =
                 listOf(
                     Csaf.Remediation(
