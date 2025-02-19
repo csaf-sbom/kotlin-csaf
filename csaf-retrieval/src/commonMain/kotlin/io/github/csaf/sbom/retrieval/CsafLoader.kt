@@ -23,10 +23,10 @@ import io.github.csaf.sbom.schema.generated.ROLIEFeed
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.*
 
 /**
@@ -42,7 +42,11 @@ expect fun defaultHttpClientEngine(): HttpClientEngine
  *   [defaultHttpClientEngine].
  */
 class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
-    private val httpClient = HttpClient(engine) { install(ContentNegotiation) { json() } }
+    private val httpClient =
+        HttpClient(engine) {
+            expectSuccess = true
+            install(ContentNegotiation) { json() }
+        }
 
     /**
      * Helper function for all other functions defined below. Performs a get request and returns the
@@ -56,14 +60,12 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
         url: String,
         crossinline responseCallback: ((HttpResponse) -> Unit),
     ): T {
-        val response = httpClient.get(url)
-        responseCallback.invoke(response)
-
-        if (!response.status.isSuccess()) {
-            throw Exception("Could not retrieve $url: ${response.status.description}")
+        try {
+            return httpClient.get(url).also { responseCallback(it) }.body()
+        } catch (e: ResponseException) {
+            responseCallback.invoke(e.response)
+            throw e
         }
-
-        return response.body()
     }
 
     /**

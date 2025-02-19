@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, The Authors. All rights reserved.
+ * Copyright (c) 2025, The Authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,16 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.validation
+package io.github.csaf.sbom.retrieval
 
-/** This exception will be thrown, if the result of a validation is [ValidationFailed]. */
-data class ValidationException(val errors: List<String>) : RuntimeException() {
-    override val message: String
-        get() = "Validation failed with this errors: $errors"
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.request
+
+class RetrievalException(message: String, cause: Throwable) : RuntimeException(message, cause) {
+    val url: String? =
+        if (cause is ResponseException) {
+            cause.response.request.url.toString()
+        } else {
+            null
+        }
 }

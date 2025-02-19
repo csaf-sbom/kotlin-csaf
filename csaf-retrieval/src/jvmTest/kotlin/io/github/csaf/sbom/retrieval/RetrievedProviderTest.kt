@@ -17,6 +17,9 @@
 package io.github.csaf.sbom.retrieval
 
 import io.github.csaf.sbom.validation.ValidationException
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.request
+import io.ktor.http.HttpStatusCode
 import kotlin.test.*
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.test.runTest
@@ -44,9 +47,16 @@ class RetrievedProviderTest {
             assertFailsWith<Exception> {
                 runTest { RetrievedProvider.fromDomain("broken-domain.com").getOrThrow() }
             }
+        assertTrue(
+            exception.message!!.startsWith(
+                "Failed to resolve provider for broken-domain.com via all implemented methods:"
+            ),
+            "Expected exception message to start with \"Failed to resolve provider for...\"",
+        )
         assertEquals(
-            "Failed to resolve provider for broken-domain.com via .well-known, security.txt or DNS.",
-            exception.message,
+            4,
+            exception.message!!.split('\n').count(),
+            "Expected 4 lines in exception message",
         )
     }
 
@@ -126,11 +136,14 @@ class RetrievedProviderTest {
             validationException.errors,
         )
         // Check download error
-        val fetchException = assertIs<Exception>(documentResults[2].exceptionOrNull()?.cause)
+        val retrievalException = assertIs<RetrievalException>(documentResults[2].exceptionOrNull())
         assertEquals(
-            "Could not retrieve https://$domain/directory/2024/does-not-exist.json: Not Found",
-            fetchException.message,
+            "https://$domain/directory/2024/does-not-exist.json",
+            retrievalException.url,
+            "Expected given invalid URL",
         )
+        val fetchException = assertIs<ResponseException>(retrievalException.cause)
+        assertEquals(HttpStatusCode.NotFound, fetchException.response.status, "Expected 404 status")
         // Check index error
         assertEquals(
             "Failed to fetch index.txt from directory at https://$domain/invalid-directory",
@@ -152,8 +165,13 @@ class RetrievedProviderTest {
         )
         val invalidProviderUrl = "https://does-not-exist.com/provider-metadata.json"
         val invalidProviderByUrl = RetrievedProvider.fromUrl(invalidProviderUrl)
-        val fetchException = assertIs<Exception>(invalidProviderByUrl.exceptionOrNull())
-        assertEquals("Could not retrieve $invalidProviderUrl: Not Found", fetchException.message)
+        val fetchException = assertIs<ResponseException>(invalidProviderByUrl.exceptionOrNull())
+        assertEquals(HttpStatusCode.NotFound, fetchException.response.status, "Expected 404 status")
+        assertEquals(
+            invalidProviderUrl,
+            fetchException.response.request.url.toString(),
+            "Expected identical URL",
+        )
     }
 
     @Test

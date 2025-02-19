@@ -67,7 +67,7 @@ data class RetrievedDocument(
                     }
                 }
                 .recoverCatching { e ->
-                    throw Exception("Failed to load CSAF document from $documentUrl", e)
+                    throw RetrievalException("Failed to load CSAF document from $documentUrl", e)
                 }
         }
 
