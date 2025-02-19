@@ -17,6 +17,8 @@
 package io.github.csaf.sbom.retrieval;
 
 import io.github.csaf.sbom.validation.ValidationException;
+import io.ktor.client.plugins.ResponseException;
+import io.ktor.http.HttpStatusCode;
 import kotlinx.datetime.Instant;
 import org.junit.jupiter.api.Test;
 
@@ -102,11 +104,12 @@ public class RetrievedProviderJavaTest {
         // Check document error
         final var documentError2 = documentResults.get(2).exceptionOrNull();
         assertNotNull(documentError2);
-        final var documentFetchError = (Exception) documentError2.getCause();
+        final var documentFetchError = (ResponseException) documentError2.getCause();
         assertNotNull(documentFetchError);
         assertEquals(
-                "Could not retrieve https://example.com/directory/2024/does-not-exist.json: Not Found",
-                documentFetchError.getMessage()
+                HttpStatusCode.Companion.getNotFound(),
+                documentFetchError.getResponse().getStatus(),
+                "Expected HTTP 404 Not Found"
         );
         // Check index error
         final var indexError = documentResults.get(3).exceptionOrNull();

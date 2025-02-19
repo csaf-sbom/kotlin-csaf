@@ -270,7 +270,7 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                         }
                     send(
                         Result.failure(
-                            Exception(
+                            RetrievalException(
                                 "Failed to fetch $fileName from directory at $directoryUrl",
                                 e,
                             )
@@ -304,7 +304,9 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                 },
                 { e ->
                     send(
-                        Result.failure(Exception("Failed to fetch ROLIE feed from ${feed.url}", e))
+                        Result.failure(
+                            RetrievalException("Failed to fetch ROLIE feed from ${feed.url}", e)
+                        )
                     )
                 },
             )
@@ -399,23 +401,32 @@ data class RetrievedProvider(val json: Provider) : Validatable {
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedProvider> {
             val ctx = RetrievalContext()
+            val errors = mutableListOf<Pair<String, Throwable>>()
+            val logAndSaveError = { e: Throwable, message: String ->
+                log.info(e) { "$message." }
+                errors += message to e
+            }
             // First, we need to check if a .well-known URL exists.
             val wellKnownPath = "https://$domain/.well-known/csaf/provider-metadata.json"
             return fromUrlWithContext(wellKnownPath, ctx, loader)
                 .recoverCatching {
-                    log.info(it) {
-                        "Failed to fetch and validate provider via .well-known, trying security.txt..."
-                    }
+                    logAndSaveError(it, "Failed to fetch and validate provider via .well-known")
                     // If failure, we fetch CSAF fields from security.txt and try observed URLs
                     // one-by-one.
-                    loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOf { entry ->
-                        fromUrlWithContext(entry, ctx, loader).getOrNull()
-                    }
+                    loader.fetchSecurityTxtCsafUrls(domain).getOrThrow().firstNotNullOfOrNull {
+                        entry ->
+                        fromUrlWithContext(entry, ctx, loader)
+                            .onFailure {
+                                logAndSaveError(
+                                    it,
+                                    "Failed to fetch and validate provider via security.txt entry",
+                                )
+                            }
+                            .getOrNull()
+                    } ?: throw NoSuchElementException("No valid entry found via security.txt")
                 }
                 .recoverCatching {
-                    log.info(it) {
-                        "Failed to fetch and validate provider via security.txt, trying DNS..."
-                    }
+                    logAndSaveError(it, "Failed to fetch and validate provider via security.txt")
                     // If still failure, we try to fetch the provider directly via HTTPS request to
                     // "csaf.data.security.domain.tld", see
                     // https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path.
@@ -423,11 +434,12 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                         .getOrThrow()
                 }
                 .recoverCatching {
-                    log.info(it) {
-                        "Failed to fetch and validate provider via DNS, resolution finally failed."
-                    }
-                    throw Exception(
-                        "Failed to resolve provider for $domain via .well-known, security.txt or DNS.",
+                    logAndSaveError(it, "Failed to fetch and validate provider via DNS")
+                    throw RetrievalException(
+                        "Failed to resolve provider for $domain via all implemented methods:\n" +
+                            errors.joinToString("\n") { (message, error) ->
+                                "- $message: ${error.message}"
+                            },
                         it,
                     )
                 }

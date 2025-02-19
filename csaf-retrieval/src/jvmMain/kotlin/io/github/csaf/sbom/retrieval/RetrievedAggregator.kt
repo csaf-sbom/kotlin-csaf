@@ -144,7 +144,7 @@ data class RetrievedAggregator(val json: Aggregator) : Validatable {
         }
 
         /**
-         * Retrieves an [Aggregator] from a given [url].
+         * Retrieves an [Aggregator] from a given URL.
          *
          * @param url The URL where to retrieve the [Aggregator] from.
          * @param loader An instance of [CsafLoader].
@@ -160,7 +160,7 @@ data class RetrievedAggregator(val json: Aggregator) : Validatable {
                 .fetchAggregator(url, ctx)
                 .mapCatching { a -> RetrievedAggregator(a).also { it.validate(ctx) } }
                 .recoverCatching { e ->
-                    throw Exception("Failed to load CSAF Aggregator from $url", e)
+                    throw RetrievalException("Failed to load CSAF Aggregator from $url", e)
                 }
         }
     }
