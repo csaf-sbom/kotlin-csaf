@@ -19,13 +19,18 @@ package io.github.csaf.sbom.schema
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
+/** A platform independent representation of a URI / URL used in JSON documents. */
 @Serializable(UriSerializer::class)
 expect class JsonUri {
     constructor(s: String)
 
     companion object {
+        /** A platform independent way to create a [JsonUri] from a string. */
         fun create(s: String): JsonUri
     }
+
+    /** The string representation of this [JsonUri], must contain the full URI. */
+    override fun toString(): String
 }
 
 fun epoch(): Instant {

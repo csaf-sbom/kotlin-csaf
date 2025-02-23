@@ -29,7 +29,7 @@ actual class JsonUri(private var value: URI) {
         }
     }
 
-    override fun toString(): String {
+    actual override fun toString(): String {
         return value.toString()
     }
 
