@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
         // Create a new "RetrievedAggregator" from wid.cert-bund.de. This will automatically
         // discover a
         // suitable provider-metadata.json
-        RetrievedAggregator.from(
+        RetrievedAggregator.fromUrl(
                 "https://wid.cert-bund.de/.well-known/csaf-aggregator/aggregator.json"
             )
             .onSuccess { aggregator ->

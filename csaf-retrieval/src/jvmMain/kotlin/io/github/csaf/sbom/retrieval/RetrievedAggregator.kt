@@ -134,24 +134,32 @@ data class RetrievedAggregator(val json: Aggregator) : Validatable {
     companion object {
         private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+        /**
+         * Retrieves a [RetrievedAggregator] asynchronously from the provided URL.
+         *
+         * @param url The URL to retrieve the aggregator from.
+         * @param loader An optional [CsafLoader] instance. Defaults to [lazyLoader].
+         * @return A [CompletableFuture] that wraps a [RetrievedAggregator] instance upon success,
+         *   or the thrown [Throwable] in case of an error.
+         */
         @JvmStatic
         @JvmOverloads
-        fun fromAsync(
-            domain: String,
+        fun fromUrlAsync(
+            url: String,
             loader: CsafLoader = lazyLoader,
         ): CompletableFuture<RetrievedAggregator> {
-            return ioScope.future { from(domain, loader).getOrThrow() }
+            return ioScope.future { fromUrl(url, loader).getOrThrow() }
         }
 
         /**
-         * Retrieves an [Aggregator] from a given URL.
+         * Retrieves a [RetrievedAggregator] from a given URL.
          *
-         * @param url The URL where to retrieve the [Aggregator] from.
-         * @param loader An instance of [CsafLoader].
+         * @param url The URL to retrieve the [RetrievedAggregator] from.
+         * @param loader An optional [CsafLoader] instance. Defaults to [lazyLoader].
          * @return An instance of [RetrievedAggregator], wrapped in a [Result] monad, if successful.
          *   A failed [Result] wrapping the thrown [Throwable] in case of an error.
          */
-        suspend fun from(
+        suspend fun fromUrl(
             url: String,
             loader: CsafLoader = lazyLoader,
         ): Result<RetrievedAggregator> {
