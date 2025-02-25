@@ -36,12 +36,13 @@ class RetrievedAggregatorTest {
 
     @Test
     fun testRetrievedAggregator() = runTest {
-        val lister = RetrievedAggregator.from("https://example.com/example-01-lister.json")
+        val lister = RetrievedAggregator.fromUrl("https://example.com/example-01-lister.json")
         assertTrue(lister.isSuccess)
-        val aggregator = RetrievedAggregator.from("https://example.com/example-01-aggregator.json")
+        val aggregator =
+            RetrievedAggregator.fromUrl("https://example.com/example-01-aggregator.json")
         assertTrue(aggregator.isSuccess)
         val nonExistingLister =
-            RetrievedAggregator.from("https://does-not-exist.com/example-01-lister.json")
+            RetrievedAggregator.fromUrl("https://does-not-exist.com/example-01-lister.json")
         assertTrue(nonExistingLister.isFailure)
     }
 
@@ -65,19 +66,20 @@ class RetrievedAggregatorTest {
 
     @Test
     fun testFetchAll() = runTest {
-        RetrievedAggregator.from("https://example.com/example-01-aggregator.json")
+        RetrievedAggregator.fromUrl("https://example.com/example-01-aggregator.json")
             .getOrThrow()
             .let { aggregator ->
                 val (successes, failures) = aggregator.fetchAll().partition { it.isSuccess }
                 assertEquals(2, successes.size)
                 assertEquals(2, failures.size)
             }
-        RetrievedAggregator.from("https://example.com/example-01-lister.json").getOrThrow().let {
-            lister ->
-            val (successes, failures) = lister.fetchProviders().partition { it.isSuccess }
-            assertEquals(1, successes.size)
-            assertEquals(0, failures.size)
-            assertEquals(0, lister.fetchPublishers().size)
-        }
+        RetrievedAggregator.fromUrl("https://example.com/example-01-lister.json")
+            .getOrThrow()
+            .let { lister ->
+                val (successes, failures) = lister.fetchProviders().partition { it.isSuccess }
+                assertEquals(1, successes.size)
+                assertEquals(0, failures.size)
+                assertEquals(0, lister.fetchPublishers().size)
+            }
     }
 }

@@ -39,7 +39,7 @@ public class RetrievedAggregatorJavaTest {
     @Test
     public void testFetchProvidersAsync() throws ExecutionException, InterruptedException {
         final RetrievedAggregator aggregator =
-                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+                RetrievedAggregator.fromUrlAsync("https://example.com/example-01-aggregator.json").get();
         CompletableFuture<List<ResultCompat<RetrievedProvider>>> providersFuture = aggregator.fetchProvidersAsync();
         assertNotNull(providersFuture);
         List<ResultCompat<RetrievedProvider>> providers = providersFuture.get();
@@ -50,7 +50,7 @@ public class RetrievedAggregatorJavaTest {
     @Test
     public void testFetchPublishersAsync() throws ExecutionException, InterruptedException {
         final RetrievedAggregator aggregator =
-                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+                RetrievedAggregator.fromUrlAsync("https://example.com/example-01-aggregator.json").get();
         CompletableFuture<List<ResultCompat<RetrievedProvider>>> publishersFuture = aggregator.fetchPublishersAsync();
         assertNotNull(publishersFuture);
         List<ResultCompat<RetrievedProvider>> publishers = publishersFuture.get();
@@ -61,7 +61,7 @@ public class RetrievedAggregatorJavaTest {
     @Test
     public void testFetchAllAsync() throws ExecutionException, InterruptedException {
         final RetrievedAggregator aggregator =
-                RetrievedAggregator.fromAsync("https://example.com/example-01-aggregator.json").get();
+                RetrievedAggregator.fromUrlAsync("https://example.com/example-01-aggregator.json").get();
         CompletableFuture<List<ResultCompat<RetrievedProvider>>> allFuture = aggregator.fetchAllAsync();
         assertNotNull(allFuture);
         List<ResultCompat<RetrievedProvider>> allResults = allFuture.get();
