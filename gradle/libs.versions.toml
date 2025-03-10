@@ -18,7 +18,7 @@ cpe = "2.1.0"
 semver = "2.0.0"
 slf4j = "2.0.17"
 spotless = "7.0.2"
-protobuf = "4.29.3"
+protobuf = "4.30.0"
 pbandk = "0.16.0"
 
 [libraries]
