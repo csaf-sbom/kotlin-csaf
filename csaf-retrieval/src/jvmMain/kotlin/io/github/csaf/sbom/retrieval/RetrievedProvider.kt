@@ -257,7 +257,9 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                         }
                     } else {
                         index.lines().forEach { line ->
-                            send(Result.success("$directoryUrl/$line"))
+                            if (line.isNotBlank()) {
+                                send(Result.success("$directoryUrl/$line"))
+                            }
                         }
                     }
                 },
