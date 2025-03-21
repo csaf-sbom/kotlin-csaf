@@ -133,3 +133,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
         return matches.map { Match(it.key.o, it.value) }
     }
 }
+
+interface MatchingTask {
+    fun match(component: Node): Float
+}
