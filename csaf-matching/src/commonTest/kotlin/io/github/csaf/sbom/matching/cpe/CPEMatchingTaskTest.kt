@@ -17,20 +17,85 @@
 package io.github.csaf.sbom.matching.cpe
 
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
+import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
 class CPEMatchingTaskTest {
-    @Test
-    fun testMatch() {
-        val affectedCpe = parseCpe("cpe:/a:example:example:1.0")
-        val sbomCpe = "cpe:/a:example:example:1.0"
 
-        val matchValue =
-            CPEMatchingTask(affectedCpe)
-                .match(Node(identifiers = mapOf(SoftwareIdentifierType.CPE22.value to sbomCpe)))
-        assertTrue(matchValue is DefiniteMatch)
+    val expectedMatchValues =
+        mapOf(
+            Pair("cpe:/a:example:example:1.0", "cpe:/a:example:example:1.0") to DefiniteMatch,
+            Pair("cpe:/a:example:example:1.0", "cpe:/a:example:example:2.0") to DefinitelyNoMatch,
+            Pair("cpe:/a:example:example", "cpe:/a:example:example:1.0") to DefiniteMatch,
+            Pair("cpe:/a:exmple:example:1.0", "cpe:/a:example:example:1.0") to DefinitelyNoMatch,
+            Pair("cpe:/a:example:xample:1.0", "cpe:/a:example:example:1.0") to DefinitelyNoMatch,
+            Pair("cpe:/a:example:example", "cpe:/a:example:xample:1.0") to DefinitelyNoMatch,
+            Pair("cpe:/a:example:xample", "cpe:/a:example:xample") to DefiniteMatch,
+            Pair("cpe:/a:example:example", null) to MatcherNotSuitable,
+        )
+
+    @Test
+    fun testMatchCPE22() {
+        expectedMatchValues.forEach { purlCpe, expectedValue ->
+            val affectedCpe = parseCpe(purlCpe.first)
+            val sbomCpe = purlCpe.second?.let { parseCpe(it) }
+
+            val matchValue =
+                CPEMatchingTask(affectedCpe)
+                    .match(
+                        Node(
+                            identifiers =
+                                sbomCpe?.let {
+                                    mapOf(SoftwareIdentifierType.CPE22.value to it.toCpe23FS())
+                                } ?: mapOf()
+                        )
+                    )
+            assertEquals(
+                expectedValue,
+                matchValue,
+                "{${affectedCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
+            )
+
+            if (expectedValue !is MatcherNotSuitable) {
+                assertTrue(expectedValue.value >= 0.0f)
+            } else {
+                assertEquals(-1.0f, expectedValue.value)
+            }
+        }
+    }
+
+    @Test
+    fun testMatchCPE23() {
+        expectedMatchValues.forEach { purlCpe, expectedValue ->
+            val affectedCpe = parseCpe(purlCpe.first)
+            val sbomCpe = purlCpe.second?.let { parseCpe(it) }
+
+            val matchValue =
+                CPEMatchingTask(affectedCpe)
+                    .match(
+                        Node(
+                            identifiers =
+                                sbomCpe?.let {
+                                    mapOf(SoftwareIdentifierType.CPE23.value to it.toCpe23FS())
+                                } ?: mapOf()
+                        )
+                    )
+            assertEquals(
+                expectedValue,
+                matchValue,
+                "{${affectedCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
+            )
+
+            if (expectedValue !is MatcherNotSuitable) {
+                assertTrue(expectedValue.value >= 0.0f)
+            } else {
+                assertEquals(-1.0f, expectedValue.value)
+            }
+        }
     }
 }
