@@ -52,26 +52,29 @@ class PurlMatchingTaskTest {
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-matching@0.4.0",
             ) to DefinitelyNoMatch,
+            Pair("pkg:maven/io.csaf/csaf-matching@1.0.0", null) to MatcherNotSuitable,
         )
 
     @Test
     fun testMatch() {
         expectedMatchValues.forEach { purlPair, expectedValue ->
             val affectedPurl = Purl(purlPair.first)
-            val sbomPurl = Purl(purlPair.second)
+            val sbomPurl = purlPair.second?.let { Purl(it) }
 
             val matchValue =
                 PurlMatchingTask(affectedPurl)
                     .match(
                         Node(
                             identifiers =
-                                mapOf(SoftwareIdentifierType.PURL.value to sbomPurl.canonicalize())
+                                sbomPurl?.let {
+                                    mapOf(SoftwareIdentifierType.PURL.value to it.canonicalize())
+                                } ?: mapOf()
                         )
                     )
             assertEquals(
                 expectedValue,
                 matchValue,
-                "{${affectedPurl.canonicalize()} vs ${sbomPurl.canonicalize()}} expected $expectedValue but got $matchValue",
+                "{${affectedPurl.canonicalize()} vs ${sbomPurl?.canonicalize()}} expected $expectedValue but got $matchValue",
             )
 
             if (expectedValue !is MatcherNotSuitable) {
