@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.cpe.Cpe
 import io.github.csaf.sbom.matching.cpe.parseCpe
+import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.Purl
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.mapBranchesNotNull
@@ -98,7 +99,7 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
      * Matches the provided SBOM nodes with the CSAF documents and determines whether they meet
      * specific criteria.
      *
-     * @param nodes A list of SBOM nodes represented by protobom.protobom.Node instances.
+     * @param nodes A list of SBOM nodes represented by [Node] instances.
      * @param threshold The minimum threshold required for a match to be included.
      * @return A list of CSAF documents matching the given nodes, along with resp. match scores.
      */
@@ -135,5 +136,5 @@ class Matcher(val docs: List<Csaf>, val threshold: Float = 0.5f) {
 }
 
 interface MatchingTask {
-    fun match(component: Node): Float
+    fun match(component: Node): MatchingConfidence
 }
