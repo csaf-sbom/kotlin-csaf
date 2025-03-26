@@ -49,7 +49,7 @@ object MatcherNotSuitable : MatchingConfidence {
     override val value = -1.0f
 }
 
-fun Purl.matches(other: Purl): MatchingConfidence {
+fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
     // All of these must match, otherwise we definitely not have a match. We can skip comparing the
     // scheme because the schema is already checked in the Purl constructor.
     if (this.getType() != other.getType()) return DefinitelyNoMatch
@@ -66,6 +66,12 @@ fun Purl.matches(other: Purl): MatchingConfidence {
     return DefinitelyNoMatch
 }
 
+/**
+ * A [PurlMatchingTask] is a matching task that matches a PURL (specified in the security advisory)
+ * against a component. It implements the [MatchingTask] interface.
+ *
+ * It uses the [Purl.confidenceMatching] function to determine the matching confidence.
+ */
 class PurlMatchingTask(val purl: Purl) : MatchingTask {
 
     override fun match(component: Node): MatchingConfidence {
@@ -76,6 +82,6 @@ class PurlMatchingTask(val purl: Purl) : MatchingTask {
             return MatcherNotSuitable
         }
 
-        return purl.matches(componentPurl)
+        return purl.confidenceMatching(componentPurl)
     }
 }
