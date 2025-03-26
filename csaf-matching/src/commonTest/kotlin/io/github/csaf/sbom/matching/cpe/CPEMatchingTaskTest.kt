@@ -19,6 +19,8 @@ package io.github.csaf.sbom.matching.cpe
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
+import io.github.csaf.sbom.schema.JsonUri
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -37,28 +39,37 @@ class CPEMatchingTaskTest {
             Pair("cpe:/a:example:example", "cpe:/a:example:xample:1.0") to DefinitelyNoMatch,
             Pair("cpe:/a:example:xample", "cpe:/a:example:xample") to DefiniteMatch,
             Pair("cpe:/a:example:example", null) to MatcherNotSuitable,
+            Pair(null, "cpe:/a:example:example") to MatcherNotSuitable,
         )
 
     @Test
     fun testMatchCPE22() {
         expectedMatchValues.forEach { purlCpe, expectedValue ->
-            val affectedCpe = parseCpe(purlCpe.first)
+            val vulnerableCpe = purlCpe.first?.let { parseCpe(it) }
             val sbomCpe = purlCpe.second?.let { parseCpe(it) }
 
             val matchValue =
-                CPEMatchingTask(affectedCpe)
+                CPEMatchingTask()
                     .match(
+                        Csaf.Product(
+                            product_identification_helper =
+                                vulnerableCpe?.let {
+                                    Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                                },
+                            name = "Product",
+                            product_id = "CSAF0001",
+                        ),
                         Node(
                             identifiers =
                                 sbomCpe?.let {
                                     mapOf(SoftwareIdentifierType.CPE22.value to it.toCpe23FS())
                                 } ?: mapOf()
-                        )
+                        ),
                     )
             assertEquals(
                 expectedValue,
                 matchValue,
-                "{${affectedCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
+                "{${vulnerableCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
             )
 
             if (expectedValue !is MatcherNotSuitable) {
@@ -72,23 +83,31 @@ class CPEMatchingTaskTest {
     @Test
     fun testMatchCPE23() {
         expectedMatchValues.forEach { purlCpe, expectedValue ->
-            val affectedCpe = parseCpe(purlCpe.first)
+            val vulnerableCpe = purlCpe.first?.let { parseCpe(it) }
             val sbomCpe = purlCpe.second?.let { parseCpe(it) }
 
             val matchValue =
-                CPEMatchingTask(affectedCpe)
+                CPEMatchingTask()
                     .match(
+                        Csaf.Product(
+                            product_identification_helper =
+                                vulnerableCpe?.let {
+                                    Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                                },
+                            name = "Product",
+                            product_id = "CSAF0001",
+                        ),
                         Node(
                             identifiers =
                                 sbomCpe?.let {
                                     mapOf(SoftwareIdentifierType.CPE23.value to it.toCpe23FS())
                                 } ?: mapOf()
-                        )
+                        ),
                     )
             assertEquals(
                 expectedValue,
                 matchValue,
-                "{${affectedCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
+                "{${vulnerableCpe} vs ${sbomCpe}} expected $expectedValue but got $matchValue",
             )
 
             if (expectedValue !is MatcherNotSuitable) {

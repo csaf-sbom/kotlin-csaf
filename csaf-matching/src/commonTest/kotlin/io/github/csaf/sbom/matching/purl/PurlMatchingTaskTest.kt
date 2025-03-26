@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching.purl
 
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -53,28 +54,37 @@ class PurlMatchingTaskTest {
                 "pkg:maven/io.csaf/csaf-matching@0.4.0",
             ) to DefinitelyNoMatch,
             Pair("pkg:maven/io.csaf/csaf-matching@1.0.0", null) to MatcherNotSuitable,
+            Pair(null, "pkg:maven/io.csaf/csaf-matching@1.0.0") to MatcherNotSuitable,
         )
 
     @Test
     fun testMatch() {
         expectedMatchValues.forEach { purlPair, expectedValue ->
-            val affectedPurl = Purl(purlPair.first)
+            val vulnerablePurl = Purl(purlPair.first)
             val sbomPurl = purlPair.second?.let { Purl(it) }
 
             val matchValue =
-                PurlMatchingTask(affectedPurl)
+                PurlMatchingTask()
                     .match(
+                        Csaf.Product(
+                            product_identification_helper =
+                                vulnerablePurl.let {
+                                    Csaf.ProductIdentificationHelper(cpe = it.canonicalize())
+                                },
+                            name = "Product",
+                            product_id = "CSAF0001",
+                        ),
                         Node(
                             identifiers =
                                 sbomPurl?.let {
                                     mapOf(SoftwareIdentifierType.PURL.value to it.canonicalize())
                                 } ?: mapOf()
-                        )
+                        ),
                     )
             assertEquals(
                 expectedValue,
                 matchValue,
-                "{${affectedPurl.canonicalize()} vs ${sbomPurl?.canonicalize()}} expected $expectedValue but got $matchValue",
+                "{${vulnerablePurl.canonicalize()} vs ${sbomPurl?.canonicalize()}} expected $expectedValue but got $matchValue",
             )
 
             if (expectedValue !is MatcherNotSuitable) {

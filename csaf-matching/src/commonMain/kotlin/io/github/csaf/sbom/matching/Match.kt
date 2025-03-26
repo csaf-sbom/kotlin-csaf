@@ -16,17 +16,23 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.schema.generated.Csaf
+import protobom.protobom.Node
 
 /**
- * A data class representing a CSAF-SBOM-match with associated score in [0.0; 1.0].
+ * A data class representing a match between an [Csaf.Product] to a SBOM [Node] with given
+ * [MatchingConfidence].
  *
  * @property csaf The matched CSAF document.
- * @property score The matching score in the interval [0.0; 1.0].
+ * @property affectedProduct The affected product from the CSAF document.
+ * @property affectedComponent The affected component from the SBOM document.
+ * @property confidence The confidence score of the match.
  * @constructor Creates CSAF-SBOM-match with given score.
  */
-data class Match(val csaf: Csaf, val score: Float) {
-    init {
-        require(score in 0.0..1.0) { "Score must be in the interval [0.0; 1.0]." }
-    }
-}
+data class Match(
+    val csaf: Csaf,
+    val affectedProduct: Csaf.Product,
+    val affectedComponent: Node,
+    val confidence: MatchingConfidence,
+)
