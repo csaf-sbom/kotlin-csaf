@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching.purl
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -28,29 +29,29 @@ class PurlMatchingTaskTest {
             Pair(
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
-            ) to DEFINITE_MATCH,
+            ) to DefiniteMatch,
             Pair(
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-mätching@1.0.0",
-            ) to DEFINITELY_NO_MATCH,
+            ) to DefinitelyNoMatch,
             Pair("pkg:maven/io.csaf/csaf-matching", "pkg:maven/io.csaf/csaf-matching@1.0.0") to
-                MATCH_PACKAGE_NO_VERSION,
+                MatchPackageNoVersion,
             Pair(
                 "pkg:meven/io.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-mätching@1.0.0",
-            ) to DEFINITELY_NO_MATCH,
+            ) to DefinitelyNoMatch,
             Pair(
                 "pkg:maven/iu.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
-            ) to DEFINITELY_NO_MATCH,
+            ) to DefinitelyNoMatch,
             Pair(
                 "pkg:maven/io.csaf/csef-metching@1.0.0",
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
-            ) to DEFINITELY_NO_MATCH,
+            ) to DefinitelyNoMatch,
             Pair(
                 "pkg:maven/io.csaf/csaf-matching@1.0.0",
                 "pkg:maven/io.csaf/csaf-matching@0.4.0",
-            ) to DEFINITELY_NO_MATCH,
+            ) to DefinitelyNoMatch,
         )
 
     @Test
@@ -72,6 +73,12 @@ class PurlMatchingTaskTest {
                 matchValue,
                 "{${affectedPurl.canonicalize()} vs ${sbomPurl.canonicalize()}} expected $expectedValue but got $matchValue",
             )
+
+            if (expectedValue !is MatcherNotSuitable) {
+                assertTrue(expectedValue.value >= 0.0f)
+            } else {
+                assertEquals(-1.0f, expectedValue.value)
+            }
         }
     }
 }
