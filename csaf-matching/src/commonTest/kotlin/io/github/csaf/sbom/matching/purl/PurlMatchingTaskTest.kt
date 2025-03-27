@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching.purl
 
+import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,15 +61,15 @@ class PurlMatchingTaskTest {
     @Test
     fun testMatch() {
         expectedMatchValues.forEach { purlPair, expectedValue ->
-            val vulnerablePurl = Purl(purlPair.first)
+            val vulnerablePurl = purlPair.first?.let { Purl(it) }
             val sbomPurl = purlPair.second?.let { Purl(it) }
 
             val matchValue =
                 PurlMatchingTask.match(
                     Csaf.Product(
                         product_identification_helper =
-                            vulnerablePurl.let {
-                                Csaf.ProductIdentificationHelper(cpe = it.canonicalize())
+                            vulnerablePurl?.let {
+                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.canonicalize()))
                             },
                         name = "Product",
                         product_id = "CSAF0001",
@@ -83,7 +84,7 @@ class PurlMatchingTaskTest {
             assertEquals(
                 expectedValue,
                 matchValue,
-                "{${vulnerablePurl.canonicalize()} vs ${sbomPurl?.canonicalize()}} expected $expectedValue but got $matchValue",
+                "{${vulnerablePurl?.canonicalize()} vs ${sbomPurl?.canonicalize()}} expected $expectedValue but got $matchValue",
             )
 
             if (expectedValue !is MatcherNotSuitable) {

@@ -19,7 +19,6 @@ package io.github.csaf.sbom.matching.cpe
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
-import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,7 +52,7 @@ class CPEMatchingTaskTest {
                     Csaf.Product(
                         product_identification_helper =
                             vulnerableCpe?.let {
-                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                                Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
                             },
                         name = "Product",
                         product_id = "CSAF0001",
@@ -90,7 +89,7 @@ class CPEMatchingTaskTest {
                     Csaf.Product(
                         product_identification_helper =
                             vulnerableCpe?.let {
-                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                                Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
                             },
                         name = "Product",
                         product_id = "CSAF0001",
