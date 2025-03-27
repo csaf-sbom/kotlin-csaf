@@ -18,11 +18,10 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
-import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 
 object NameMatchingTask : MatchingTask {
-    override fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence {
+    override fun match(vulnerable: ProductWithSelector, component: Node): MatchingConfidence {
         return DefinitelyNoMatch
     }
 }

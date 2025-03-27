@@ -32,7 +32,7 @@ import protobom.protobom.Node
  */
 data class Match(
     val csaf: Csaf,
-    val affectedProduct: Csaf.Product,
+    val affectedProduct: ProductWithSelector,
     val affectedComponent: Node,
     val confidence: MatchingConfidence,
 )

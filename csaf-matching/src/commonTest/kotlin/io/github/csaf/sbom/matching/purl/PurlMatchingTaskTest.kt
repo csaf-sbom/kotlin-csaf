@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching.purl
 
+import io.github.csaf.sbom.matching.ProductWithSelector
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
@@ -66,13 +67,20 @@ class PurlMatchingTaskTest {
 
             val matchValue =
                 PurlMatchingTask.match(
-                    Csaf.Product(
-                        product_identification_helper =
-                            vulnerablePurl?.let {
-                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.canonicalize()))
-                            },
-                        name = "Product",
-                        product_id = "CSAF0001",
+                    ProductWithSelector(
+                        product =
+                            Csaf.Product(
+                                product_identification_helper =
+                                    vulnerablePurl?.let {
+                                        Csaf.ProductIdentificationHelper(
+                                            purl = JsonUri(it.canonicalize())
+                                        )
+                                    },
+                                name = "Product",
+                                product_id = "CSAF0001",
+                            ),
+                        additionalSelector = Csaf.Category3.product_name,
+                        selectorValue = "Product",
                     ),
                     Node(
                         identifiers =
