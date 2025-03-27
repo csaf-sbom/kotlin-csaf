@@ -231,10 +231,7 @@ object Test616ContradictingProductStatus : Test {
         val contradicted = mutableSetOf<String>()
 
         for (vulnerability in doc.vulnerabilities ?: listOf()) {
-            val affected =
-                vulnerability.product_status?.first_affected +
-                    vulnerability.product_status?.known_affected +
-                    vulnerability.product_status?.last_affected
+            val affected = vulnerability.affectedProducts
             val notAffected = vulnerability.product_status?.known_not_affected ?: setOf()
             val fixed =
                 vulnerability.product_status?.first_fixed + vulnerability.product_status?.fixed
@@ -259,6 +256,20 @@ object Test616ContradictingProductStatus : Test {
         }
     }
 }
+
+/**
+ * Gathers all affected products of a [Csaf.Vulnerability] object.
+ *
+ * This includes:
+ * - [Csaf.ProductStatus.first_affected]
+ * - [Csaf.ProductStatus.known_affected]
+ * - [Csaf.ProductStatus.last_affected]
+ */
+val Csaf.Vulnerability.affectedProducts
+    get(): Collection<String> =
+        this.product_status?.first_affected +
+            this.product_status?.known_affected +
+            this.product_status?.last_affected
 
 /**
  * Implementation of
