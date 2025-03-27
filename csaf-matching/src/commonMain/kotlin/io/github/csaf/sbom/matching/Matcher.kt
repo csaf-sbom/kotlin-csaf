@@ -20,7 +20,7 @@ import io.github.csaf.sbom.matching.cpe.CPEMatchingTask
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PurlMatchingTask
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.gatherProductIdsPerGroup
+import io.github.csaf.sbom.validation.tests.affectedProducts
 import io.github.csaf.sbom.validation.tests.mapBranchesNotNull
 import io.github.csaf.sbom.validation.tests.plus
 import protobom.protobom.Document
@@ -43,15 +43,8 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
      */
     init {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
-        val productIds =
-            doc.vulnerabilities?.flatMap { vuln ->
-                vuln.product_status?.first_affected +
-                    vuln.product_status?.known_affected +
-                    vuln.product_status?.last_affected
-            } ?: listOf()
-        val map = doc.gatherProductIdsPerGroup()
+        val productIds = doc.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
-        // productIds.resolveProductIDs(map)
 
         affectedProducts =
             doc.product_tree.mapBranchesNotNull({
