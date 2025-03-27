@@ -43,10 +43,10 @@ fun Cpe.confidenceMatching(other: Cpe): MatchingConfidence {
 object CPEMatchingTask : MatchingTask {
     override fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence {
         // Check if the vulnerable product has a CPE
-        val vulnerable = vulnerable.product_identification_helper?.cpe?.let { parseCpe(it) }
+        val vulnerableCpe = vulnerable.product_identification_helper?.cpe?.let { parseCpe(it) }
 
         // If we have no CPE, we cannot match (for now)
-        if (vulnerable == null) {
+        if (vulnerableCpe == null) {
             return MatcherNotSuitable
         }
 
@@ -58,6 +58,6 @@ object CPEMatchingTask : MatchingTask {
         val componentCpe = parseCpe(cpeString)
 
         // Check if the CPE is a match
-        return vulnerable.confidenceMatching(componentCpe)
+        return vulnerableCpe.confidenceMatching(componentCpe)
     }
 }
