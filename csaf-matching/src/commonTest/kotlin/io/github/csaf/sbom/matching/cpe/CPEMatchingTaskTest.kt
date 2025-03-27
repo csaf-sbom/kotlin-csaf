@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
+import io.github.csaf.sbom.matching.ProductWithSelector
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
@@ -49,13 +50,18 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    Csaf.Product(
-                        product_identification_helper =
-                            vulnerableCpe?.let {
-                                Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
-                            },
-                        name = "Product",
-                        product_id = "CSAF0001",
+                    ProductWithSelector(
+                        product =
+                            Csaf.Product(
+                                product_identification_helper =
+                                    vulnerableCpe?.let {
+                                        Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
+                                    },
+                                name = "Product",
+                                product_id = "CSAF0001",
+                            ),
+                        additionalSelector = Csaf.Category3.product_name,
+                        selectorValue = "Product",
                     ),
                     Node(
                         identifiers =
@@ -86,13 +92,18 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    Csaf.Product(
-                        product_identification_helper =
-                            vulnerableCpe?.let {
-                                Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
-                            },
-                        name = "Product",
-                        product_id = "CSAF0001",
+                    ProductWithSelector(
+                        product =
+                            Csaf.Product(
+                                product_identification_helper =
+                                    vulnerableCpe?.let {
+                                        Csaf.ProductIdentificationHelper(cpe = it.toCpe23FS())
+                                    },
+                                name = "Product",
+                                product_id = "CSAF0001",
+                            ),
+                        additionalSelector = Csaf.Category3.product_name,
+                        selectorValue = "Product",
                     ),
                     Node(
                         identifiers =

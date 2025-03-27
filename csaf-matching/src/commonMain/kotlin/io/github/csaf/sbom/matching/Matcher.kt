@@ -22,10 +22,19 @@ import io.github.csaf.sbom.matching.purl.PurlMatchingTask
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.affectedProducts
 import io.github.csaf.sbom.validation.tests.mapBranchesNotNull
-import io.github.csaf.sbom.validation.tests.plus
 import protobom.protobom.Document
 import protobom.protobom.Node
 import protobom.protobom.NodeList
+
+/**
+ * This is utility class populated by the [Csaf.Branche] so that we have a nullable product and an
+ * additional selector (e.g., version) based on [Csaf.Branche.category].
+ */
+data class ProductWithSelector(
+    val product: Csaf.Product,
+    val additionalSelector: Csaf.Category3,
+    val selectorValue: String,
+)
 
 /**
  * Matcher for matching SBOM documents with a provided CSAF document.
@@ -34,7 +43,7 @@ import protobom.protobom.NodeList
  * @property threshold The default threshold required for a match to be included.
  */
 class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
-    var affectedProducts = listOf<Csaf.Product>()
+    var affectedProducts = listOf<ProductWithSelector>()
     var tasks = listOf<MatchingTask>()
 
     /**
@@ -46,11 +55,13 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
         val productIds = doc.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
 
+        val test = doc.product_tree.mapBranchesNotNull(predicate = null) { Pair(it, it) }
+
         affectedProducts =
             doc.product_tree.mapBranchesNotNull({
                 it.product != null && affectedProductIds.contains(it.product?.product_id) == true
             }) {
-                it.product
+                it.product?.let { product -> ProductWithSelector(product, it.category, it.name) }
             }
 
         tasks = listOf<MatchingTask>(CPEMatchingTask, PurlMatchingTask, NameMatchingTask)
@@ -118,5 +129,5 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 }
 
 interface MatchingTask {
-    fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence
+    fun match(vulnerable: ProductWithSelector, component: Node): MatchingConfidence
 }

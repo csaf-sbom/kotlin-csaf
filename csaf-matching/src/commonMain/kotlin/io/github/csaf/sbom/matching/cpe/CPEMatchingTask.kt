@@ -17,11 +17,11 @@
 package io.github.csaf.sbom.matching.cpe
 
 import io.github.csaf.sbom.matching.MatchingTask
+import io.github.csaf.sbom.matching.ProductWithSelector
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
-import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -41,9 +41,10 @@ fun Cpe.confidenceMatching(other: Cpe): MatchingConfidence {
  * It uses the [Cpe.confidenceMatching] function to determine the matching confidence.
  */
 object CPEMatchingTask : MatchingTask {
-    override fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence {
+    override fun match(vulnerable: ProductWithSelector, component: Node): MatchingConfidence {
         // Check if the vulnerable product has a CPE
-        val vulnerableCpe = vulnerable.product_identification_helper?.cpe?.let { parseCpe(it) }
+        val vulnerableCpe =
+            vulnerable.product.product_identification_helper?.cpe?.let { parseCpe(it) }
 
         // If we have no CPE, we cannot match (for now)
         if (vulnerableCpe == null) {
