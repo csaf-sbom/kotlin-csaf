@@ -49,23 +49,22 @@ class CPEMatchingTaskTest {
             val sbomCpe = purlCpe.second?.let { parseCpe(it) }
 
             val matchValue =
-                CPEMatchingTask()
-                    .match(
-                        Csaf.Product(
-                            product_identification_helper =
-                                vulnerableCpe?.let {
-                                    Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
-                                },
-                            name = "Product",
-                            product_id = "CSAF0001",
-                        ),
-                        Node(
-                            identifiers =
-                                sbomCpe?.let {
-                                    mapOf(SoftwareIdentifierType.CPE22.value to it.toCpe23FS())
-                                } ?: mapOf()
-                        ),
-                    )
+                CPEMatchingTask.match(
+                    Csaf.Product(
+                        product_identification_helper =
+                            vulnerableCpe?.let {
+                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                            },
+                        name = "Product",
+                        product_id = "CSAF0001",
+                    ),
+                    Node(
+                        identifiers =
+                            sbomCpe?.let {
+                                mapOf(SoftwareIdentifierType.CPE22.value to it.toCpe23FS())
+                            } ?: mapOf()
+                    ),
+                )
             assertEquals(
                 expectedValue,
                 matchValue,
@@ -87,23 +86,22 @@ class CPEMatchingTaskTest {
             val sbomCpe = purlCpe.second?.let { parseCpe(it) }
 
             val matchValue =
-                CPEMatchingTask()
-                    .match(
-                        Csaf.Product(
-                            product_identification_helper =
-                                vulnerableCpe?.let {
-                                    Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
-                                },
-                            name = "Product",
-                            product_id = "CSAF0001",
-                        ),
-                        Node(
-                            identifiers =
-                                sbomCpe?.let {
-                                    mapOf(SoftwareIdentifierType.CPE23.value to it.toCpe23FS())
-                                } ?: mapOf()
-                        ),
-                    )
+                CPEMatchingTask.match(
+                    Csaf.Product(
+                        product_identification_helper =
+                            vulnerableCpe?.let {
+                                Csaf.ProductIdentificationHelper(purl = JsonUri(it.toCpe23FS()))
+                            },
+                        name = "Product",
+                        product_id = "CSAF0001",
+                    ),
+                    Node(
+                        identifiers =
+                            sbomCpe?.let {
+                                mapOf(SoftwareIdentifierType.CPE23.value to it.toCpe23FS())
+                            } ?: mapOf()
+                    ),
+                )
             assertEquals(
                 expectedValue,
                 matchValue,
