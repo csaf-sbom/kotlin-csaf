@@ -73,7 +73,7 @@ fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
  *
  * It uses the [Purl.confidenceMatching] function to determine the matching confidence.
  */
-class PurlMatchingTask : MatchingTask {
+object PurlMatchingTask : MatchingTask {
 
     override fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence {
         // Check if we have a purl in the vulnerable product

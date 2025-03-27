@@ -40,7 +40,7 @@ fun Cpe.confidenceMatching(other: Cpe): MatchingConfidence {
  *
  * It uses the [Cpe.confidenceMatching] function to determine the matching confidence.
  */
-class CPEMatchingTask : MatchingTask {
+object CPEMatchingTask : MatchingTask {
     override fun match(vulnerable: Csaf.Product, component: Node): MatchingConfidence {
         // Check if the vulnerable product has a CPE
         val vulnerable = vulnerable.product_identification_helper?.cpe?.let { parseCpe(it) }

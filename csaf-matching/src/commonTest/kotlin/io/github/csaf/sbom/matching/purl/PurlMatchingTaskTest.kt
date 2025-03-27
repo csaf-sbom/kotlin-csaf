@@ -64,23 +64,22 @@ class PurlMatchingTaskTest {
             val sbomPurl = purlPair.second?.let { Purl(it) }
 
             val matchValue =
-                PurlMatchingTask()
-                    .match(
-                        Csaf.Product(
-                            product_identification_helper =
-                                vulnerablePurl.let {
-                                    Csaf.ProductIdentificationHelper(cpe = it.canonicalize())
-                                },
-                            name = "Product",
-                            product_id = "CSAF0001",
-                        ),
-                        Node(
-                            identifiers =
-                                sbomPurl?.let {
-                                    mapOf(SoftwareIdentifierType.PURL.value to it.canonicalize())
-                                } ?: mapOf()
-                        ),
-                    )
+                PurlMatchingTask.match(
+                    Csaf.Product(
+                        product_identification_helper =
+                            vulnerablePurl.let {
+                                Csaf.ProductIdentificationHelper(cpe = it.canonicalize())
+                            },
+                        name = "Product",
+                        product_id = "CSAF0001",
+                    ),
+                    Node(
+                        identifiers =
+                            sbomPurl?.let {
+                                mapOf(SoftwareIdentifierType.PURL.value to it.canonicalize())
+                            } ?: mapOf()
+                    ),
+                )
             assertEquals(
                 expectedValue,
                 matchValue,

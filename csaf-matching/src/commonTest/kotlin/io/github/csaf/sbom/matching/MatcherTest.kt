@@ -67,13 +67,17 @@ class MatcherTest {
             Matcher(
                 goodCsaf(
                     productTree = goodProductTree(relationships = null),
-                    vulnerabilities = goodVulnerabilities(productStatus = null),
+                    vulnerabilities = goodVulnerabilities(),
                 ),
                 threshold = 0.5f,
             )
-        val result = matcher.matchAll(Document(), threshold = 0.0f)
+        val result =
+            matcher.matchAll(
+                Document(nodeList = NodeList(nodes = listOf(Node()))),
+                threshold = 0.0f,
+            )
 
-        assertEquals(2, result.size)
+        assertEquals(1, result.size)
     }
 
     @Test

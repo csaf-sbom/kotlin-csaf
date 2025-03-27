@@ -55,12 +55,12 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 
         affectedProducts =
             doc.product_tree.mapBranchesNotNull({
-                it.product != null && affectedProductIds?.contains(it.product?.product_id) == true
+                it.product != null && affectedProductIds.contains(it.product?.product_id) == true
             }) {
                 it.product
             }
 
-        tasks = listOf<MatchingTask>(CPEMatchingTask(), PurlMatchingTask())
+        tasks = listOf<MatchingTask>(CPEMatchingTask, PurlMatchingTask, NameMatchingTask)
     }
 
     /**
@@ -84,7 +84,7 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
      *   value of this [Matcher].
      * @return A list of CSAF documents matching the given document, along with resp. match scores.
      */
-    fun matchAll(sbomDocument: Document, threshold: Float = this.threshold): List<Match> =
+    fun matchAll(sbomDocument: Document, threshold: Float = this.threshold): Set<Match> =
         match((sbomDocument.nodeList ?: NodeList()).nodes, threshold)
 
     /**
@@ -95,8 +95,10 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
      * @param threshold The minimum threshold required for a match to be included.
      * @return A list of CSAF documents matching the given nodes, along with resp. match scores.
      */
-    private fun match(nodes: List<Node>, threshold: Float): List<Match> {
-        val matches = mutableListOf<Match>()
+    private fun match(nodes: List<Node>, threshold: Float): Set<Match> {
+        require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
+
+        val matches = mutableMapOf<Node, Match>()
         // Loop through all matching tasks
         for (task in tasks) {
             // Loop through all nodes
@@ -105,14 +107,20 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
                 for (affectedProduct in affectedProducts) {
                     // Check if the node is affected by the product
                     val confidence = task.match(affectedProduct, node)
+                    // If the confidence is above the threshold, add it to the matches (unless we
+                    // already have a higher confidence match)
                     if (confidence.value >= threshold) {
-                        matches += Match(doc, affectedProduct, node, confidence)
+                        val existing = matches[node]
+                        if (existing != null && existing.confidence.value >= confidence.value) {
+                            continue
+                        }
+                        matches[node] = Match(doc, affectedProduct, node, confidence)
                     }
                 }
             }
         }
 
-        return matches
+        return matches.values.toSet()
     }
 }
 
