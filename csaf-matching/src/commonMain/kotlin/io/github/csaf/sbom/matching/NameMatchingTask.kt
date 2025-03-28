@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.purl.MatchPackageNoVersion
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PartialNameMatch
 import io.github.csaf.sbom.schema.generated.Csaf
@@ -26,11 +27,29 @@ import protobom.protobom.Node
 
 object NameMatchingTask : MatchingTask {
     override fun match(vulnerable: ProductWithBranches, component: Node): MatchingConfidence {
-        if (vulnerable.matchesName(component) == DefinitelyNoMatch) {
+        // First, try to match the name. If we have a definite mismatch we can exit early
+        var match: MatchingConfidence = vulnerable.matchesName(component)
+        if (match == DefinitelyNoMatch) {
             return DefinitelyNoMatch
         }
 
-        return DefinitelyNoMatch
+        // Then, try to match the version. If we have a definite mismatch we can exit early
+        match += vulnerable.matchesVersion(component)
+        if (match == DefinitelyNoMatch) {
+            return DefinitelyNoMatch
+        }
+
+        return match
+    }
+}
+
+fun ProductWithBranches.matchesVersion(node: Node): MatchingConfidence {
+    val version = this.branches.find { it.category == Csaf.Category3.product_version }?.name
+
+    return when (version) {
+        null -> MatchPackageNoVersion
+        node.version -> DefiniteMatch
+        else -> DefinitelyNoMatch
     }
 }
 

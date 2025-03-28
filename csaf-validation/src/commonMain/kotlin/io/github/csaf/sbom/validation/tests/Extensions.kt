@@ -239,7 +239,7 @@ fun Csaf.ProductTree?.gatherProductsWithBranches(
             // We arrived at a product node, we are finished
             val product = nextBranch.product
             if (product != null && predicate?.invoke(product) != false) {
-                paths.add(ProductWithBranches(product, currentPath))
+                paths.add(ProductWithBranches(product, currentPath + nextBranch))
                 // Done with this path
                 continue
             }
