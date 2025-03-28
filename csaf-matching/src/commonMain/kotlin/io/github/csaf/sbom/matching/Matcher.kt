@@ -32,7 +32,7 @@ import protobom.protobom.NodeList
  * @property threshold The default threshold required for a match to be included.
  */
 class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
-    var affectedProducts = listOf<ProductInfo>()
+    var affectedProducts = listOf<VulnerableProduct>()
     var tasks = listOf<MatchingTask>()
 
     /**
@@ -44,7 +44,7 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
         val productIds = doc.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
 
-        val products = doc.product_tree.gatherProductsWithBranches()
+        val products = doc.product_tree.gatherVulnerableProducts()
 
         affectedProducts = products.filter { it.product.product_id in affectedProductIds }
 
@@ -113,5 +113,5 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 }
 
 interface MatchingTask {
-    fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence
+    fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence
 }

@@ -17,7 +17,7 @@
 package io.github.csaf.sbom.matching.cpe
 
 import io.github.csaf.sbom.matching.MatchingTask
-import io.github.csaf.sbom.matching.ProductInfo
+import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
@@ -41,7 +41,7 @@ fun Cpe.confidenceMatching(other: Cpe): MatchingConfidence {
  * It uses the [Cpe.confidenceMatching] function to determine the matching confidence.
  */
 object CPEMatchingTask : MatchingTask {
-    override fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence {
+    override fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence {
         // Check if the vulnerable product has a CPE
         val vulnerableCpe = vulnerable.cpe
 
