@@ -17,7 +17,7 @@
 package io.github.csaf.sbom.matching.purl
 
 import io.github.csaf.sbom.matching.MatchingTask
-import io.github.csaf.sbom.validation.tests.ProductWithBranches
+import io.github.csaf.sbom.matching.ProductInfo
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -95,10 +95,9 @@ fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
  */
 object PurlMatchingTask : MatchingTask {
 
-    override fun match(vulnerable: ProductWithBranches, component: Node): MatchingConfidence {
+    override fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence {
         // Check if we have a purl in the vulnerable product
-        val vulnerablePurl =
-            vulnerable.product.product_identification_helper?.purl?.let { Purl(it.toString()) }
+        val vulnerablePurl = vulnerable.purl
 
         // Check, if we have a purl to match against
         val componentPurl =

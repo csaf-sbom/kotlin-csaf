@@ -22,11 +22,14 @@ import io.github.csaf.sbom.matching.purl.MatchPackageNoVersion
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PartialNameMatch
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import protobom.protobom.Node
 
-object NameMatchingTask : MatchingTask {
-    override fun match(vulnerable: ProductWithBranches, component: Node): MatchingConfidence {
+/**
+ * A [BranchMatchingTask] is a [MatchingTask] that matches a [ProductInfo] against a [Node] based on
+ * the information contained in [Csaf.Branche].
+ */
+object BranchMatchingTask : MatchingTask {
+    override fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence {
         // First, try to match the name. If we have a definite mismatch we can exit early
         var match: MatchingConfidence = vulnerable.matchesName(component)
         if (match == DefinitelyNoMatch) {
@@ -43,17 +46,25 @@ object NameMatchingTask : MatchingTask {
     }
 }
 
-fun ProductWithBranches.matchesVersion(node: Node): MatchingConfidence {
-    val version = this.branches.find { it.category == Csaf.Category3.product_version }?.name
+fun ProductInfo.matchesVersion(node: Node): MatchingConfidence {
+    val vulnerableVersion =
+        this.branches.find { it.category == Csaf.Category3.product_version }?.name
+    val componentVersion = node.version
 
-    return when (version) {
+    // In an effort to sanitize the version strings, we remove training zeros and leading 'v'
+    // characters
+    val vulnerableVersionSanitized = vulnerableVersion?.trimStart('v', ' ', '\t')
+    val componentVersionSanitized = componentVersion.trimStart('v', ' ', '\t')
+
+    return when (vulnerableVersionSanitized) {
         null -> MatchPackageNoVersion
-        node.version -> DefiniteMatch
+        componentVersionSanitized -> DefiniteMatch
         else -> DefinitelyNoMatch
     }
 }
 
-fun ProductWithBranches.matchesName(node: Node): MatchingConfidence {
+/** Matches the name of the vulnerable product with the name of the component. */
+fun ProductInfo.matchesName(node: Node): MatchingConfidence {
     val name = this.branches.find { it.category == Csaf.Category3.product_name }?.name
 
     return when {
