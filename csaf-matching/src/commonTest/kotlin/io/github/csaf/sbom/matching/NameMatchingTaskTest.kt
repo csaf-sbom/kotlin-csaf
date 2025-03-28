@@ -16,9 +16,11 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.gatherProductsWithBranches
 import kotlin.test.Test
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import protobom.protobom.Node
 
@@ -66,6 +68,6 @@ class NameMatchingTaskTest {
                 vulnerable = linux40,
                 component = Node(name = "Linux Kernel", version = "4.0"),
             )
-        assertNotNull(match)
+        assertIs<DefiniteMatch>(match)
     }
 }

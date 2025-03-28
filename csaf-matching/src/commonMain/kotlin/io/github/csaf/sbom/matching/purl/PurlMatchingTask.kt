@@ -23,6 +23,18 @@ import protobom.protobom.SoftwareIdentifierType
 
 interface MatchingConfidence {
     val value: Float
+
+    operator fun plus(other: MatchingConfidence): MatchingConfidence {
+        return when (this) {
+            is DefiniteMatch -> other
+            is DefinitelyNoMatch -> this
+            else -> CombinedMatch(listOf(this, other))
+        }
+    }
+}
+
+class CombinedMatch(elements: List<MatchingConfidence>) : MatchingConfidence {
+    override val value = elements.map { it.value }.reduce { acc, element -> acc * element }
 }
 
 /** A [DefiniteMatch] indicates a definite match. This is the highest possible match value. */
