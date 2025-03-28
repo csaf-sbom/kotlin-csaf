@@ -21,6 +21,7 @@ import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PurlMatchingTask
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.affectedProducts
+import io.github.csaf.sbom.validation.tests.gatherProductPaths
 import io.github.csaf.sbom.validation.tests.mapBranchesNotNull
 import protobom.protobom.Document
 import protobom.protobom.Node
@@ -55,7 +56,7 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
         val productIds = doc.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
 
-        val test = doc.product_tree.mapBranchesNotNull(predicate = null) { Pair(it, it) }
+        val test = doc.product_tree.gatherProductPaths()
 
         affectedProducts =
             doc.product_tree.mapBranchesNotNull({
