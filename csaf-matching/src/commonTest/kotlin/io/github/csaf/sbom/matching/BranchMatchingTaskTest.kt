@@ -16,10 +16,6 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.matching.purl.DefiniteMatch
-import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.purl.MatchPackageNoVersion
-import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,13 +34,13 @@ val productTree =
                         listOf(
                             Csaf.Branche(
                                 category = Csaf.Category3.product_name,
-                                name = "Linux Kernel",
+                                name = "Kernel",
                                 branches =
                                     listOf(
                                         Csaf.Branche(
                                             product =
                                                 Csaf.Product(
-                                                    name = "Linux Kernel 4.0",
+                                                    name = "Kernel 4.0",
                                                     product_id = "LINUX_KERNEL_4_0",
                                                 ),
                                             category = Csaf.Category3.product_version,
@@ -55,20 +51,20 @@ val productTree =
                             Csaf.Branche(
                                 product =
                                     Csaf.Product(
-                                        name = "Linux Kernel",
+                                        name = "Kernel",
                                         product_id = "LINUX_KERNEL_UNSPECIFIED",
                                     ),
                                 category = Csaf.Category3.product_name,
-                                name = "Linux Kernel",
+                                name = "Kernel",
                             ),
                         ),
                 )
             )
     )
 
-class NameMatchingTaskTest {
+class BranchMatchingTaskTest {
     @Test
-    fun testMatchVersion() {
+    fun testMatch() {
         val linux40 =
             productTree
                 .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
@@ -83,16 +79,22 @@ class NameMatchingTaskTest {
 
         val expectedMatches =
             mapOf(
-                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to DefiniteMatch,
-                Pair(linuxUnspecified, Node(name = "Linux Kernel", version = "4.0")) to
+                Pair(linux40, Node(name = "Kernel", version = "4.0")) to DefiniteMatch,
+                Pair(linuxUnspecified, Node(name = "Kernel", version = "4.0")) to
                     MatchPackageNoVersion,
-                Pair(linux40, Node(name = "Linux Kernel", version = "5.0")) to DefinitelyNoMatch,
+                Pair(linux40, Node(name = "Kernel", version = "5.0")) to DefinitelyNoMatch,
+                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to PartialNameMatch,
+                Pair(linux40, Node(name = "Linux Körnel", version = "4.0")) to DefinitelyNoMatch,
             )
 
         expectedMatches.forEach { pair, expectedMatch ->
             val match = BranchMatchingTask.match(vulnerable = pair.first, component = pair.second)
             assertIs<MatchingConfidence>(match)
-            assertEquals(expectedMatch, match)
+            assertEquals(
+                expectedMatch,
+                match,
+                "{${pair.first} vs ${pair.second} expected $expectedMatch but got $match",
+            )
         }
     }
 }

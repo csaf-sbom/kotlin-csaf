@@ -16,12 +16,12 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
+import io.github.csaf.sbom.matching.DefiniteMatch
+import io.github.csaf.sbom.matching.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.MatcherNotSuitable
+import io.github.csaf.sbom.matching.MatchingConfidence
 import io.github.csaf.sbom.matching.MatchingTask
 import io.github.csaf.sbom.matching.VulnerableProduct
-import io.github.csaf.sbom.matching.purl.DefiniteMatch
-import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
-import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 

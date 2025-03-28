@@ -16,10 +16,10 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
+import io.github.csaf.sbom.matching.DefiniteMatch
+import io.github.csaf.sbom.matching.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.VulnerableProduct
-import io.github.csaf.sbom.matching.purl.DefiniteMatch
-import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
