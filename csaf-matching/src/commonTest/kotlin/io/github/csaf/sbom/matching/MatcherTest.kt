@@ -16,15 +16,20 @@
  */
 package io.github.csaf.sbom.matching
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.*
 import protobom.protobom.Document
 import protobom.protobom.Node
 import protobom.protobom.NodeList
 import protobom.protobom.SoftwareIdentifierType
 
 class MatcherTest {
+
+    @Test
+    fun `test Matcher with null vulnerabilities`() {
+        val csafDoc = goodCsaf(vulnerabilities = null)
+        val matcher = Matcher(csafDoc)
+        assertNotNull(matcher)
+    }
 
     @Test
     fun `test Matcher initialization with valid threshold`() {
@@ -37,28 +42,13 @@ class MatcherTest {
     @Test
     fun `test Matcher initialization with invalid thresholds`() {
         val csafDoc = goodCsaf()
-        assertThrows<IllegalArgumentException> { Matcher(csafDoc, threshold = -0.1f) }
-        assertThrows<IllegalArgumentException> { Matcher(csafDoc, threshold = 1.1f) }
+        assertFailsWith<IllegalArgumentException> { Matcher(csafDoc, threshold = -0.1f) }
+        assertFailsWith<IllegalArgumentException> { Matcher(csafDoc, threshold = 1.1f) }
         val matcher = Matcher(csafDoc, threshold = 0.5f)
-        assertThrows<IllegalArgumentException> { matcher.matchAll(Document(), threshold = -0.1f) }
-        assertThrows<IllegalArgumentException> { matcher.matchAll(Document(), threshold = 1.1f) }
-    }
-
-    @Test
-    fun `test Matcher maps correct PURLs`() {
-        val csafDoc = goodCsaf()
-        val matcher = Matcher(csafDoc, threshold = 0.5f)
-
-        // assertFalse(matcher.purlMap.isEmpty())
-        // assertTrue(matcher.purlMap.containsKey("pkg:rpm/vendor/linux@0.2?arch=src"))
-    }
-
-    @Test
-    fun `test Matcher maps correct CPEs`() {
-        val csafDoc = goodCsaf()
-        val matcher = Matcher(csafDoc, threshold = 0.5f)
-
-        // assertEquals(1, matcher.cpeMap.size)
+        assertFailsWith<IllegalArgumentException> {
+            matcher.matchAll(Document(), threshold = -0.1f)
+        }
+        assertFailsWith<IllegalArgumentException> { matcher.matchAll(Document(), threshold = 1.1f) }
     }
 
     @Test
