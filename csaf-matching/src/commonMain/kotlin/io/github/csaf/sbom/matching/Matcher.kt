@@ -17,7 +17,6 @@
 package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.cpe.CPEMatchingTask
-import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PurlMatchingTask
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.affectedProducts

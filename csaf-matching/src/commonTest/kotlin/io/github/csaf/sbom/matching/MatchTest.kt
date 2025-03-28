@@ -16,44 +16,25 @@
  */
 package io.github.csaf.sbom.matching
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class MatchTest {
 
-    /*
     @Test
-    fun `test valid Match creation`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 0.75f)
-        assertEquals(csaf, match.csaf)
-        assertEquals(0.75f, match.score)
+    fun testMatchingConfidencePlus() {
+        val expectedMatches =
+            mapOf(
+                Pair(DefiniteMatch, DefiniteMatch) to DefiniteMatch,
+                Pair(DefiniteMatch, MatchPackageNoVersion) to MatchPackageNoVersion,
+                Pair(DefiniteMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(DefinitelyNoMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(MatchPackageNoVersion, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(MatchPackageNoVersion, PartialNameMatch) to
+                    CombinedMatch(listOf(MatchPackageNoVersion, PartialNameMatch)),
+            )
+        expectedMatches.forEach { pair, expectedMatch ->
+            assertEquals(expectedMatch, pair.first + pair.second)
+        }
     }
-
-    @Test
-    fun `test Match creation with minimum score`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 0.0f)
-        assertEquals(0.0f, match.score)
-    }
-
-    @Test
-    fun `test Match creation with maximum score`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 1.0f)
-        assertEquals(1.0f, match.score)
-    }
-
-    @Test
-    fun `test Match creation with score below minimum`() {
-        val csaf = goodCsaf()
-        val exception =
-            assertFailsWith<IllegalArgumentException> { Match(csaf = csaf, score = -0.1f) }
-        assertEquals("Score must be in the interval [0.0; 1.0].", exception.message)
-    }
-
-    @Test
-    fun `test Match creation with score above maximum`() {
-        val csaf = goodCsaf()
-        val exception =
-            assertFailsWith<IllegalArgumentException> { Match(csaf = csaf, score = 1.1f) }
-        assertEquals("Score must be in the interval [0.0; 1.0].", exception.message)
-    }*/
 }
