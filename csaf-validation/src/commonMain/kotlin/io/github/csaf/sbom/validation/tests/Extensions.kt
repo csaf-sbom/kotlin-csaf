@@ -211,6 +211,41 @@ fun <T> Csaf.ProductTree?.mapBranchesNotNull(
     return flattened
 }
 
+data class ProductPath(var product: Csaf.Product, var branches: List<Csaf.Branche>)
+
+fun Csaf.ProductTree?.gatherProductPaths(): List<ProductPath> {
+    val paths = mutableListOf<ProductPath>()
+    val worklist = mutableListOf<List<Csaf.Branche>>()
+    val alreadySeen = mutableSetOf<Csaf.Branche>()
+
+    // Start with this branches
+    worklist += this?.branches
+
+    while (worklist.isNotEmpty()) {
+        val currentPath = worklist.maxBy { it.size }
+        worklist.remove(currentPath)
+
+        val currentBranch = currentPath.last()
+        alreadySeen += currentBranch
+
+        val nextBranches = currentBranch.branches
+        for (nextBranch in nextBranches ?: listOf()) {
+            // We arrived at a product node, we are finished
+            val product = nextBranch.product
+            if (product != null) {
+                paths.add(ProductPath(product, currentPath + nextBranch))
+                // Done with this path
+                continue
+            }
+
+            // Otherwise, continue
+            worklist.add(currentPath + nextBranch)
+        }
+    }
+
+    return paths
+}
+
 /**
  * Returns the profile according to
  * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
