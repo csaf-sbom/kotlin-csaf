@@ -211,10 +211,16 @@ fun <T> Csaf.ProductTree?.mapBranchesNotNull(
     return flattened
 }
 
-data class ProductPath(var product: Csaf.Product, var branches: List<Csaf.Branche>)
+/**
+ * A utility class for a [Product] and a list of [Csaf.Branche]s that define the "path" from the
+ * roof of the [Csaf.ProductTree] to the [Product]
+ */
+data class ProductWithBranches(var product: Product, var branches: List<Csaf.Branche>)
 
-fun Csaf.ProductTree?.gatherProductPaths(): List<ProductPath> {
-    val paths = mutableListOf<ProductPath>()
+fun Csaf.ProductTree?.gatherProductsWithBranches(
+    predicate: ((Product) -> Boolean)? = null
+): List<ProductWithBranches> {
+    val paths = mutableListOf<ProductWithBranches>()
     val worklist = mutableListOf<List<Csaf.Branche>>()
     val alreadySeen = mutableSetOf<Csaf.Branche>()
 
@@ -232,8 +238,8 @@ fun Csaf.ProductTree?.gatherProductPaths(): List<ProductPath> {
         for (nextBranch in nextBranches ?: listOf()) {
             // We arrived at a product node, we are finished
             val product = nextBranch.product
-            if (product != null) {
-                paths.add(ProductPath(product, currentPath + nextBranch))
+            if (product != null && predicate?.invoke(product) != false) {
+                paths.add(ProductWithBranches(product, currentPath))
                 // Done with this path
                 continue
             }

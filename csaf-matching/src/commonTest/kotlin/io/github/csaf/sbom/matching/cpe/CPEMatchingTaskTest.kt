@@ -16,11 +16,11 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
-import io.github.csaf.sbom.matching.ProductWithSelector
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -50,7 +50,7 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    ProductWithSelector(
+                    ProductWithBranches(
                         product =
                             Csaf.Product(
                                 product_identification_helper =
@@ -60,8 +60,13 @@ class CPEMatchingTaskTest {
                                 name = "Product",
                                 product_id = "CSAF0001",
                             ),
-                        additionalSelector = Csaf.Category3.product_name,
-                        selectorValue = "Product",
+                        branches =
+                            listOf(
+                                Csaf.Branche(
+                                    category = Csaf.Category3.product_name,
+                                    name = "Product",
+                                )
+                            ),
                     ),
                     Node(
                         identifiers =
@@ -92,7 +97,7 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    ProductWithSelector(
+                    ProductWithBranches(
                         product =
                             Csaf.Product(
                                 product_identification_helper =
@@ -102,8 +107,13 @@ class CPEMatchingTaskTest {
                                 name = "Product",
                                 product_id = "CSAF0001",
                             ),
-                        additionalSelector = Csaf.Category3.product_name,
-                        selectorValue = "Product",
+                        branches =
+                            listOf(
+                                Csaf.Branche(
+                                    category = Csaf.Category3.product_name,
+                                    name = "Product",
+                                )
+                            ),
                     ),
                     Node(
                         identifiers =

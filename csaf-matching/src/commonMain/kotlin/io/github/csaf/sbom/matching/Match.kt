@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import protobom.protobom.Node
 
 /**
@@ -32,7 +33,7 @@ import protobom.protobom.Node
  */
 data class Match(
     val csaf: Csaf,
-    val affectedProduct: ProductWithSelector,
+    val affectedProduct: ProductWithBranches,
     val affectedComponent: Node,
     val confidence: MatchingConfidence,
 )

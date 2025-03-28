@@ -16,9 +16,9 @@
  */
 package io.github.csaf.sbom.matching.purl
 
-import io.github.csaf.sbom.matching.ProductWithSelector
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
+import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -67,7 +67,7 @@ class PurlMatchingTaskTest {
 
             val matchValue =
                 PurlMatchingTask.match(
-                    ProductWithSelector(
+                    ProductWithBranches(
                         product =
                             Csaf.Product(
                                 product_identification_helper =
@@ -79,8 +79,13 @@ class PurlMatchingTaskTest {
                                 name = "Product",
                                 product_id = "CSAF0001",
                             ),
-                        additionalSelector = Csaf.Category3.product_name,
-                        selectorValue = "Product",
+                        branches =
+                            listOf(
+                                Csaf.Branche(
+                                    category = Csaf.Category3.product_name,
+                                    name = "Product",
+                                )
+                            ),
                     ),
                     Node(
                         identifiers =
