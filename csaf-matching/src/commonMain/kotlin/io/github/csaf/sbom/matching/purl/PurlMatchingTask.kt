@@ -17,7 +17,7 @@
 package io.github.csaf.sbom.matching.purl
 
 import io.github.csaf.sbom.matching.MatchingTask
-import io.github.csaf.sbom.matching.ProductWithSelector
+import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -33,6 +33,14 @@ object DefiniteMatch : MatchingConfidence {
 /** A [DefinitelyNoMatch] indicates a definite no match. This is the lowest possible match value. */
 object DefinitelyNoMatch : MatchingConfidence {
     override val value = 0.0f
+}
+
+/**
+ * A [PartialNameMatch] indicates that the name of the vulnerable product partially matches the
+ * affected component.
+ */
+object PartialNameMatch : MatchingConfidence {
+    override val value = 0.5f
 }
 
 /**
@@ -75,7 +83,7 @@ fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
  */
 object PurlMatchingTask : MatchingTask {
 
-    override fun match(vulnerable: ProductWithSelector, component: Node): MatchingConfidence {
+    override fun match(vulnerable: ProductWithBranches, component: Node): MatchingConfidence {
         // Check if we have a purl in the vulnerable product
         val vulnerablePurl =
             vulnerable.product.product_identification_helper?.purl?.let { Purl(it.toString()) }
