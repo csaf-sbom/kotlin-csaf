@@ -71,13 +71,13 @@ class NameMatchingTaskTest {
     fun testMatchVersion() {
         val linux40 =
             productTree
-                .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_4_0" }
+                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
                 .firstOrNull()
         assertNotNull(linux40)
 
         val linuxUnspecified =
             productTree
-                .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
+                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
                 .firstOrNull()
         assertNotNull(linuxUnspecified)
 

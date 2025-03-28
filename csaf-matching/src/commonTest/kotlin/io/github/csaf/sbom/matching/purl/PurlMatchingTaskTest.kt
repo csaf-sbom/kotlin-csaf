@@ -16,7 +16,7 @@
  */
 package io.github.csaf.sbom.matching.purl
 
-import io.github.csaf.sbom.matching.ProductInfo
+import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
@@ -67,7 +67,7 @@ class PurlMatchingTaskTest {
 
             val matchValue =
                 PurlMatchingTask.match(
-                    ProductInfo(
+                    VulnerableProduct(
                         product =
                             Csaf.Product(
                                 product_identification_helper =

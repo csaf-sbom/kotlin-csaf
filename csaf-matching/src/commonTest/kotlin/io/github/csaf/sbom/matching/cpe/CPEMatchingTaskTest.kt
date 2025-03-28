@@ -16,7 +16,7 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
-import io.github.csaf.sbom.matching.ProductInfo
+import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
 import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.purl.MatcherNotSuitable
@@ -50,7 +50,7 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    ProductInfo(
+                    VulnerableProduct(
                         product =
                             Csaf.Product(
                                 product_identification_helper =
@@ -97,7 +97,7 @@ class CPEMatchingTaskTest {
 
             val matchValue =
                 CPEMatchingTask.match(
-                    ProductInfo(
+                    VulnerableProduct(
                         product =
                             Csaf.Product(
                                 product_identification_helper =

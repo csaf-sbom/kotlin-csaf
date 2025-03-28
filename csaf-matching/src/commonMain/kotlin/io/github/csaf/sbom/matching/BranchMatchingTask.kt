@@ -25,11 +25,11 @@ import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 
 /**
- * A [BranchMatchingTask] is a [MatchingTask] that matches a [ProductInfo] against a [Node] based on
- * the information contained in [Csaf.Branche].
+ * A [BranchMatchingTask] is a [MatchingTask] that matches a [VulnerableProduct] against a [Node]
+ * based on the information contained in [Csaf.Branche].
  */
 object BranchMatchingTask : MatchingTask {
-    override fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence {
+    override fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence {
         // First, try to match the name. If we have a definite mismatch we can exit early
         var match: MatchingConfidence = vulnerable.matchesName(component)
         if (match == DefinitelyNoMatch) {
@@ -46,7 +46,7 @@ object BranchMatchingTask : MatchingTask {
     }
 }
 
-fun ProductInfo.matchesVersion(node: Node): MatchingConfidence {
+fun VulnerableProduct.matchesVersion(node: Node): MatchingConfidence {
     val vulnerableVersion =
         this.branches.find { it.category == Csaf.Category3.product_version }?.name
     val componentVersion = node.version
@@ -64,7 +64,7 @@ fun ProductInfo.matchesVersion(node: Node): MatchingConfidence {
 }
 
 /** Matches the name of the vulnerable product with the name of the component. */
-fun ProductInfo.matchesName(node: Node): MatchingConfidence {
+fun VulnerableProduct.matchesName(node: Node): MatchingConfidence {
     val name = this.branches.find { it.category == Csaf.Category3.product_name }?.name
 
     return when {
