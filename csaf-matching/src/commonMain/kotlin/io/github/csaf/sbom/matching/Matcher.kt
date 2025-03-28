@@ -20,9 +20,7 @@ import io.github.csaf.sbom.matching.cpe.CPEMatchingTask
 import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.matching.purl.PurlMatchingTask
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.ProductWithBranches
 import io.github.csaf.sbom.validation.tests.affectedProducts
-import io.github.csaf.sbom.validation.tests.gatherProductsWithBranches
 import protobom.protobom.Document
 import protobom.protobom.Node
 import protobom.protobom.NodeList
@@ -34,7 +32,7 @@ import protobom.protobom.NodeList
  * @property threshold The default threshold required for a match to be included.
  */
 class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
-    var affectedProducts = listOf<ProductWithBranches>()
+    var affectedProducts = listOf<ProductInfo>()
     var tasks = listOf<MatchingTask>()
 
     /**
@@ -50,7 +48,7 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 
         affectedProducts = products.filter { it.product.product_id in affectedProductIds }
 
-        tasks = listOf<MatchingTask>(CPEMatchingTask, PurlMatchingTask, NameMatchingTask)
+        tasks = listOf<MatchingTask>(CPEMatchingTask, PurlMatchingTask, BranchMatchingTask)
     }
 
     /**
@@ -115,5 +113,5 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 }
 
 interface MatchingTask {
-    fun match(vulnerable: ProductWithBranches, component: Node): MatchingConfidence
+    fun match(vulnerable: ProductInfo, component: Node): MatchingConfidence
 }

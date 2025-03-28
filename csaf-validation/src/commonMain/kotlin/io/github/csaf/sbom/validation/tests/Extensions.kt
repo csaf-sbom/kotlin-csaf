@@ -212,47 +212,6 @@ fun <T> Csaf.ProductTree?.mapBranchesNotNull(
 }
 
 /**
- * A utility class for a [Product] and a list of [Csaf.Branche]s that define the "path" from the
- * roof of the [Csaf.ProductTree] to the [Product]
- */
-data class ProductWithBranches(var product: Product, var branches: List<Csaf.Branche>)
-
-fun Csaf.ProductTree?.gatherProductsWithBranches(
-    predicate: ((Product) -> Boolean)? = null
-): List<ProductWithBranches> {
-    val paths = mutableListOf<ProductWithBranches>()
-    val worklist = mutableListOf<List<Csaf.Branche>>()
-    val alreadySeen = mutableSetOf<Csaf.Branche>()
-
-    // Start with this branches
-    worklist += this?.branches
-
-    while (worklist.isNotEmpty()) {
-        val currentPath = worklist.maxBy { it.size }
-        worklist.remove(currentPath)
-
-        val currentBranch = currentPath.last()
-        alreadySeen += currentBranch
-
-        val nextBranches = currentBranch.branches
-        for (nextBranch in nextBranches ?: listOf()) {
-            // We arrived at a product node, we are finished
-            val product = nextBranch.product
-            if (product != null && predicate?.invoke(product) != false) {
-                paths.add(ProductWithBranches(product, currentPath + nextBranch))
-                // Done with this path
-                continue
-            }
-
-            // Otherwise, continue
-            worklist.add(currentPath + nextBranch)
-        }
-    }
-
-    return paths
-}
-
-/**
  * Returns the profile according to
  * [Section 4](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#4-profiles). If this
  * is a local profile, [CSAFBase] is returned as a "catch-all".

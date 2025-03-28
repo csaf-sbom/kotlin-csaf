@@ -17,9 +17,12 @@
 package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.purl.DefiniteMatch
+import io.github.csaf.sbom.matching.purl.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.purl.MatchPackageNoVersion
+import io.github.csaf.sbom.matching.purl.MatchingConfidence
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.gatherProductsWithBranches
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import protobom.protobom.Node
@@ -48,7 +51,16 @@ val productTree =
                                             name = "4.0",
                                         )
                                     ),
-                            )
+                            ),
+                            Csaf.Branche(
+                                product =
+                                    Csaf.Product(
+                                        name = "Linux Kernel",
+                                        product_id = "LINUX_KERNEL_UNSPECIFIED",
+                                    ),
+                                category = Csaf.Category3.product_name,
+                                name = "Linux Kernel",
+                            ),
                         ),
                 )
             )
@@ -63,11 +75,24 @@ class NameMatchingTaskTest {
                 .firstOrNull()
         assertNotNull(linux40)
 
-        val match =
-            NameMatchingTask.match(
-                vulnerable = linux40,
-                component = Node(name = "Linux Kernel", version = "4.0"),
+        val linuxUnspecified =
+            productTree
+                .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
+                .firstOrNull()
+        assertNotNull(linuxUnspecified)
+
+        val expectedMatches =
+            mapOf(
+                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to DefiniteMatch,
+                Pair(linuxUnspecified, Node(name = "Linux Kernel", version = "4.0")) to
+                    MatchPackageNoVersion,
+                Pair(linux40, Node(name = "Linux Kernel", version = "5.0")) to DefinitelyNoMatch,
             )
-        assertIs<DefiniteMatch>(match)
+
+        expectedMatches.forEach { pair, expectedMatch ->
+            val match = BranchMatchingTask.match(vulnerable = pair.first, component = pair.second)
+            assertIs<MatchingConfidence>(match)
+            assertEquals(expectedMatch, match)
+        }
     }
 }
