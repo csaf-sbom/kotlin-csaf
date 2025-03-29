@@ -34,7 +34,7 @@ enum class PropertySource {
  * This interface is used to provide a property one can "match" against. This can be for example
  * something string-based (such as name) or others structures like a software identifier.
  */
-abstract class Property<T>(val value: T, val source: PropertySource) {
+abstract class Property<T : Any>(val value: T, val source: PropertySource) {
 
     /**
      * This method is used to compare the property with another property of the same type. Instead
@@ -58,7 +58,7 @@ abstract class Property<T>(val value: T, val source: PropertySource) {
     }
 
     override fun hashCode(): Int {
-        var result = value?.hashCode() ?: 0
+        var result = value.hashCode()
         result = 31 * result + source.hashCode()
         return result
     }

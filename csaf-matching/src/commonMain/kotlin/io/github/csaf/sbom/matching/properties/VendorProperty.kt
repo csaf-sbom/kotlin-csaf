@@ -34,14 +34,13 @@ typealias VendorProperty = StringProperty
  */
 object VendorPropertyProvider : PropertyProvider<VendorProperty> {
     override fun provideProperty(vulnerable: VulnerableProduct): VendorProperty? {
-        return vulnerable.branches
-            .firstOrNull { it.category == Csaf.Category3.vendor }
-            ?.name
-            ?.toProperty(PropertySource.OTHER)
+        val name = vulnerable.branches.firstOrNull { it.category == Csaf.Category3.vendor }?.name
+        return name?.toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(node: Node): VendorProperty? {
-        return node.suppliers.firstOrNull { it.isOrg }?.name?.toProperty(PropertySource.OTHER)
+        val org = node.suppliers.firstOrNull { it.isOrg }?.name
+        return org?.toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(cpe: Cpe): VendorProperty? {

@@ -18,9 +18,7 @@ package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.gatherVulnerableProducts
 import io.github.csaf.sbom.matching.linuxProductTree
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -55,5 +53,16 @@ class PropertyTest {
 
         val toMatch = VendorPropertyProvider.gatherComponentProperties(linuxComponent)
         assertNotNull(toMatch)
+    }
+
+    @Test
+    fun testEquals() {
+        val p1 = "test".toProperty(PropertySource.OTHER)
+        val p2 = "test2".toProperty(PropertySource.OTHER)
+        val p3 = "test".toProperty(PropertySource.CPE)
+        assertEquals(p1, p1)
+        assertNotEquals(p1, p2)
+        assertNotEquals(p1, p3)
+        assertNotEquals(p1, Any())
     }
 }
