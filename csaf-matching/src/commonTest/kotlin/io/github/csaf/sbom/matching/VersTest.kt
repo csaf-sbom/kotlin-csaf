@@ -14,10 +14,19 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.cpe
+package io.github.csaf.sbom.matching
 
-expect interface Cpe {
-    fun matches(other: Cpe): Boolean
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
+
+class VersTest {
+    @Test
+    fun testParseVers() {
+        var vers = parseVers("vers:deb/>=1.2.3")
+        assertNotNull(vers)
+
+        vers = parseVers("not-a-vers")
+        assertNull(vers)
+    }
 }
-
-expect fun parseCpe(cpe: String): Cpe

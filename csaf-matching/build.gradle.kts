@@ -75,6 +75,7 @@ kotlin {
             dependencies {
                 implementation(libs.purl)
                 implementation(libs.cpe)
+                implementation(libs.versatile)
             }
         }
     }

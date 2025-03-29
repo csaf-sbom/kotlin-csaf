@@ -221,25 +221,25 @@ val Csaf.profile: Profile
         return officialProfiles[this.document.category] ?: CSAFBase
     }
 
-internal fun Collection<String>?.resolveProductIDs(
+fun Collection<String>?.resolveProductIDs(
     map: Map<String, Collection<String>>
 ): Collection<String>? {
     return this?.flatMap { map[it] ?: setOf() }
 }
 
-internal operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
+operator fun <E> MutableCollection<E>.plusAssign(set: Collection<E>?) {
     if (set != null) {
         this.addAll(set)
     }
 }
 
-internal operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
+operator fun <E> MutableCollection<E>.plusAssign(item: E?) {
     if (item != null) {
         this.add(item)
     }
 }
 
-internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection<E> {
+operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection<E> {
     return if (other != null && this != null) {
         this.union(other)
     } else if (other != null) {
@@ -252,7 +252,7 @@ internal operator fun <E> Collection<E>?.plus(other: Collection<E>?): Collection
     }
 }
 
-internal operator fun <E> Collection<E>?.minus(other: Collection<E>?): Collection<E> {
+operator fun <E> Collection<E>?.minus(other: Collection<E>?): Collection<E> {
     return if (other != null && this != null) {
         this.subtract(other)
     } else if (other != null) {
