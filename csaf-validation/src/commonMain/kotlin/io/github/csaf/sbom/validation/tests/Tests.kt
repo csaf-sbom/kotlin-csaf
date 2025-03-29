@@ -19,6 +19,7 @@ package io.github.csaf.sbom.validation.tests
 import com.github.packageurl.MalformedPackageURLException
 import com.github.packageurl.PackageURL
 import io.github.csaf.sbom.cvss.MetricValue
+import io.github.csaf.sbom.cvss.v2.CvssV2Calculation
 import io.github.csaf.sbom.cvss.v3.CvssV3Calculation
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Label1
@@ -313,6 +314,27 @@ object Test618InvalidCVSS : Test {
     }
 }
 
+val test619V2PropertiesMap =
+    mapOf<KProperty1<Csaf.CvssV2, Any?>, KProperty1<CvssV2Calculation, Any>>(
+        Csaf.CvssV2::baseScore to CvssV2Calculation::baseScore,
+        Csaf.CvssV2::exploitability to CvssV2Calculation::exploitability,
+        Csaf.CvssV2::accessVector to CvssV2Calculation::accessVector,
+        Csaf.CvssV2::accessComplexity to CvssV2Calculation::accessComplexity,
+        Csaf.CvssV2::authentication to CvssV2Calculation::authentication,
+        Csaf.CvssV2::confidentialityImpact to CvssV2Calculation::confidentialityImpact,
+        Csaf.CvssV2::integrityImpact to CvssV2Calculation::integrityImpact,
+        Csaf.CvssV2::availabilityImpact to CvssV2Calculation::availabilityImpact,
+        Csaf.CvssV2::confidentialityRequirement to CvssV2Calculation::confidentialityRequirement,
+        Csaf.CvssV2::integrityRequirement to CvssV2Calculation::integrityRequirement,
+        Csaf.CvssV2::availabilityRequirement to CvssV2Calculation::availabilityRequirement,
+        Csaf.CvssV2::environmentalScore to CvssV2Calculation::environmentalScore,
+        Csaf.CvssV2::temporalScore to CvssV2Calculation::temporalScore,
+        Csaf.CvssV2::remediationLevel to CvssV2Calculation::remediationLevel,
+        Csaf.CvssV2::reportConfidence to CvssV2Calculation::reportConfidence,
+        Csaf.CvssV2::collateralDamagePotential to CvssV2Calculation::collateralDamagePotential,
+        Csaf.CvssV2::targetDistribution to CvssV2Calculation::targetDistribution,
+    )
+
 val test619V3PropertiesMap =
     mapOf<KProperty1<Csaf.CvssV3, Any?>, KProperty1<CvssV3Calculation, Any>>(
         Csaf.CvssV3::baseScore to CvssV3Calculation::baseScore,
@@ -331,8 +353,21 @@ object Test619InvalidCVSSComputation : Test {
     override fun test(doc: Csaf): ValidationResult {
         val invalids = mutableSetOf<Pair<String, Pair<Any?, Any>>>()
         for (score in doc.vulnerabilities?.flatMap { it.scores ?: listOf() } ?: listOf()) {
-            // TODO(oxisto): CVSS2
+            score.cvss_v2?.let {
+                val calc = CvssV2Calculation.fromVectorString(it.vectorString)
 
+                // Check the following properties for validity
+                for (entry in test619V2PropertiesMap) {
+                    val documentValue = entry.key.get(it)
+                    val calculatedValue = entry.value.get(calc)
+
+                    // Compare the values. Since it is allowed to skip values in the CSAF document,
+                    // we only compare non-null values
+                    if (documentValue != null && documentValue != calculatedValue) {
+                        invalids += Pair(entry.key.name, Pair(documentValue, calculatedValue))
+                    }
+                }
+            }
             score.cvss_v3?.let {
                 // (Re)-Calculate the score
                 val calc = CvssV3Calculation.fromVectorString(it.vectorString)

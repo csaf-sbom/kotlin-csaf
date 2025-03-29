@@ -207,12 +207,23 @@ class TestsTest {
             "The following properties are invalid: baseScore: 10.0 != 6.5, baseSeverity: LOW != MEDIUM",
             test.test(mandatoryTest("6-1-09-01")),
         )
+        assertValidationFailed(
+            "The following properties are invalid: baseScore: 10.0 != 6.5, baseSeverity: HIGH != MEDIUM",
+            test.test(mandatoryTest("6-1-09-02")),
+        )
+        assertValidationFailed(
+            "The following properties are invalid: baseScore: 6.5 != 10.0",
+            test.test(mandatoryTest("6-1-09-03")),
+        )
 
         // good examples
         assertValidationSuccessful(test.test(goodCsaf(vulnerabilities = null)))
         assertValidationSuccessful(
             test.test(goodCsaf(vulnerabilities = listOf(Csaf.Vulnerability(scores = null))))
         )
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-09-11")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-09-12")))
+        assertValidationSuccessful(test.test(mandatoryTest("6-1-09-13")))
     }
 
     @Test
