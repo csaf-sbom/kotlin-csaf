@@ -30,7 +30,7 @@ import protobom.protobom.Node
  */
 data class VulnerableProduct(var product: Product, var branches: List<Csaf.Branche>) {
     val cpe: Cpe? = product.product_identification_helper?.cpe?.let { parseCpe(it) }
-    val purl: Purl? = product.product_identification_helper?.purl?.toString()?.let { Purl(it) }
+    val purl: Purl? = product.product_identification_helper?.purl?.let { Purl(it.toString()) }
 }
 
 fun Csaf.ProductTree?.gatherVulnerableProducts(

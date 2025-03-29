@@ -16,8 +16,12 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.matching.purl.Purl
+import io.github.csaf.sbom.schema.JsonUri
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class MatchTest {
 
@@ -36,5 +40,50 @@ class MatchTest {
         expectedMatches.forEach { pair, expectedMatch ->
             assertEquals(expectedMatch, pair.first + pair.second)
         }
+    }
+
+    @Test
+    fun testNullGatherVulnerableProducts() {
+        val productTree: Csaf.ProductTree? = null
+        val vulnerableProducts = productTree.gatherVulnerableProducts()
+        assertEquals(emptyList(), vulnerableProducts)
+    }
+
+    @Test
+    fun testVulnerableProductPurl() {
+        var vulnerableProduct =
+            VulnerableProduct(
+                product = Csaf.Product(name = "Product", product_id = "PRODUCT"),
+                branches = listOf(),
+            )
+        assertEquals(null, vulnerableProduct.purl)
+
+        vulnerableProduct =
+            VulnerableProduct(
+                product =
+                    Csaf.Product(
+                        name = "Product",
+                        product_id = "PRODUCT",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(purl = null),
+                    ),
+                branches = listOf(),
+            )
+        assertEquals(null, vulnerableProduct.purl)
+
+        vulnerableProduct =
+            VulnerableProduct(
+                product =
+                    Csaf.Product(
+                        name = "Product",
+                        product_id = "PRODUCT",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(
+                                purl = JsonUri("pkg:maven/io.csaf/csaf-matching@1.0.0")
+                            ),
+                    ),
+                branches = listOf(),
+            )
+        assertIs<Purl>(vulnerableProduct.purl)
     }
 }
