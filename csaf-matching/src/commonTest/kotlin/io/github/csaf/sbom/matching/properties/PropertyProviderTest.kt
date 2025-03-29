@@ -14,14 +14,13 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.provider
+package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.gatherVulnerableProducts
 import io.github.csaf.sbom.matching.linuxProductTree
-import io.github.csaf.sbom.matching.properties.toProperty
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Test
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -34,7 +33,7 @@ class PropertyProviderTest {
                 .firstOrNull()
         assertNotNull(linux40)
 
-        val vulnerable = VendorProvider.gatherVulnerableProperties(linux40)
+        val vulnerable = VendorPropertyProvider.gatherVulnerableProperties(linux40)
         assertEquals(
             mapOf(
                 PropertySource.OTHER to "Linux".toProperty(PropertySource.OTHER),
@@ -54,7 +53,7 @@ class PropertyProviderTest {
                     ),
             )
 
-        val toMatch = VendorProvider.gatherComponentProperties(linuxComponent)
+        val toMatch = VendorPropertyProvider.gatherComponentProperties(linuxComponent)
         assertNotNull(toMatch)
     }
 }

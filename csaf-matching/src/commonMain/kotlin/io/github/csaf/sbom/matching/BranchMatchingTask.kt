@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.matching.vers.parseVers
 import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 

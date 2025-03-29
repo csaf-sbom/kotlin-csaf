@@ -14,8 +14,19 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.purl
+package io.github.csaf.sbom.matching
 
-import com.github.packageurl.PackageURL
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import org.junit.jupiter.api.Test
 
-actual typealias Purl = PackageURL
+class VersTest {
+    @Test
+    fun testParseVers() {
+        var vers = parseVers("vers:deb/>=1.2.3")
+        assertNotNull(vers)
+
+        vers = parseVers("not-a-vers")
+        assertNull(vers)
+    }
+}

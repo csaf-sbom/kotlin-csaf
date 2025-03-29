@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.purl
+package io.github.csaf.sbom.matching.old
 
 import io.github.csaf.sbom.matching.DefiniteMatch
 import io.github.csaf.sbom.matching.DefinitelyNoMatch
@@ -22,6 +22,7 @@ import io.github.csaf.sbom.matching.MatchPackageNoVersion
 import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.MatchingConfidence
 import io.github.csaf.sbom.matching.MatchingTask
+import io.github.csaf.sbom.matching.Purl
 import io.github.csaf.sbom.matching.VulnerableProduct
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
@@ -47,7 +48,7 @@ fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
  * A [PurlMatchingTask] is a matching task that matches a PURL (specified in the security advisory)
  * against a component. It implements the [MatchingTask] interface.
  *
- * It uses the [Purl.confidenceMatching] function to determine the matching confidence.
+ * It uses the [confidenceMatching] function to determine the matching confidence.
  */
 object PurlMatchingTask : MatchingTask {
 

@@ -14,12 +14,14 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.cpe
+package io.github.csaf.sbom.matching.old
 
 import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.MatchingConfidence
 import io.github.csaf.sbom.matching.MatchingTask
 import io.github.csaf.sbom.matching.VulnerableProduct
+import io.github.csaf.sbom.matching.parseCpe
+import io.github.csaf.sbom.matching.properties.CpeProperty
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 

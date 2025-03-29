@@ -16,19 +16,11 @@
  */
 package io.github.csaf.sbom.matching.properties
 
-import io.github.csaf.sbom.matching.CaseInsensitiveIgnoreDashMatch
-import io.github.csaf.sbom.matching.CaseInsensitiveMatch
-import io.github.csaf.sbom.matching.CombinedMatch
-import io.github.csaf.sbom.matching.DefiniteMatch
-import io.github.csaf.sbom.matching.DifferentSources
-import io.github.csaf.sbom.matching.PartialStringMatch
-import io.github.csaf.sbom.matching.provider.PropertySource
+import io.github.csaf.sbom.matching.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * This test class tests the confidence matching of [StringProperty].
- */
+/** This test class tests the confidence matching of [StringProperty]. */
 class StringPropertyTest {
     @Test
     fun testConfidenceMatching() {

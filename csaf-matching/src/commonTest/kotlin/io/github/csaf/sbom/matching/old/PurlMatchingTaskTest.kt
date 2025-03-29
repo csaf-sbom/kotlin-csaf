@@ -14,8 +14,9 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.purl
+package io.github.csaf.sbom.matching.old
 
+import com.github.packageurl.PackageURL
 import io.github.csaf.sbom.matching.DefiniteMatch
 import io.github.csaf.sbom.matching.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.MatchPackageNoVersion
@@ -23,9 +24,9 @@ import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
@@ -66,8 +67,8 @@ class PurlMatchingTaskTest {
     @Test
     fun testMatch() {
         expectedMatchValues.forEach { purlPair, expectedValue ->
-            val vulnerablePurl = purlPair.first?.let { Purl(it) }
-            val sbomPurl = purlPair.second?.let { Purl(it) }
+            val vulnerablePurl = purlPair.first?.let { PackageURL(it) }
+            val sbomPurl = purlPair.second?.let { PackageURL(it) }
 
             val matchValue =
                 PurlMatchingTask.match(
