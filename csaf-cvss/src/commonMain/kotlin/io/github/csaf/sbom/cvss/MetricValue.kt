@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.cvss
 
+import io.github.csaf.sbom.cvss.v2.CvssV2Calculation
 import kotlin.reflect.KProperty
 
 /**
@@ -53,7 +54,11 @@ internal open class MetricDelegate<PropertyEnum : Enum<PropertyEnum>>(
         if (stringValue == null && required) {
             throw IllegalArgumentException("Required property not present: ${property.name}")
         } else if (stringValue == null) {
-            stringValue = "X"
+            if (thisRef is CvssV2Calculation) {
+                stringValue = "ND"
+            } else {
+                stringValue = "X"
+            }
         }
 
         // Find the entry with the matching string value
