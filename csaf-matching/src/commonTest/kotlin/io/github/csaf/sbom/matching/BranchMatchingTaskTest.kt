@@ -54,6 +54,22 @@ val linuxProductTree =
                                     ),
                             ),
                             Csaf.Branche(
+                                category = Csaf.Category3.product_name,
+                                name = "Kernel",
+                                branches =
+                                    listOf(
+                                        Csaf.Branche(
+                                            product =
+                                                Csaf.Product(
+                                                    name = "Kernel >= 4.0",
+                                                    product_id = "LINUX_KERNEL_GTE_4_0",
+                                                ),
+                                            category = Csaf.Category3.product_version_range,
+                                            name = "vers:deb/>=4.0",
+                                        )
+                                    ),
+                            ),
+                            Csaf.Branche(
                                 product =
                                     Csaf.Product(
                                         name = "Kernel",
@@ -76,6 +92,12 @@ class BranchMatchingTaskTest {
                 .firstOrNull()
         assertNotNull(linux40)
 
+        val linuxGTE40 =
+            linuxProductTree
+                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_GTE_4_0" }
+                .firstOrNull()
+        assertNotNull(linuxGTE40)
+
         val linuxUnspecified =
             linuxProductTree
                 .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
@@ -85,6 +107,8 @@ class BranchMatchingTaskTest {
         val expectedMatches =
             mapOf(
                 Pair(linux40, Node(name = "Kernel", version = "4.0")) to DefiniteMatch,
+                Pair(linuxGTE40, Node(name = "Kernel", version = "4.0")) to DefiniteMatch,
+                Pair(linuxGTE40, Node(name = "Kernel", version = "3.0")) to DefinitelyNoMatch,
                 Pair(linuxUnspecified, Node(name = "Kernel", version = "4.0")) to
                     MatchPackageNoVersion,
                 Pair(linux40, Node(name = "Kernel", version = "5.0")) to DefinitelyNoMatch,
@@ -98,7 +122,7 @@ class BranchMatchingTaskTest {
             assertEquals(
                 expectedMatch,
                 match,
-                "{${pair.first} vs ${pair.second} expected $expectedMatch but got $match",
+                "{${pair.first.product.product_id} vs ${pair.second} expected $expectedMatch but got $match",
             )
         }
     }
