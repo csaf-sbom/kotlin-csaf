@@ -18,6 +18,8 @@ package io.github.csaf.sbom.matching
 
 expect class Vers {
     fun contains(version: String): Boolean
+
+    fun overlapsWith(vers: Vers): Boolean
 }
 
 expect fun parseVers(versString: String): Vers?

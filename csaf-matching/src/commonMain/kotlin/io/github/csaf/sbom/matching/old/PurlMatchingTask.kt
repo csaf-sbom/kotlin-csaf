@@ -16,16 +16,7 @@
  */
 package io.github.csaf.sbom.matching.old
 
-import io.github.csaf.sbom.matching.DefiniteMatch
-import io.github.csaf.sbom.matching.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.MatchPackageNoVersion
-import io.github.csaf.sbom.matching.MatcherNotSuitable
-import io.github.csaf.sbom.matching.MatchingConfidence
-import io.github.csaf.sbom.matching.MatchingTask
-import io.github.csaf.sbom.matching.Purl
-import io.github.csaf.sbom.matching.VulnerableProduct
-import protobom.protobom.Node
-import protobom.protobom.SoftwareIdentifierType
+import io.github.csaf.sbom.matching.*
 
 fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
     // All of these must match, otherwise we definitely not have a match. We can skip comparing the
@@ -42,30 +33,4 @@ fun Purl.confidenceMatching(other: Purl): MatchingConfidence {
     if (this.getVersion() == other.getVersion()) return DefiniteMatch
 
     return DefinitelyNoMatch
-}
-
-/**
- * A [PurlMatchingTask] is a matching task that matches a PURL (specified in the security advisory)
- * against a component. It implements the [MatchingTask] interface.
- *
- * It uses the [confidenceMatching] function to determine the matching confidence.
- */
-object PurlMatchingTask : MatchingTask {
-
-    override fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence {
-        // Check if we have a purl in the vulnerable product
-        val vulnerablePurl = vulnerable.purl
-
-        // Check, if we have a purl to match against
-        val componentPurl =
-            component.identifiers[SoftwareIdentifierType.PURL.value]?.let { Purl(it) }
-
-        // No purl in the vulnerable product or no purl in the component means we cannot match with
-        // this matcher (for now).
-        if (vulnerablePurl == null || componentPurl == null) {
-            return MatcherNotSuitable
-        }
-
-        return vulnerablePurl.confidenceMatching(componentPurl)
-    }
 }

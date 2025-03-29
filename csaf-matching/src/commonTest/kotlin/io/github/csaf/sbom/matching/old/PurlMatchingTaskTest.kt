@@ -16,20 +16,7 @@
  */
 package io.github.csaf.sbom.matching.old
 
-import com.github.packageurl.PackageURL
-import io.github.csaf.sbom.matching.DefiniteMatch
-import io.github.csaf.sbom.matching.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.MatchPackageNoVersion
-import io.github.csaf.sbom.matching.MatcherNotSuitable
-import io.github.csaf.sbom.matching.VulnerableProduct
-import io.github.csaf.sbom.schema.JsonUri
-import io.github.csaf.sbom.schema.generated.Csaf
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
-import protobom.protobom.Node
-import protobom.protobom.SoftwareIdentifierType
-
+/*
 class PurlMatchingTaskTest {
 
     val expectedMatchValues =
@@ -113,3 +100,4 @@ class PurlMatchingTaskTest {
         }
     }
 }
+*/
