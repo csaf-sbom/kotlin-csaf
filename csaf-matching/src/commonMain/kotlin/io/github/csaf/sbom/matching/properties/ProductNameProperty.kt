@@ -34,10 +34,9 @@ typealias ProductNameProperty = StringProperty
  */
 object ProductNamePropertyProvider : PropertyProvider<ProductNameProperty> {
     override fun provideProperty(vulnerable: VulnerableProduct): ProductNameProperty? {
-        return vulnerable.branches
-            .firstOrNull { it.category == Csaf.Category3.product_name }
-            ?.name
-            ?.toProperty(PropertySource.OTHER)
+        val name =
+            vulnerable.branches.firstOrNull { it.category == Csaf.Category3.product_name }?.name
+        return name?.toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(node: Node): ProductNameProperty? {

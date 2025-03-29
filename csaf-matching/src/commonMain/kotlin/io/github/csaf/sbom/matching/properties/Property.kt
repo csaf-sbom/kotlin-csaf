@@ -96,12 +96,12 @@ fun <T : Property<*>> PropertyProvider<T>.gatherVulnerableProperties(
 ): Map<PropertySource, T> {
     val properties = mutableMapOf<PropertySource, T>()
     this.provideProperty(vulnerable)?.let { properties[PropertySource.OTHER] = it }
-    vulnerable.cpe
-        ?.let { cpe -> this.provideProperty(cpe) }
-        ?.let { properties[PropertySource.CPE] = it }
-    vulnerable.purl
-        ?.let { purl -> this.provideProperty(purl) }
-        ?.let { properties[PropertySource.PURL] = it }
+
+    var property = vulnerable.cpe?.let { cpe -> this.provideProperty(cpe) }
+    property?.let { properties[PropertySource.CPE] = it }
+
+    property = vulnerable.purl?.let { purl -> this.provideProperty(purl) }
+    property?.let { properties[PropertySource.PURL] = it }
 
     return properties
 }
@@ -117,10 +117,12 @@ fun <T : Property<*>> PropertyProvider<T>.gatherComponentProperties(
 ): Map<PropertySource, T> {
     val properties = mutableMapOf<PropertySource, T>()
     this.provideProperty(node)?.let { properties[PropertySource.OTHER] = it }
-    node.cpe?.let { cpe -> this.provideProperty(cpe) }?.let { properties[PropertySource.CPE] = it }
-    node.purl
-        ?.let { purl -> this.provideProperty(purl) }
-        ?.let { properties[PropertySource.PURL] = it }
+
+    var property = node.cpe?.let { cpe -> this.provideProperty(cpe) }
+    property?.let { properties[PropertySource.CPE] = it }
+
+    property = node.purl?.let { purl -> this.provideProperty(purl) }
+    property?.let { properties[PropertySource.PURL] = it }
 
     return properties
 }
