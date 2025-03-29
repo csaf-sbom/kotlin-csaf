@@ -41,7 +41,7 @@ object VendorPropertyProvider : PropertyProvider<VendorProperty> {
     }
 
     override fun provideProperty(node: Node): VendorProperty? {
-        return null
+        return node.suppliers.firstOrNull { it.isOrg }?.name?.toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(cpe: Cpe): VendorProperty? {

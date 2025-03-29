@@ -22,18 +22,13 @@ import kotlin.test.*
 import protobom.protobom.Document
 import protobom.protobom.Node
 import protobom.protobom.NodeList
+import protobom.protobom.Person
 import protobom.protobom.SoftwareIdentifierType
 
 class MatcherTest {
 
     @Test
     fun `test matchProperty`() {
-        val linux40 =
-            linuxProductTree
-                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
-                .firstOrNull()
-        assertNotNull(linux40)
-
         val vulnerable = linux40
         val node = Node(name = "Linux Kernel", version = "4.0")
         val match = matchProperty(ProductNamePropertyProvider, vulnerable, node)
@@ -42,17 +37,84 @@ class MatcherTest {
 
     @Test
     fun `test matchProperties with matching product and version but missing vendor`() {
-        val linux40 =
-            linuxProductTree
-                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
-                .firstOrNull()
-        assertNotNull(linux40)
-
         val vulnerable = linux40
         // We intentionally do not set the vendor here
         val node = Node(name = "Linux Kernel", version = "4.0")
         val match = matchProperties(vulnerable, node)
         assertIs<MatchWithoutVendor>(match)
+    }
+
+    @Test
+    fun `test matchProperties with different values`() {
+        val expectedMatches =
+            mapOf(
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "4.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to DefiniteMatch,
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "5.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to DefinitelyNoMatch,
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Kernel Enterprise",
+                        version = "4.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to PartialStringMatch,
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Körnel",
+                        version = "4.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to DefinitelyNoMatch,
+                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to MatchWithoutVendor,
+                Pair(
+                    linuxGTE40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "4.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to DefiniteMatch,
+                Pair(
+                    linuxGTE40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "3.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to DefinitelyNoMatch,
+                Pair(
+                    linuxUnspecified,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "4.0",
+                        suppliers = listOf(Person(name = "Linux", isOrg = true)),
+                    ),
+                ) to MatchPackageNoVersion,
+            )
+        expectedMatches.forEach { pair, expectedMatch ->
+            val match = matchProperties(vulnerable = pair.first, node = pair.second)
+            assertIs<MatchingConfidence>(match)
+            assertEquals(
+                expectedMatch,
+                match,
+                "{${pair.first.product.product_id} vs ${pair.second} expected $expectedMatch but got $match",
+            )
+        }
     }
 
     @Test

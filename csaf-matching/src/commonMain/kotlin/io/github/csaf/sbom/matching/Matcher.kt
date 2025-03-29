@@ -16,8 +16,6 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.matching.old.CPEMatchingTask
-import io.github.csaf.sbom.matching.old.PurlMatchingTask
 import io.github.csaf.sbom.matching.properties.*
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.affectedProducts
@@ -47,8 +45,6 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
         val products = doc.product_tree.gatherVulnerableProducts()
 
         affectedProducts = products.filter { it.product.product_id in affectedProductIds }
-
-        tasks = listOf<MatchingTask>(CPEMatchingTask, PurlMatchingTask, BranchMatchingTask)
     }
 
     /**
@@ -86,29 +82,23 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
     private fun match(nodes: List<Node>, threshold: Float): Set<Match> {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
 
-        val matches = mutableMapOf<Node, Match>()
-        // Loop through all matching tasks
-        for (task in tasks) {
-            // Loop through all nodes
-            for (node in nodes) {
-                // Loop through all affected products
-                for (affectedProduct in affectedProducts) {
-                    // Check if the node is affected by the product
-                    val confidence = task.match(affectedProduct, node)
-                    // If the confidence is above the threshold, add it to the matches (unless we
-                    // already have a higher confidence match)
-                    if (confidence.value >= threshold) {
-                        val existing = matches[node]
-                        if (existing != null && existing.confidence.value >= confidence.value) {
-                            continue
-                        }
-                        matches[node] = Match(doc, affectedProduct, node, confidence)
-                    }
+        val matches = mutableSetOf<Match>()
+
+        // Loop through all nodes
+        for (node in nodes) {
+            // Loop through all affected products
+            for (affectedProduct in affectedProducts) {
+                // Check if the node is affected by the product
+                val confidence = matchProperties(affectedProduct, node)
+                // If the confidence is above the threshold, add it to the matches (unless we
+                // already have a higher confidence match)
+                if (confidence.value >= threshold) {
+                    matches += Match(doc, affectedProduct, node, confidence)
                 }
             }
         }
 
-        return matches.values.toSet()
+        return matches
     }
 }
 
@@ -121,6 +111,8 @@ interface MatchingTask {
  * by comparing different [Property] objects in a defined order.
  * - First, it matches the vendor name (see [VendorProperty] / [VendorPropertyProvider])
  * - Then, it matches the product name (see [ProductNameProperty] / [ProductNamePropertyProvider])
+ * - Finally, it matches the product version (see [ProductVersionProperty] /
+ *   [ProductVersionPropertyProvider])
  */
 fun matchProperties(vulnerable: VulnerableProduct, node: Node): MatchingConfidence {
     // First, match on vendor name. If we do not have a match on the vendor, we can still continue,
@@ -133,6 +125,10 @@ fun matchProperties(vulnerable: VulnerableProduct, node: Node): MatchingConfiden
     if (match == DefinitelyNoMatch) {
         return DefinitelyNoMatch
     }
+
+    // Next, we try to match on the product version. If we do not have a match on the product
+    // version, we can still continue albeit with a lower confidence
+    match *= matchProperty(ProductVersionPropertyProvider, vulnerable, node, MatchPackageNoVersion)
 
     return match
 }

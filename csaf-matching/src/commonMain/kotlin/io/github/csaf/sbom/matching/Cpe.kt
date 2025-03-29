@@ -29,6 +29,8 @@ expect interface Cpe {
     fun getVendor(): String
 
     fun getProduct(): String
+
+    fun getVersion(): String
 }
 
 /** Parses a CPE string into a [Cpe] object. */
