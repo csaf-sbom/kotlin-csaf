@@ -25,7 +25,7 @@ import kotlin.test.assertIs
 class MatchTest {
 
     @Test
-    fun testMatchingConfidencePlus() {
+    fun testMatchingConfidenceTimes() {
         val expectedMatches =
             mapOf(
                 Pair(DefiniteMatch, DefiniteMatch) to DefiniteMatch,

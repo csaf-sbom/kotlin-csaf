@@ -20,6 +20,9 @@ import io.github.csaf.sbom.matching.Cpe
 import io.github.csaf.sbom.matching.DefiniteMatch
 import io.github.csaf.sbom.matching.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.MatchingConfidence
+import io.github.csaf.sbom.matching.Purl
+import io.github.csaf.sbom.matching.VulnerableProduct
+import protobom.protobom.Node
 
 /**
  * A property that represents a CPE value.
@@ -40,5 +43,34 @@ class CpeProperty(value: Cpe) : Property<Cpe>(value, PropertySource.CPE) {
         }
 
         return DefinitelyNoMatch
+    }
+}
+
+/** A little helper extension to convert a [Cpe] to a [CpeProperty]. */
+fun Cpe.toProperty(): CpeProperty {
+    return CpeProperty(this)
+}
+
+/**
+ * The [CpePropertyProvider] is a [PropertyProvider] that provides the CPE of a product as a
+ * [CpeProperty].
+ *
+ * This is mostly a simple wrapper around the [CpeProperty] constructor.
+ */
+object CpePropertyProvider : PropertyProvider<CpeProperty> {
+    override fun provideProperty(vulnerable: VulnerableProduct): CpeProperty? {
+        return null
+    }
+
+    override fun provideProperty(node: Node): CpeProperty? {
+        return null
+    }
+
+    override fun provideProperty(cpe: Cpe): CpeProperty? {
+        return cpe.toProperty()
+    }
+
+    override fun provideProperty(purl: Purl): CpeProperty? {
+        return null
     }
 }

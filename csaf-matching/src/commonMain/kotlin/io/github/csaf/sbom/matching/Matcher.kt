@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.old.CPEMatchingTask
 import io.github.csaf.sbom.matching.old.PurlMatchingTask
+import io.github.csaf.sbom.matching.properties.*
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.validation.tests.affectedProducts
 import protobom.protobom.Document
@@ -113,4 +114,76 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 
 interface MatchingTask {
     fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence
+}
+
+/**
+ * This is the core function of the [Matcher]. It matches a vulnerable product against a component
+ * by comparing different [Property] objects in a defined order.
+ * - First, it matches the vendor name (see [VendorProperty] / [VendorPropertyProvider])
+ * - Then, it matches the product name (see [ProductNameProperty] / [ProductNamePropertyProvider])
+ */
+fun matchProperties(vulnerable: VulnerableProduct, node: Node): MatchingConfidence {
+    // First, match on vendor name. If we do not have a match on the vendor, we can still continue,
+    // albeit with a lower confidence
+    var match = matchProperty(VendorPropertyProvider, vulnerable, node, MatchWithoutVendor)
+
+    // Next, we try to match on the product name. If we do not have a match on the product name, we
+    // can exit here
+    match *= matchProperty(ProductNamePropertyProvider, vulnerable, node)
+    if (match == DefinitelyNoMatch) {
+        return DefinitelyNoMatch
+    }
+
+    return match
+}
+
+/**
+ * Matches a certain property (of type [PropertyType]) from a vulnerable product against a property
+ * from a component. The property is provided by a [ProviderType].
+ *
+ * The matching is done by comparing the properties with each other and returning the highest
+ * confidence. The idea is that we can potentially match the properties coming from different
+ * sources. For example, we might be able to obtain a [DefiniteMatch] on a [ProductNameProperty] by
+ * matching their names in an [CpeProperty] (e.g., `linux_kernel`) and a
+ * [CaseInsensitiveIgnoreDashMatch] when comparing the human-readable name (`Linux Kernel`) against
+ * it. In this case, we only return the [DefiniteMatch].
+ *
+ * It follows the following steps:
+ * - Gather the properties from the vulnerable product (using [gatherVulnerableProperties])
+ * - Gather the properties from the component (using [gatherComponentProperties])
+ * - Calculate a confidence for each possible pair of properties and store them in a list
+ * - Return the highest confidence from the list
+ *
+ * @param provider The provider that provides the properties.
+ * @param vulnerable The vulnerable product to match against.
+ * @param node The component to match against.
+ * @param default The default confidence to return if no match is found.
+ */
+fun <
+    RawType,
+    PropertyType : Property<RawType>,
+    ProviderType : PropertyProvider<PropertyType>,
+> matchProperty(
+    provider: ProviderType,
+    vulnerable: VulnerableProduct,
+    node: Node,
+    default: MatchingConfidence = DefinitelyNoMatch,
+): MatchingConfidence {
+    // Gather the properties from the vulnerable product
+    val vulnerableProperties = provider.gatherVulnerableProperties(vulnerable)
+
+    // Gather the properties from the component
+    val componentProperties = provider.gatherComponentProperties(node)
+
+    // Try to match the properties
+    val possibleMatches = mutableListOf<MatchingConfidence>()
+    for (vulnerableProperty in vulnerableProperties.values) {
+        for (componentProperty in componentProperties.values) {
+            val match = vulnerableProperty.confidenceMatching(componentProperty)
+            possibleMatches += match
+        }
+    }
+
+    // Calculate the highest one
+    return possibleMatches.maxByOrNull { it.value } ?: default
 }

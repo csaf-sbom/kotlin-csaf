@@ -68,6 +68,7 @@ fun Csaf.ProductTree?.gatherVulnerableProducts(
     return products
 }
 
+/** [DefiniteMatch] and [DefinitelyNoMatch] */
 interface MatchingConfidence {
     val value: Float
 
@@ -148,6 +149,15 @@ data object DefinitelyNoMatch : MatchingConfidence {
  */
 data object MatchPackageNoVersion : MatchingConfidence {
     override val value = 0.7f
+}
+
+/**
+ * A [MatchWithoutVendor] indicates that the match is without a vendor. This is a partial match
+ * because vendors are often omitted in SBOMs, but they are important for exact matching. So we
+ * consider this a partial match.
+ */
+data object MatchWithoutVendor : MatchingConfidence {
+    override val value = 0.8f
 }
 
 /** A [MatcherNotSuitable] indicates that the matcher is not suitable for the given component. */

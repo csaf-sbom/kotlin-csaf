@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.matching.properties.ProductNamePropertyProvider
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.*
 import protobom.protobom.Document
@@ -24,6 +25,35 @@ import protobom.protobom.NodeList
 import protobom.protobom.SoftwareIdentifierType
 
 class MatcherTest {
+
+    @Test
+    fun `test matchProperty`() {
+        val linux40 =
+            linuxProductTree
+                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
+                .firstOrNull()
+        assertNotNull(linux40)
+
+        val vulnerable = linux40
+        val node = Node(name = "Linux Kernel", version = "4.0")
+        val match = matchProperty(ProductNamePropertyProvider, vulnerable, node)
+        assertIs<DefiniteMatch>(match)
+    }
+
+    @Test
+    fun `test matchProperties with matching product and version but missing vendor`() {
+        val linux40 =
+            linuxProductTree
+                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
+                .firstOrNull()
+        assertNotNull(linux40)
+
+        val vulnerable = linux40
+        // We intentionally do not set the vendor here
+        val node = Node(name = "Linux Kernel", version = "4.0")
+        val match = matchProperties(vulnerable, node)
+        assertIs<MatchWithoutVendor>(match)
+    }
 
     @Test
     fun `test Matcher with null vulnerabilities`() {
