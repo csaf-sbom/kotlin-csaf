@@ -33,7 +33,7 @@ object BranchMatchingTask : MatchingTask {
         }
 
         // Then, try to match the version. If we have a definite mismatch we can exit early
-        match += vulnerable.matchesVersion(component)
+        match = match.times(vulnerable.matchesVersion(component))
         if (match == DefinitelyNoMatch) {
             return DefinitelyNoMatch
         }
@@ -91,7 +91,7 @@ fun VulnerableProduct.matchesName(node: Node): MatchingConfidence {
     return when {
         name == null -> DefinitelyNoMatch
         name == node.name -> DefiniteMatch
-        node.name.contains(name) -> PartialNameMatch
+        node.name.contains(name) -> PartialStringMatch
         else -> DefinitelyNoMatch
     }
 }

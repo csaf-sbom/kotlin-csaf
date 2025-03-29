@@ -34,11 +34,11 @@ class MatchTest {
                 Pair(DefiniteMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
                 Pair(DefinitelyNoMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
                 Pair(MatchPackageNoVersion, DefinitelyNoMatch) to DefinitelyNoMatch,
-                Pair(MatchPackageNoVersion, PartialNameMatch) to
-                    CombinedMatch(listOf(MatchPackageNoVersion, PartialNameMatch)),
+                Pair(MatchPackageNoVersion, PartialStringMatch) to
+                    CombinedMatch(listOf(MatchPackageNoVersion, PartialStringMatch)),
             )
         expectedMatches.forEach { pair, expectedMatch ->
-            assertEquals(expectedMatch, pair.first + pair.second)
+            assertEquals(expectedMatch, pair.first.times(pair.second))
         }
     }
 

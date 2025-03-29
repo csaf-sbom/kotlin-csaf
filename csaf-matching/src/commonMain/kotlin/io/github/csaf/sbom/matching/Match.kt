@@ -18,6 +18,7 @@ package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.matching.cpe.Cpe
 import io.github.csaf.sbom.matching.cpe.parseCpe
+import io.github.csaf.sbom.matching.provider.PropertySource
 import io.github.csaf.sbom.matching.purl.Purl
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
@@ -73,7 +74,7 @@ fun Csaf.ProductTree?.gatherVulnerableProducts(
 interface MatchingConfidence {
     val value: Float
 
-    operator fun plus(other: MatchingConfidence): MatchingConfidence {
+    operator fun times(other: MatchingConfidence): MatchingConfidence {
         return when {
             this is DefiniteMatch -> other
             this is DefinitelyNoMatch -> this
@@ -84,26 +85,62 @@ interface MatchingConfidence {
     }
 }
 
+/**
+ * A [CombinedMatch] indicates a match that is combined from multiple [elements] with different
+ * confidence.
+ *
+ * The value of a [CombinedMatch] is the product of the values of the [MatchingConfidence] elements.
+ */
 data class CombinedMatch(val elements: List<MatchingConfidence>) : MatchingConfidence {
     override val value = elements.map { it.value }.reduce { acc, element -> acc * element }
 }
 
-/** A [DefiniteMatch] indicates a definite match. This is the highest possible match value. */
-object DefiniteMatch : MatchingConfidence {
+/**
+ * A [DefiniteMatch] indicates a definite match. This is the highest possible match value. This
+ * should be used if two properties match exactly -- either lexically or by rules defined in a
+ * specification. For example if one [Cpe] matches another, this is a [DefiniteMatch].
+ */
+data object DefiniteMatch : MatchingConfidence {
     override val value = 1.0f
 }
 
-/** A [DefinitelyNoMatch] indicates a definite no match. This is the lowest possible match value. */
-object DefinitelyNoMatch : MatchingConfidence {
-    override val value = 0.0f
+/**
+ * A [CaseInsensitiveMatch] indicates a (string-based) match that is case-insensitive. This is a
+ * high match value, but not as high as a [DefiniteMatch].
+ */
+data object CaseInsensitiveMatch : MatchingConfidence {
+    override val value = 0.95f
 }
 
 /**
- * A [PartialNameMatch] indicates that the name of the vulnerable product partially matches the
- * affected component.
+ * A [CaseInsensitiveIgnoreDashMatch] indicates a (string-based) match that is case-insensitive and
+ * ignores dashes. This is a relatively high match value, but not as high as a
+ * [CaseInsensitiveMatch].
  */
-object PartialNameMatch : MatchingConfidence {
+data object CaseInsensitiveIgnoreDashMatch : MatchingConfidence {
+    override val value = 0.90f
+}
+
+/**
+ * A [PartialStringMatch] indicates that a string property of the vulnerable product partially
+ * matches the affected component's string property.
+ */
+data object PartialStringMatch : MatchingConfidence {
     override val value = 0.5f
+}
+
+/**
+ * A [DifferentSources] indicates that the information comes from different sources (e.g., matching
+ * a [Cpe.getVendor] to a vendor specified in a [Csaf.Branche]. This can be used to "multiply" the
+ * matching confidence with this value to adjust it for the different sources.
+ */
+data class DifferentSources(val sources: List<PropertySource>) : MatchingConfidence {
+    override val value = 0.9f
+}
+
+/** A [DefinitelyNoMatch] indicates a definite no match. This is the lowest possible match value. */
+data object DefinitelyNoMatch : MatchingConfidence {
+    override val value = 0.0f
 }
 
 /**
@@ -112,12 +149,12 @@ object PartialNameMatch : MatchingConfidence {
  * which version. So in theory, all versions that are in the SBOM could be a match. It is not a
  * definite match, but it is also not a no match. It is a partial match.
  */
-object MatchPackageNoVersion : MatchingConfidence {
+data object MatchPackageNoVersion : MatchingConfidence {
     override val value = 0.7f
 }
 
 /** A [MatcherNotSuitable] indicates that the matcher is not suitable for the given component. */
-object MatcherNotSuitable : MatchingConfidence {
+data object MatcherNotSuitable : MatchingConfidence {
     override val value = -1.0f
 }
 

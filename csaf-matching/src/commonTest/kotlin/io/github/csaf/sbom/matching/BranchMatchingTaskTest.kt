@@ -112,7 +112,7 @@ class BranchMatchingTaskTest {
                 Pair(linuxUnspecified, Node(name = "Kernel", version = "4.0")) to
                     MatchPackageNoVersion,
                 Pair(linux40, Node(name = "Kernel", version = "5.0")) to DefinitelyNoMatch,
-                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to PartialNameMatch,
+                Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to PartialStringMatch,
                 Pair(linux40, Node(name = "Linux Körnel", version = "4.0")) to DefinitelyNoMatch,
             )
 
