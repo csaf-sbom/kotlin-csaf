@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
-class PropertyProviderTest {
+class PropertyTest {
     @Test
     fun testGatherProperties() {
         val linux40 =

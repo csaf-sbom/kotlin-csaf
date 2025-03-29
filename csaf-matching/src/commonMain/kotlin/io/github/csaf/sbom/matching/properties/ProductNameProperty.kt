@@ -41,7 +41,7 @@ object ProductNamePropertyProvider : PropertyProvider<ProductNameProperty> {
     }
 
     override fun provideProperty(node: Node): ProductNameProperty? {
-        return null
+        return node.name.toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(cpe: Cpe): ProductNameProperty? {
