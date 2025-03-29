@@ -23,12 +23,12 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import protobom.protobom.Node
 
-val productTree =
+val linuxProductTree =
     Csaf.ProductTree(
         branches =
             listOf(
                 Csaf.Branche(
-                    name = "Linux Foundation",
+                    name = "Linux",
                     category = Csaf.Category3.vendor,
                     branches =
                         listOf(
@@ -42,6 +42,11 @@ val productTree =
                                                 Csaf.Product(
                                                     name = "Kernel 4.0",
                                                     product_id = "LINUX_KERNEL_4_0",
+                                                    product_identification_helper =
+                                                        Csaf.ProductIdentificationHelper(
+                                                            cpe =
+                                                                "cpe:2.3:o:linux:linux_kernel:4.0:*:*:*:*:*:*:*"
+                                                        ),
                                                 ),
                                             category = Csaf.Category3.product_version,
                                             name = "4.0",
@@ -66,13 +71,13 @@ class BranchMatchingTaskTest {
     @Test
     fun testMatch() {
         val linux40 =
-            productTree
+            linuxProductTree
                 .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
                 .firstOrNull()
         assertNotNull(linux40)
 
         val linuxUnspecified =
-            productTree
+            linuxProductTree
                 .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
                 .firstOrNull()
         assertNotNull(linuxUnspecified)

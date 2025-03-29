@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.*
 import protobom.protobom.Document
 import protobom.protobom.Node
@@ -202,5 +203,44 @@ class MatcherTest {
         val result = matcher.matchAll(sbomWithDifferentCpe)
 
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `testMatch existing confidence is higher`() {
+        val csafDoc =
+            goodCsaf(
+                productTree = linuxProductTree,
+                vulnerabilities =
+                    listOf(
+                        Csaf.Vulnerability(
+                            product_status =
+                                Csaf.ProductStatus(first_affected = setOf("LINUX_KERNEL_4_0"))
+                        )
+                    ),
+            )
+        val matcher = Matcher(csafDoc)
+
+        val sbomWithCpeAndNameMatch =
+            Document(
+                nodeList =
+                    NodeList(
+                        listOf(
+                            Node(
+                                identifiers =
+                                    mapOf(
+                                        SoftwareIdentifierType.CPE23.value to
+                                            "cpe:2.3:o:linux:linux_kernel:4.0:*:*:*:*:*:*:*"
+                                    ),
+                                version = "4.0",
+                                name = "Linux Kernel",
+                            )
+                        )
+                    )
+            )
+
+        val result = matcher.matchAll(sbomWithCpeAndNameMatch)
+        val singleMatch = result.singleOrNull()
+        assertNotNull(singleMatch)
+        assertIs<DefiniteMatch>(singleMatch.confidence)
     }
 }
