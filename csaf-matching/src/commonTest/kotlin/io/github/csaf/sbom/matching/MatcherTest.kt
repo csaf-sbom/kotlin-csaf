@@ -31,7 +31,7 @@ class MatcherTest {
     fun `test matchProperty`() {
         val vulnerable = linux40
         val node = Node(name = "Linux Kernel", version = "4.0")
-        val match = matchProperty(ProductNamePropertyProvider, vulnerable, node)
+        val match: MatchingConfidence = matchProperty(ProductNamePropertyProvider, vulnerable, node)
         assertIs<DefiniteMatch>(match)
     }
 
@@ -81,6 +81,27 @@ class MatcherTest {
                     ),
                 ) to DefinitelyNoMatch,
                 Pair(linux40, Node(name = "Linux Kernel", version = "4.0")) to MatchWithoutVendor,
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "4.0",
+                        identifiers =
+                            mapOf(SoftwareIdentifierType.CPE22.value to "cpe:/a:vendor:linux:4.0"),
+                    ),
+                ) to DefinitelyNoMatch,
+                Pair(
+                    linux40,
+                    Node(
+                        name = "Linux Kernel",
+                        version = "4.0",
+                        identifiers =
+                            mapOf(
+                                SoftwareIdentifierType.CPE22.value to
+                                    "cpe:/o:linux:linux_kernel:4.0"
+                            ),
+                    ),
+                ) to DefiniteMatch,
                 Pair(
                     linuxGTE40,
                     Node(
@@ -145,7 +166,7 @@ class MatcherTest {
     }
 
     @Test
-    fun `test matchAll returns all documents for threshold 0`() {
+    fun `test matchAll returns all for threshold 0`() {
         val matcher =
             Matcher(
                 goodCsaf(
@@ -160,7 +181,7 @@ class MatcherTest {
                 threshold = 0.0f,
             )
 
-        assertEquals(1, result.size)
+        assertEquals(3, result.size)
     }
 
     @Test

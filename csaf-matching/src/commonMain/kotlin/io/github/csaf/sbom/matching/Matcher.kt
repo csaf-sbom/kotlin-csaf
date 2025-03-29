@@ -31,7 +31,6 @@ import protobom.protobom.NodeList
  */
 class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
     var affectedProducts = listOf<VulnerableProduct>()
-    var tasks = listOf<MatchingTask>()
 
     /**
      * The constructor checks that the given threshold is within its bounds and then extracts all
@@ -90,8 +89,7 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
             for (affectedProduct in affectedProducts) {
                 // Check if the node is affected by the product
                 val confidence = matchProperties(affectedProduct, node)
-                // If the confidence is above the threshold, add it to the matches (unless we
-                // already have a higher confidence match)
+                // If the confidence is above the threshold, add it to the matches
                 if (confidence.value >= threshold) {
                     matches += Match(doc, affectedProduct, node, confidence)
                 }
@@ -100,10 +98,6 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
 
         return matches
     }
-}
-
-interface MatchingTask {
-    fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence
 }
 
 /**
@@ -115,6 +109,22 @@ interface MatchingTask {
  *   [ProductVersionPropertyProvider])
  */
 fun matchProperties(vulnerable: VulnerableProduct, node: Node): MatchingConfidence {
+    // First level of priority: CPE, Purl. If either of these is set, we can directly return with
+    // high confidence
+    if (vulnerable.cpe != null) {
+        var match = matchProperty(CpePropertyProvider, vulnerable, node)
+        if (match == DefiniteMatch) {
+            return match
+        }
+    } else if (vulnerable.purl != null) {
+        var match = matchProperty(PurlPropertyProvider, vulnerable, node)
+        if (match == DefiniteMatch) {
+            return match
+        }
+    }
+
+    // Next, we try to match on the category values.
+    //
     // First, match on vendor name. If we do not have a match on the vendor, we can still continue,
     // albeit with a lower confidence
     var match = matchProperty(VendorPropertyProvider, vulnerable, node, MatchWithoutVendor)
@@ -181,5 +191,5 @@ fun <
     }
 
     // Calculate the highest one
-    return possibleMatches.maxByOrNull { it.value } ?: default
+    return (possibleMatches.maxByOrNull { it.value } ?: default)
 }

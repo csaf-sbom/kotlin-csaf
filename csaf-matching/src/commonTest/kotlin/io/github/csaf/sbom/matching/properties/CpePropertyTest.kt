@@ -41,8 +41,9 @@ class CpePropertyTest {
             )
         expectedMatches.forEach { pair, expectedMatch ->
             val match =
-                CpeProperty(parseCpe(pair.first))
-                    .confidenceMatching(CpeProperty(parseCpe(pair.second)))
+                parseCpe(pair.first)
+                    .toProperty()
+                    .confidenceMatching(parseCpe(pair.second).toProperty())
             assertEquals(
                 expectedMatch,
                 match,
