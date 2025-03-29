@@ -16,6 +16,7 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.matching.vers.parseVers
 import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 
@@ -42,20 +43,45 @@ object BranchMatchingTask : MatchingTask {
 }
 
 fun VulnerableProduct.matchesVersion(node: Node): MatchingConfidence {
+    // Extract a vulnerable version from the branches
     val vulnerableVersion =
         this.branches.find { it.category == Csaf.Category3.product_version }?.name
     val componentVersion = node.version
+
+    // Extract a vulnerable version range from the branches...
+    val vulnerableVersionRange =
+        this.branches.find { it.category == Csaf.Category3.product_version_range }?.name
+    // ...and try to parse it as a vers range
+    val vers = vulnerableVersionRange?.let { parseVers(it) }
 
     // In an effort to sanitize the version strings, we remove training zeros and leading 'v'
     // characters
     val vulnerableVersionSanitized = vulnerableVersion?.trimStart('v', ' ', '\t')
     val componentVersionSanitized = componentVersion.trimStart('v', ' ', '\t')
 
-    return when (vulnerableVersionSanitized) {
-        null -> MatchPackageNoVersion
-        componentVersionSanitized -> DefiniteMatch
-        else -> DefinitelyNoMatch
-    }
+    // Match based on the fixed version first
+    val match =
+        when (vulnerableVersionSanitized) {
+            // We are only looking at version ranges if the version is not set
+            null -> {
+                return when (vers) {
+                    // If neither version nor version range is set, we assume that the whole package
+                    // is affected, but our match is less confident
+                    null -> MatchPackageNoVersion
+                    // If a version range is set, we can use it to compare it against our
+                    // (sanitized) component version
+                    else ->
+                        if (vers.contains(componentVersionSanitized)) DefiniteMatch
+                        else DefinitelyNoMatch
+                }
+            }
+            // If the versions matches our (sanitized) component version, we have a definite match
+            componentVersionSanitized -> DefiniteMatch
+            // Otherwise, we have a definite mismatch
+            else -> DefinitelyNoMatch
+        }
+
+    return match
 }
 
 /** Matches the name of the vulnerable product with the name of the component. */
