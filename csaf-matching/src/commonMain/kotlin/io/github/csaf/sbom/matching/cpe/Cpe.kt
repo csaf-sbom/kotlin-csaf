@@ -16,8 +16,47 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
+import io.github.csaf.sbom.matching.DefiniteMatch
+import io.github.csaf.sbom.matching.DefinitelyNoMatch
+import io.github.csaf.sbom.matching.MatchingConfidence
+import io.github.csaf.sbom.matching.properties.Property
+import io.github.csaf.sbom.matching.provider.PropertySource
+import protobom.protobom.Node
+import protobom.protobom.SoftwareIdentifierType
+
 expect interface Cpe {
     fun matches(other: Cpe): Boolean
+
+    fun getVendor(): String
 }
 
 expect fun parseCpe(cpe: String): Cpe
+
+val Node.cpe: Cpe?
+    get() {
+        return (this.identifiers[SoftwareIdentifierType.CPE22.value]
+                ?: this.identifiers[SoftwareIdentifierType.CPE23.value])
+            ?.let { parseCpe(it) }
+    }
+
+/**
+ * A property that represents a CPE value.
+ *
+ * The confidence of a match (see [confidenceMatching]) is determined by comparing the CPE values.
+ * - If the CPEs are equal according to the CPE specification, the confidence is [DefiniteMatch].
+ * - Otherwise, the confidence is [DefinitelyNoMatch].
+ *
+ * We do not need to consider different sources, as a [CpeProperty] can only come from
+ * [PropertySource.CPE].
+ */
+class CpeProperty(value: Cpe) : Property<Cpe>(value, PropertySource.CPE) {
+    override fun confidenceMatching(other: Property<Cpe>): MatchingConfidence {
+        // Check if the CPEs are equal according to the CPE specification, then we have a definite
+        // match
+        if (this.value.matches(other.value)) {
+            return DefiniteMatch
+        }
+
+        return DefinitelyNoMatch
+    }
+}

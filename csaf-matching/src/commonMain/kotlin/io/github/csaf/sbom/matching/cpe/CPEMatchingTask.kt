@@ -16,8 +16,6 @@
  */
 package io.github.csaf.sbom.matching.cpe
 
-import io.github.csaf.sbom.matching.DefiniteMatch
-import io.github.csaf.sbom.matching.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.MatchingConfidence
 import io.github.csaf.sbom.matching.MatchingTask
@@ -25,20 +23,11 @@ import io.github.csaf.sbom.matching.VulnerableProduct
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
 
-fun Cpe.confidenceMatching(other: Cpe): MatchingConfidence {
-    // Check if the CPEs are equal according to the CPE specification, then we have a definite match
-    if (this.matches(other)) {
-        return DefiniteMatch
-    }
-
-    return DefinitelyNoMatch
-}
-
 /**
  * A [CPEMatchingTask] is a matching task that matches a CPE (specified in the security advisory)
  * against a component. It implements the [MatchingTask] interface.
  *
- * It uses the [Cpe.confidenceMatching] function to determine the matching confidence.
+ * It uses the [CpeProperty.confidenceMatching] function to determine the matching confidence.
  */
 object CPEMatchingTask : MatchingTask {
     override fun match(vulnerable: VulnerableProduct, component: Node): MatchingConfidence {
@@ -58,6 +47,6 @@ object CPEMatchingTask : MatchingTask {
         val componentCpe = parseCpe(cpeString)
 
         // Check if the CPE is a match
-        return vulnerableCpe.confidenceMatching(componentCpe)
+        return CpeProperty(vulnerableCpe).confidenceMatching(CpeProperty(componentCpe))
     }
 }

@@ -16,6 +16,9 @@
  */
 package io.github.csaf.sbom.matching.purl
 
+import protobom.protobom.Node
+import protobom.protobom.SoftwareIdentifierType
+
 expect class Purl(purl: String) {
     fun canonicalize(): String
 
@@ -33,3 +36,8 @@ expect class Purl(purl: String) {
 
     fun getSubpath(): String?
 }
+
+val Node.purl: Purl?
+    get() {
+        return this.identifiers[SoftwareIdentifierType.PURL.value]?.let { Purl(it) }
+    }
