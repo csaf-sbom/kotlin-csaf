@@ -110,8 +110,3 @@ data object MatchPackageNoVersion : MatchingConfidence {
 data object MatchWithoutVendor : MatchingConfidence {
     override val value = 0.8f
 }
-
-/** A [MatcherNotSuitable] indicates that the matcher is not suitable for the given component. */
-data object MatcherNotSuitable : MatchingConfidence {
-    override val value = -1.0f
-}

@@ -30,7 +30,7 @@ expect class Purl(purl: String) {
 
     fun getName(): String
 
-    fun getVersion(): String?
+    fun getVersion(): String
 
     fun getQualifiers(): MutableMap<String, String>?
 

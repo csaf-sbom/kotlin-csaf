@@ -29,7 +29,6 @@ sealed class ProductVersion {
             return when (other) {
                 is Fixed -> if (version == other.version) DefiniteMatch else DefinitelyNoMatch
                 is Range -> if (other.range.contains(version)) DefiniteMatch else DefinitelyNoMatch
-                Unspecified -> MatchPackageNoVersion
             }
         }
     }
@@ -40,14 +39,7 @@ sealed class ProductVersion {
                 is Fixed -> if (range.contains(other.version)) DefiniteMatch else DefinitelyNoMatch
                 is Range ->
                     if (range.overlapsWith(other.range)) DefiniteMatch else DefinitelyNoMatch
-                Unspecified -> MatchPackageNoVersion
             }
-        }
-    }
-
-    object Unspecified : ProductVersion() {
-        override fun matchingConfidence(other: ProductVersion): MatchingConfidence {
-            return MatchPackageNoVersion
         }
     }
 }
@@ -80,9 +72,12 @@ fun String.toProductVersion(): ProductVersion.Fixed {
     return ProductVersion.Fixed(versionSanitized)
 }
 
-/** A little helper extension to convert a [Vers] to a [ProductVersion.Range]. */
-fun Vers.toProductVersion(): ProductVersion.Range {
-    return ProductVersion.Range(this)
+/**
+ * A little helper extension to convert a [Vers] to a [ProductVersionProperty] (using
+ * [ProductVersion.Range]).
+ */
+fun Vers.toProductProperty(source: PropertySource): ProductVersionProperty {
+    return ProductVersionProperty(ProductVersion.Range(this), source)
 }
 
 /**
@@ -103,17 +98,18 @@ object ProductVersionPropertyProvider : PropertyProvider<ProductVersionProperty>
                 vulnerable.branches
                     .firstOrNull { it.category == Csaf.Category3.product_version_range }
                     ?.name
-            return versionRange
-                ?.let { parseVers(it) }
-                ?.toProductVersion()
-                ?.toProperty(PropertySource.OTHER)
+            return versionRange?.let { parseVers(it) }?.toProductProperty(PropertySource.OTHER)
         }
 
         return version.toProductVersion().toProperty(PropertySource.OTHER)
     }
 
     override fun provideProperty(node: Node): ProductVersionProperty? {
-        return node.version.ifBlank { null }?.toProductVersion()?.toProperty(PropertySource.OTHER)
+        return if (node.version == "") {
+            null
+        } else {
+            node.version.toProductVersion().toProperty(PropertySource.OTHER)
+        }
     }
 
     override fun provideProperty(cpe: Cpe): ProductVersionProperty? {
@@ -121,6 +117,6 @@ object ProductVersionPropertyProvider : PropertyProvider<ProductVersionProperty>
     }
 
     override fun provideProperty(purl: Purl): ProductVersionProperty? {
-        return purl.getVersion()?.toProductVersion()?.toProperty(PropertySource.PURL)
+        return purl.getVersion().toProductVersion().toProperty(PropertySource.PURL)
     }
 }

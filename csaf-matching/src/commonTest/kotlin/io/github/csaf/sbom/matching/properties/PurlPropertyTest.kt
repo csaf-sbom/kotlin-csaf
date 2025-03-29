@@ -20,6 +20,8 @@ import io.github.csaf.sbom.matching.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import protobom.protobom.Node
 
 class PurlPropertyTest {
     @Test
@@ -66,9 +68,12 @@ class PurlPropertyTest {
 
     @Test
     fun testProvider() {
-        val provider =
+        var provider =
             PurlPropertyProvider.provideProperty(Purl("pkg:maven/io.csaf/csaf-matching@1.0.0"))
         assertNotNull(provider)
         assertEquals("1.0.0", provider.value.version)
+
+        provider = PurlPropertyProvider.provideProperty(Node(version = ""))
+        assertNull(provider)
     }
 }

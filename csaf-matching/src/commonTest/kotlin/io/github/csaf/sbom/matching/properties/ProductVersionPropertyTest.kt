@@ -17,28 +17,15 @@
 package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.*
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class ProductVersionPropertyTest {
     @Test
     fun testMatchingConfidence() {
-
-        assertNotNull(linux40)
-
-        val linuxGTE40 =
-            linuxProductTree
-                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_GTE_4_0" }
-                .firstOrNull()
-        assertNotNull(linuxGTE40)
-
-        val linuxUnspecified =
-            linuxProductTree
-                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
-                .firstOrNull()
-        assertNotNull(linuxUnspecified)
-
         val expectedMatches =
             mapOf(
                 // Match with fixed version
@@ -51,11 +38,24 @@ class ProductVersionPropertyTest {
                     ProductVersion.Fixed(version = "4.0").toProperty(PropertySource.OTHER),
                     ProductVersion.Fixed(version = "5.0").toProperty(PropertySource.OTHER),
                 ) to DefinitelyNoMatch,
-                // Match with range
+                // Match with range to fixed
                 Pair(
                     ProductVersion.Range(range = assertNotNull(parseVers("vers:deb/>=4.0")))
                         .toProperty(PropertySource.OTHER),
                     ProductVersion.Fixed(version = "4.0").toProperty(PropertySource.OTHER),
+                ) to DefiniteMatch,
+                // Match with fixed to range
+                Pair(
+                    ProductVersion.Fixed(version = "4.0").toProperty(PropertySource.OTHER),
+                    ProductVersion.Range(range = assertNotNull(parseVers("vers:deb/>=4.0")))
+                        .toProperty(PropertySource.OTHER),
+                ) to DefiniteMatch,
+                // Match range to range
+                Pair(
+                    ProductVersion.Range(range = assertNotNull(parseVers("vers:deb/>=3.0")))
+                        .toProperty(PropertySource.OTHER),
+                    ProductVersion.Range(range = assertNotNull(parseVers("vers:deb/>=4.0")))
+                        .toProperty(PropertySource.OTHER),
                 ) to DefiniteMatch,
                 // No match with range
                 Pair(
@@ -72,5 +72,23 @@ class ProductVersionPropertyTest {
                 "${pair.first} vs ${pair.second} expected $expectedMatch but got $match",
             )
         }
+    }
+
+    @Test
+    fun testProvider() {
+        var provider =
+            ProductVersionPropertyProvider.provideProperty(
+                VulnerableProduct(
+                    product = Csaf.Product(product_id = "PID", name = "Product"),
+                    branches =
+                        listOf(
+                            Csaf.Branche(
+                                category = Csaf.Category3.product_version_range,
+                                name = "not-a-vers",
+                            )
+                        ),
+                )
+            )
+        assertNull(provider)
     }
 }
