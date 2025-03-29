@@ -14,10 +14,30 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.vers
+package io.github.csaf.sbom.matching
 
-expect class Vers {
-    fun contains(version: String): Boolean
+import protobom.protobom.Node
+import protobom.protobom.SoftwareIdentifierType
+
+expect class Purl(purl: String) {
+    fun canonicalize(): String
+
+    fun getScheme(): String?
+
+    fun getType(): String?
+
+    fun getNamespace(): String?
+
+    fun getName(): String
+
+    fun getVersion(): String?
+
+    fun getQualifiers(): MutableMap<String, String>?
+
+    fun getSubpath(): String?
 }
 
-expect fun parseVers(versString: String): Vers?
+val Node.purl: Purl?
+    get() {
+        return this.identifiers[SoftwareIdentifierType.PURL.value]?.let { Purl(it) }
+    }

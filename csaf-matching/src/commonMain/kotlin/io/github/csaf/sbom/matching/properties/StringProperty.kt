@@ -16,14 +16,7 @@
  */
 package io.github.csaf.sbom.matching.properties
 
-import io.github.csaf.sbom.matching.CaseInsensitiveIgnoreDashMatch
-import io.github.csaf.sbom.matching.CaseInsensitiveMatch
-import io.github.csaf.sbom.matching.DefiniteMatch
-import io.github.csaf.sbom.matching.DefinitelyNoMatch
-import io.github.csaf.sbom.matching.DifferentSources
-import io.github.csaf.sbom.matching.MatchingConfidence
-import io.github.csaf.sbom.matching.PartialStringMatch
-import io.github.csaf.sbom.matching.provider.PropertySource
+import io.github.csaf.sbom.matching.*
 
 val dashUnderscoreRegex = Regex("[_-]")
 

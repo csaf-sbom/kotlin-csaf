@@ -16,8 +16,19 @@
  */
 package io.github.csaf.sbom.matching.properties
 
+import io.github.csaf.sbom.matching.Cpe
 import io.github.csaf.sbom.matching.MatchingConfidence
-import io.github.csaf.sbom.matching.provider.PropertySource
+import io.github.csaf.sbom.matching.Purl
+import io.github.csaf.sbom.matching.VulnerableProduct
+import io.github.csaf.sbom.matching.cpe
+import io.github.csaf.sbom.matching.purl
+import protobom.protobom.Node
+
+enum class PropertySource {
+    PURL,
+    CPE,
+    OTHER,
+}
 
 /**
  * This interface is used to provide a property one can "match" against. This can be for example
@@ -55,4 +66,61 @@ abstract class Property<T>(val value: T, val source: PropertySource) {
     override fun toString(): String {
         return "Property(value=$value, source=$source)"
     }
+}
+
+/**
+ * This interface is used to provide a property one can "match" against. This can be for example a
+ * name or a version.
+ *
+ * The property is (usually) extracted out of a [VulnerableProduct] in the [provideProperty] method.
+ */
+interface PropertyProvider<T : Property<*>> {
+
+    fun provideProperty(vulnerable: VulnerableProduct): T?
+
+    fun provideProperty(node: Node): T?
+
+    fun provideProperty(cpe: Cpe): T?
+
+    fun provideProperty(purl: Purl): T?
+}
+
+/**
+ * This extension function is used to gather all properties from a [PropertyProvider] for a
+ * [VulnerableProduct].
+ *
+ * It returns a [Map] with the [PropertySource] as key and the property as value.
+ */
+fun <T : Property<*>> PropertyProvider<T>.gatherVulnerableProperties(
+    vulnerable: VulnerableProduct
+): Map<PropertySource, T> {
+    val properties = mutableMapOf<PropertySource, T>()
+    this.provideProperty(vulnerable)?.let { properties[PropertySource.OTHER] = it }
+    vulnerable.cpe
+        ?.let { cpe -> this.provideProperty(cpe) }
+        ?.let { properties[PropertySource.CPE] = it }
+    vulnerable.purl
+        ?.let { purl -> this.provideProperty(purl) }
+        ?.let { properties[PropertySource.PURL] = it }
+
+    return properties
+}
+
+/**
+ * This extension function is used to gather all properties from a [PropertyProvider] for a [Node]
+ * (component).
+ *
+ * It returns a [Map] with the [PropertySource] as key and the property as value.
+ */
+fun <T : Property<*>> PropertyProvider<T>.gatherComponentProperties(
+    node: Node
+): Map<PropertySource, T> {
+    val properties = mutableMapOf<PropertySource, T>()
+    this.provideProperty(node)?.let { properties[PropertySource.OTHER] = it }
+    node.cpe?.let { cpe -> this.provideProperty(cpe) }?.let { properties[PropertySource.CPE] = it }
+    node.purl
+        ?.let { purl -> this.provideProperty(purl) }
+        ?.let { properties[PropertySource.PURL] = it }
+
+    return properties
 }

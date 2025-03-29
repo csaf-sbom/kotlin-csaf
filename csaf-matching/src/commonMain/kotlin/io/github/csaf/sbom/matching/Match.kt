@@ -16,10 +16,7 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.matching.cpe.Cpe
-import io.github.csaf.sbom.matching.cpe.parseCpe
-import io.github.csaf.sbom.matching.provider.PropertySource
-import io.github.csaf.sbom.matching.purl.Purl
+import io.github.csaf.sbom.matching.properties.PropertySource
 import io.github.csaf.sbom.schema.generated.Csaf
 import io.github.csaf.sbom.schema.generated.Csaf.Product
 import io.github.csaf.sbom.validation.tests.plusAssign

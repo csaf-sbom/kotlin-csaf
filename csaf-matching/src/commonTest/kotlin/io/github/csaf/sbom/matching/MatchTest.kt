@@ -16,7 +16,6 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.matching.purl.Purl
 import io.github.csaf.sbom.schema.JsonUri
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test

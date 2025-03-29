@@ -14,10 +14,19 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.vers
+package io.github.csaf.sbom.matching
 
+import com.github.packageurl.PackageURL
 import io.github.nscuro.versatile.Vers
 import io.github.nscuro.versatile.VersException
+import us.springett.parsers.cpe.CpeParser
+import us.springett.parsers.cpe.ICpe
+
+actual typealias Cpe = ICpe
+
+actual fun parseCpe(cpe: String): Cpe = CpeParser.parse(cpe)
+
+actual typealias Purl = PackageURL
 
 actual typealias Vers = Vers
 

@@ -14,19 +14,4 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.vers
-
-import kotlin.test.Test
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-
-class VersTest {
-    @Test
-    fun testParseVers() {
-        var vers = parseVers("vers:deb/>=1.2.3")
-        assertNotNull(vers)
-
-        vers = parseVers("not-a-vers")
-        assertNull(vers)
-    }
-}
+package io.github.csaf.sbom.matching.provider

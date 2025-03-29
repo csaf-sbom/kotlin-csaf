@@ -14,12 +14,13 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.cpe
+package io.github.csaf.sbom.matching.old
 
 import io.github.csaf.sbom.matching.DefiniteMatch
 import io.github.csaf.sbom.matching.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.MatcherNotSuitable
 import io.github.csaf.sbom.matching.VulnerableProduct
+import io.github.csaf.sbom.matching.parseCpe
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
