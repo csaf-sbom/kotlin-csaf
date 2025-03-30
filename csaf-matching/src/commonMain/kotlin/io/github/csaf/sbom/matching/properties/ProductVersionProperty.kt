@@ -44,7 +44,20 @@ sealed class ProductVersion {
     }
 }
 
-/** A property that represents a product version. */
+/**
+ * A property that represents a product version.
+ *
+ * The confidence of a match (see [confidenceMatching]) is determined by comparing the version
+ * values.
+ * - If the version is a fixed version and the other is a fixed version, the confidence is
+ *   [DefiniteMatch] if the versions are equal, otherwise [DefinitelyNoMatch].
+ * - If the version is a fixed version and the other is a range, the confidence is [DefiniteMatch]
+ *   if the version is in the range, otherwise [DefinitelyNoMatch].
+ * - If the version is a range and the other is a fixed version, the confidence is [DefiniteMatch]
+ *   if the version is in the range, otherwise [DefinitelyNoMatch].
+ * - If the version is a range and the other is a range, the confidence is [DefiniteMatch] if the
+ *   ranges overlap, otherwise [DefinitelyNoMatch].
+ */
 class ProductVersionProperty(value: ProductVersion, source: PropertySource) :
     Property<ProductVersion>(value, source) {
     override fun confidenceMatching(other: Property<ProductVersion>): MatchingConfidence {
@@ -117,6 +130,7 @@ object ProductVersionPropertyProvider : PropertyProvider<ProductVersionProperty>
     }
 
     override fun provideProperty(purl: Purl): ProductVersionProperty? {
-        return purl.getVersion().toProductVersion().toProperty(PropertySource.PURL)
+        val version = purl.getVersion()?.toProductVersion()
+        return version?.toProperty(PropertySource.PURL)
     }
 }

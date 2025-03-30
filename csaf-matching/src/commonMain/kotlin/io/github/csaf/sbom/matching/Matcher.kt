@@ -38,7 +38,8 @@ class Matcher(val advisory: Csaf, val threshold: Float = 0.5f) {
      */
     init {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
-        val productIds = advisory.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
+        val productIds =
+            advisory.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
 
         val products = advisory.product_tree.gatherVulnerableProducts()
@@ -55,8 +56,7 @@ class Matcher(val advisory: Csaf, val threshold: Float = 0.5f) {
      *   value of this [Matcher].
      * @return A list of CSAF documents matching the given node, along with resp. match scores.
      */
-    fun match(node: Node, threshold: Float = this.threshold) =
-        match(listOf(node), threshold)
+    fun match(node: Node, threshold: Float = this.threshold) = match(listOf(node), threshold)
 
     /**
      * Matches the provided SBOM document with the CSAF documents and determines whether they meet

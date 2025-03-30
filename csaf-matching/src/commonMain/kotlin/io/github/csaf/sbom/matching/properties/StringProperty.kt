@@ -27,6 +27,8 @@ val dashUnderscoreRegex = Regex("[_-]")
  * values.
  * - If the strings are equal, the confidence is [DefiniteMatch].
  * - If the strings are equal ignoring case, the confidence is [CaseInsensitiveMatch].
+ * - If the strings are equal ignoring case and ignoring dashes/underscores, the confidence is
+ *   [CaseInsensitiveIgnoreDashMatch].
  * - Otherwise, the confidence is [DefinitelyNoMatch].
  *
  * Finally, if the sources of the properties are different, the confidence is multiplied by

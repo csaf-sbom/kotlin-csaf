@@ -90,5 +90,9 @@ class ProductVersionPropertyTest {
                 )
             )
         assertNull(provider)
+
+        provider =
+            ProductVersionPropertyProvider.provideProperty(Purl("pkg:maven/io.csaf/csaf-matching"))
+        assertNull(provider)
     }
 }
