@@ -23,15 +23,15 @@ import protobom.protobom.Node
  * A data class representing a match between an [Csaf.Product] to a SBOM [Node] with given
  * [MatchingConfidence].
  *
- * @property csaf The matched CSAF document.
- * @property vulnerableProduct The vulnerable product from the CSAF document.
- * @property affectedComponent The affected component from the SBOM document.
+ * @property advisory The matched CSAF advisory.
+ * @property vulnerableProduct The vulnerable product from the CSAF advisory.
+ * @property affectedNode The affected component from the SBOM document.
  * @property confidence The confidence score of the match.
  * @constructor Creates CSAF-SBOM-match with given score.
  */
 data class Match(
-    val csaf: Csaf,
-    val vulnerableProduct: VulnerableProduct,
-    val affectedComponent: Node,
+    val advisory: Csaf,
+    val vulnerableProduct: Csaf.Product,
+    val affectedNode: Node,
     val confidence: MatchingConfidence,
 )

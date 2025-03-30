@@ -26,11 +26,11 @@ import protobom.protobom.NodeList
 /**
  * Matcher for matching SBOM documents with a provided CSAF document.
  *
- * @property doc The CSAF document used by this matcher.
+ * @property advisory The CSAF security advisory used by this matcher.
  * @property threshold The default threshold required for a match to be included.
  */
-class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
-    var affectedProducts = listOf<VulnerableProduct>()
+class Matcher(val advisory: Csaf, val threshold: Float = 0.5f) {
+    var vulnerableProducts = listOf<VulnerableProduct>()
 
     /**
      * The constructor checks that the given threshold is within its bounds and then extracts all
@@ -38,37 +38,37 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
      */
     init {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
-        val productIds = doc.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
+        val productIds = advisory.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } ?: listOf()
         val affectedProductIds = productIds
 
-        val products = doc.product_tree.gatherVulnerableProducts()
+        val products = advisory.product_tree.gatherVulnerableProducts()
 
-        affectedProducts = products.filter { it.product.product_id in affectedProductIds }
+        vulnerableProducts = products.filter { it.product.product_id in affectedProductIds }
     }
 
     /**
      * Matches the provided SBOM node with the CSAF documents and determines whether they meet
      * specific criteria.
      *
-     * @param sbomNode The SBOM node represented by a [Node] instance.
+     * @param node The SBOM node represented by a [Node] instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of CSAF documents matching the given node, along with resp. match scores.
      */
-    fun match(sbomNode: Node, threshold: Float = this.threshold) =
-        match(listOf(sbomNode), threshold)
+    fun match(node: Node, threshold: Float = this.threshold) =
+        match(listOf(node), threshold)
 
     /**
      * Matches the provided SBOM document with the CSAF documents and determines whether they meet
      * specific criteria.
      *
-     * @param sbomDocument The SBOM document represented by a [Document] instance.
+     * @param document The SBOM document represented by a [Document] instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of CSAF documents matching the given document, along with resp. match scores.
      */
-    fun matchAll(sbomDocument: Document, threshold: Float = this.threshold): Set<Match> =
-        match((sbomDocument.nodeList ?: NodeList()).nodes, threshold)
+    fun matchAll(document: Document, threshold: Float = this.threshold): Set<Match> =
+        match((document.nodeList ?: NodeList()).nodes, threshold)
 
     /**
      * Matches the provided SBOM nodes with the CSAF documents and determines whether they meet
@@ -86,12 +86,12 @@ class Matcher(val doc: Csaf, val threshold: Float = 0.5f) {
         // Loop through all nodes
         for (node in nodes) {
             // Loop through all affected products
-            for (affectedProduct in affectedProducts) {
+            for (vulnerableProduct in vulnerableProducts) {
                 // Check if the node is affected by the product
-                val confidence = matchProperties(affectedProduct, node)
+                val confidence = matchProperties(vulnerableProduct, node)
                 // If the confidence is above the threshold, add it to the matches
                 if (confidence.value >= threshold) {
-                    matches += Match(doc, affectedProduct, node, confidence)
+                    matches += Match(advisory, vulnerableProduct.product, node, confidence)
                 }
             }
         }
