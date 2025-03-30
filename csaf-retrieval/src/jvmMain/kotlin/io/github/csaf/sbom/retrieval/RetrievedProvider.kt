@@ -256,11 +256,11 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                             }
                         }
                     } else {
-                        var lines =
-                            index.lines()
+                        var lines = index.lines()
                         lines.forEachIndexed { idx, line ->
                             // The common sense is to ignore trailing empty lines (see
-                            if(idx == lines.size -1 && line.isBlank()) {
+                            // https://github.com/oasis-tcs/csaf/issues/919)
+                            if (idx == lines.size - 1 && line.isBlank()) {
                                 return@forEachIndexed
                             }
 
