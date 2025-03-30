@@ -256,10 +256,15 @@ data class RetrievedProvider(val json: Provider) : Validatable {
                             }
                         }
                     } else {
-                        index.lines().forEach { line ->
-                            if (line.isNotBlank()) {
-                                send(Result.success("$directoryUrl/$line"))
+                        var lines =
+                            index.lines()
+                        lines.forEachIndexed { idx, line ->
+                            // The common sense is to ignore trailing empty lines (see
+                            if(idx == lines.size -1 && line.isBlank()) {
+                                return@forEachIndexed
                             }
+
+                            send(Result.success("$directoryUrl/$line"))
                         }
                     }
                 },
