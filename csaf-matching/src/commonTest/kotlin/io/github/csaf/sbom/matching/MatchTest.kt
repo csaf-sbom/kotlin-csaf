@@ -43,8 +43,8 @@ class MatchTest {
 
     @Test
     fun testNullGatherVulnerableProducts() {
-        val productTree: Csaf.ProductTree? = null
-        val vulnerableProducts = productTree.gatherVulnerableProducts()
+        val csaf = goodCsaf(productTree = null)
+        val vulnerableProducts = csaf.gatherVulnerableProducts()
         assertEquals(emptyList(), vulnerableProducts)
     }
 
@@ -52,6 +52,7 @@ class MatchTest {
     fun testVulnerableProductPurl() {
         var vulnerableProduct =
             VulnerableProduct(
+                advisory = goodCsaf(),
                 product = Csaf.Product(name = "Product", product_id = "PRODUCT"),
                 branches = listOf(),
             )
@@ -59,6 +60,7 @@ class MatchTest {
 
         vulnerableProduct =
             VulnerableProduct(
+                advisory = goodCsaf(),
                 product =
                     Csaf.Product(
                         name = "Product",
@@ -72,6 +74,7 @@ class MatchTest {
 
         vulnerableProduct =
             VulnerableProduct(
+                advisory = goodCsaf(),
                 product =
                     Csaf.Product(
                         name = "Product",

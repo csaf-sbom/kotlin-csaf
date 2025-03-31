@@ -79,6 +79,7 @@ class ProductVersionPropertyTest {
         var provider =
             ProductVersionPropertyProvider.provideProperty(
                 VulnerableProduct(
+                    advisory = goodCsaf(),
                     product = Csaf.Product(product_id = "PID", name = "Product"),
                     branches =
                         listOf(

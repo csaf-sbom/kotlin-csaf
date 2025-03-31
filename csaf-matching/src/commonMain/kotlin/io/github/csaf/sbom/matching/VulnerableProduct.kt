@@ -24,12 +24,16 @@ import io.github.csaf.sbom.validation.tests.plusAssign
  * A utility class for a [Product] and a list of [Csaf.Branche]s that define the "path" from the
  * roof of the [Csaf.ProductTree] to the [Product]
  */
-data class VulnerableProduct(var product: Product, var branches: List<Csaf.Branche>) {
+data class VulnerableProduct(
+    var advisory: Csaf,
+    var product: Product,
+    var branches: List<Csaf.Branche>,
+) {
     val cpe: Cpe? = product.product_identification_helper?.cpe?.let { parseCpe(it) }
     val purl: Purl? = product.product_identification_helper?.purl?.let { Purl(it.toString()) }
 }
 
-fun Csaf.ProductTree?.gatherVulnerableProducts(
+fun Csaf.gatherVulnerableProducts(
     predicate: ((Product) -> Boolean)? = null
 ): List<VulnerableProduct> {
     val products = mutableListOf<VulnerableProduct>()
@@ -37,7 +41,7 @@ fun Csaf.ProductTree?.gatherVulnerableProducts(
     val alreadySeen = mutableSetOf<Csaf.Branche>()
 
     // Start with this branches
-    worklist += this?.branches
+    worklist += this.product_tree?.branches
 
     while (worklist.isNotEmpty()) {
         val currentPath = worklist.maxBy { it.size }
@@ -52,7 +56,11 @@ fun Csaf.ProductTree?.gatherVulnerableProducts(
             val product = nextBranch.product
             if (product != null && predicate?.invoke(product) != false) {
                 val vulnerableProduct =
-                    VulnerableProduct(product = product, branches = currentPath + nextBranch)
+                    VulnerableProduct(
+                        advisory = this,
+                        product = product,
+                        branches = currentPath + nextBranch,
+                    )
                 products.add(vulnerableProduct)
                 // Done with this path
                 continue

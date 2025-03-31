@@ -17,6 +17,7 @@
 package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.VulnerableProduct
+import io.github.csaf.sbom.matching.goodCsaf
 import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertNull
@@ -27,6 +28,7 @@ class VendorPropertyTest {
         val vendorProperty =
             VendorPropertyProvider.provideProperty(
                 VulnerableProduct(
+                    advisory = goodCsaf(),
                     product = Csaf.Product(product_id = "PRODUCT", name = "Product"),
                     branches =
                         listOf(

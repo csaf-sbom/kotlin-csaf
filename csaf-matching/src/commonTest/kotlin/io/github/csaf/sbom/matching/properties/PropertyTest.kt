@@ -16,8 +16,7 @@
  */
 package io.github.csaf.sbom.matching.properties
 
-import io.github.csaf.sbom.matching.gatherVulnerableProducts
-import io.github.csaf.sbom.matching.linuxProductTree
+import io.github.csaf.sbom.matching.linux40
 import kotlin.test.*
 import protobom.protobom.Node
 import protobom.protobom.SoftwareIdentifierType
@@ -25,12 +24,6 @@ import protobom.protobom.SoftwareIdentifierType
 class PropertyTest {
     @Test
     fun testGatherProperties() {
-        val linux40 =
-            linuxProductTree
-                .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
-                .firstOrNull()
-        assertNotNull(linux40)
-
         val vulnerable = VendorPropertyProvider.gatherVulnerableProperties(linux40)
         assertEquals(
             mapOf(
