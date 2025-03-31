@@ -49,18 +49,24 @@ class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
     }
 
     /**
-     * Matches the provided SBOM component with the CSAF documents and determines whether they meet
+     * Matches the provided SBOM database with the CSAF advisories and determines whether they meet
      * specific criteria.
      *
-     * @param node The SBOM node represented by a [Node] instance.
+     * @param database A list of SBOM documents represented by [Document] instances.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun matchSBOMComponent(node: Node, threshold: Float = this.threshold) = match(listOf(node), threshold)
+    fun matchDatabase(database: List<Document>, threshold: Float = this.threshold): Set<Match> {
+        val matches = mutableSetOf<Match>()
+        for (document in database) {
+            matches += match(document, threshold)
+        }
+        return matches
+    }
 
     /**
-     * Matches the provided SBOM document with the CSAF documents and determines whether they meet
+     * Matches the provided SBOM document with the CSAF advisories and determines whether they meet
      * specific criteria.
      *
      * @param document The SBOM document represented by a [Document] instance.
@@ -68,28 +74,20 @@ class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
      *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun matchSBOM(document: Document, threshold: Float = this.threshold): Set<Match> =
-        match((document.nodeList ?: NodeList()).nodes, threshold)
+    fun match(document: Document, threshold: Float = this.threshold): Set<Match> =
+        internalMatch((document.nodeList ?: NodeList()).nodes, threshold)
 
     /**
-     * Matches the provided SBOM database with the CSAF documents and determines whether they meet
+     * Matches the provided SBOM component with the CSAF advisories and determines whether they meet
      * specific criteria.
      *
-     * @param database A list of SBOM documents represented by [Document] instances.
+     * @param node The SBOM node represented by a [Node] instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
-     *  value of this [Matcher].
+     *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun matchSBOMDatabase(
-        database: List<Document>,
-        threshold: Float = this.threshold,
-    ): Set<Match> {
-        val matches = mutableSetOf<Match>()
-        for (document in database) {
-            matches += matchSBOM(document, threshold)
-        }
-        return matches
-    }
+    fun matchComponent(node: Node, threshold: Float = this.threshold) =
+        internalMatch(listOf(node), threshold)
 
     /**
      * Matches the provided SBOM nodes with the CSAF documents and determines whether they meet
@@ -99,7 +97,7 @@ class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
      * @param threshold The minimum threshold required for a match to be included.
      * @return A list of CSAF documents matching the given nodes, along with resp. match scores.
      */
-    private fun match(nodes: List<Node>, threshold: Float): Set<Match> {
+    private fun internalMatch(nodes: List<Node>, threshold: Float): Set<Match> {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
 
         val matches = mutableSetOf<Match>()

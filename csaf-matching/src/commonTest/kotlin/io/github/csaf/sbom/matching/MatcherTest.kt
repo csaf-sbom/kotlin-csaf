@@ -159,14 +159,29 @@ class MatcherTest {
         assertFailsWith<IllegalArgumentException> { Matcher(listOf(csafDoc), threshold = -0.1f) }
         assertFailsWith<IllegalArgumentException> { Matcher(listOf(csafDoc), threshold = 1.1f) }
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
-        assertFailsWith<IllegalArgumentException> {
-            matcher.matchSBOM(Document(), threshold = -0.1f)
-        }
-        assertFailsWith<IllegalArgumentException> { matcher.matchSBOM(Document(), threshold = 1.1f) }
+        assertFailsWith<IllegalArgumentException> { matcher.match(Document(), threshold = -0.1f) }
+        assertFailsWith<IllegalArgumentException> { matcher.match(Document(), threshold = 1.1f) }
     }
 
     @Test
-    fun `test matchSBOM returns all for threshold 0`() {
+    fun `test matchDatabase returns nothing for default threshold for empty database`() {
+        val matcher =
+            Matcher(
+                listOf(
+                    goodCsaf(
+                        productTree = goodProductTree(relationships = null),
+                        vulnerabilities = goodVulnerabilities(),
+                    )
+                )
+            )
+        val result =
+            matcher.matchDatabase(listOf(Document(nodeList = NodeList(nodes = listOf(Node())))))
+
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun `test matchDatabase returns all for threshold 0`() {
         val matcher =
             Matcher(
                 listOf(
@@ -178,8 +193,8 @@ class MatcherTest {
                 threshold = 0.5f,
             )
         val result =
-            matcher.matchSBOM(
-                Document(nodeList = NodeList(nodes = listOf(Node()))),
+            matcher.matchDatabase(
+                listOf(Document(nodeList = NodeList(nodes = listOf(Node())))),
                 threshold = 0.0f,
             )
 
@@ -187,7 +202,25 @@ class MatcherTest {
     }
 
     @Test
-    fun `test matchSBOM processes valid PURLs correctly`() {
+    fun `test match returns all for threshold 0`() {
+        val matcher =
+            Matcher(
+                listOf(
+                    goodCsaf(
+                        productTree = goodProductTree(relationships = null),
+                        vulnerabilities = goodVulnerabilities(),
+                    )
+                ),
+                threshold = 0.5f,
+            )
+        val result =
+            matcher.match(Document(nodeList = NodeList(nodes = listOf(Node()))), threshold = 0.0f)
+
+        assertEquals(3, result.size)
+    }
+
+    @Test
+    fun `test match processes valid PURLs correctly`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -207,13 +240,13 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.matchSBOM(sbomWithPurl)
+        val result = matcher.match(sbomWithPurl)
         assertEquals(1, result.size)
         assertEquals(1.0f, result.first().confidence.value)
     }
 
     @Test
-    fun `test matchSBOM and match process valid CPEs correctly`() {
+    fun `test match and match process valid CPEs correctly`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -224,52 +257,52 @@ class MatcherTest {
             )
         val sbomWithCPE = Document(nodeList = NodeList(listOf(sbomNodeWithCPE)))
 
-        val resultNode = matcher.matchSBOMComponent(sbomNodeWithCPE)
+        val resultNode = matcher.matchComponent(sbomNodeWithCPE)
         assertEquals(1, resultNode.size)
         assertEquals(1.0f, resultNode.first().confidence.value)
 
-        val resultAll = matcher.matchSBOM(sbomWithCPE)
+        val resultAll = matcher.match(sbomWithCPE)
         assertEquals(1, resultAll.size)
         assertEquals(1.0f, resultAll.first().confidence.value)
     }
 
     @Test
-    fun `test matchSBOM does not add unknown identifiers`() {
+    fun `test match does not add unknown identifiers`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithUnknownId =
             Document(nodeList = NodeList(listOf(Node(identifiers = mapOf(999 to "value")))))
 
-        val result = matcher.matchSBOM(sbomWithUnknownId)
+        val result = matcher.match(sbomWithUnknownId)
         assertEquals(0, result.size)
     }
 
     @Test
-    fun `test matchSBOM handles null nodeList`() {
+    fun `test match handles null nodeList`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithoutNodeList = Document(nodeList = null)
-        val result = matcher.matchSBOM(sbomWithoutNodeList)
+        val result = matcher.match(sbomWithoutNodeList)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test matchSBOM handles null identifiers inside nodes`() {
+    fun `test match handles null identifiers inside nodes`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
         val sbomWithNullIdentifiers =
             Document(nodeList = NodeList(listOf(Node(identifiers = emptyMap()))))
-        val result = matcher.matchSBOM(sbomWithNullIdentifiers)
+        val result = matcher.match(sbomWithNullIdentifiers)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test matchSBOM handles missing matching PURLs in sbom`() {
+    fun `test match handles missing matching PURLs in sbom`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -289,13 +322,13 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.matchSBOM(sbomWithDifferentPurl)
+        val result = matcher.match(sbomWithDifferentPurl)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `test matchAll handles missing matching CPEs in sbom`() {
+    fun `test match handles missing matching CPEs in sbom`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
 
@@ -315,7 +348,7 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.matchSBOM(sbomWithDifferentCpe)
+        val result = matcher.match(sbomWithDifferentCpe)
 
         assertTrue(result.isEmpty())
     }
@@ -353,7 +386,7 @@ class MatcherTest {
                     )
             )
 
-        val result = matcher.matchSBOM(sbomWithCpeAndNameMatch)
+        val result = matcher.match(sbomWithCpeAndNameMatch)
         val singleMatch = result.singleOrNull()
         assertNotNull(singleMatch)
         assertIs<DefiniteMatch>(singleMatch.confidence)
