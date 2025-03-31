@@ -16,22 +16,30 @@
  */
 package io.github.csaf.sbom.matching
 
-import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
+import protobom.protobom.SoftwareIdentifierType
 
 /**
- * A data class representing a match between an [Csaf.Product] to a SBOM [Node] with given
- * [MatchingConfidence].
- *
- * @property advisory The matched CSAF advisory.
- * @property vulnerableProduct The vulnerable product from the CSAF advisory.
- * @property affectedNode The affected component from the SBOM document.
- * @property confidence The confidence score of the match.
- * @constructor Creates CSAF-SBOM-match with given score.
+ * An interface for a class that represents a
+ * [CPE (Common Platform Enumeration)](https://nvd.nist.gov/products/cpe).
  */
-data class Match(
-    val advisory: Csaf,
-    val vulnerableProduct: Csaf.Product,
-    val affectedNode: Node,
-    val confidence: MatchingConfidence,
-)
+expect interface Cpe {
+    fun matches(other: Cpe): Boolean
+
+    fun getVendor(): String
+
+    fun getProduct(): String
+
+    fun getVersion(): String
+}
+
+/** Parses a CPE string into a [Cpe] object. */
+expect fun parseCpe(cpe: String): Cpe
+
+/** A [Cpe] object that is derived from a [Node.identifiers]. */
+val Node.cpe: Cpe?
+    get() {
+        return (this.identifiers[SoftwareIdentifierType.CPE22.value]
+                ?: this.identifiers[SoftwareIdentifierType.CPE23.value])
+            ?.let { parseCpe(it) }
+    }
