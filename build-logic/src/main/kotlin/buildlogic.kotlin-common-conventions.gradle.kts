@@ -11,7 +11,7 @@ plugins {
     id("buildlogic.kotlin-formatting-conventions")
 }
 
-group = "io.github.csaf-sbom"
+group = "io.csaf"
 
 repositories {
     // Use Maven Central for resolving dependencies.
