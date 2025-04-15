@@ -5,7 +5,7 @@ plugins {
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - Retrieval Module")
-        description.set("Retrieval functionality for CSAF in Kotlin")
+        description.set("Retrieval functionality for CSAF in Kotlin. This is the last release using the io.github.csaf-sbom namespace. Please use io.csaf instead.")
     }
 }
 

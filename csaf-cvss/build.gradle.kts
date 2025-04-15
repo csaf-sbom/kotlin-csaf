@@ -5,7 +5,7 @@ plugins {
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - CVSS Module")
-        description.set("CVSS calculation utilities for Kotlin CSAF")
+        description.set("CVSS calculation utilities for Kotlin CSAF. This is the last release using the io.github.csaf-sbom namespace. Please use io.csaf instead.")
     }
 }
 

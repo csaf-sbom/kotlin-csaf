@@ -13,7 +13,7 @@ plugins {
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - Schema Module")
-        description.set("CSAF Schema definitions for Kotlin")
+        description.set("CSAF Schema definitions for Kotlin. This is the last release using the io.github.csaf-sbom namespace. Please use io.csaf instead.")
     }
 }
 
