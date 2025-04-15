@@ -18,15 +18,15 @@ kover {
 
     reports {
         // Ignore generated code
-        excludedClasses.add("io.github.csaf.sbom.schema.generated.*")
-        excludedClasses.add("io.github.csaf.sbom.validation.generated.*")
-        excludedClasses.add("io.github.csaf.sbom.validation.tests.CWE*")
+        excludedClasses.add("io.csaf.schema.generated.*")
+        excludedClasses.add("io.csaf.validation.generated.*")
+        excludedClasses.add("io.csaf.validation.tests.CWE*")
         excludedClasses.add("com.google.protobuf.*")
         excludedClasses.add("protobom.protobom.*")
 
         // Ignore main classes, since they are for demo only - might be removed in the future
-        excludedClasses.add("io.github.csaf.sbom.retrieval.demo.*")
-        excludedClasses.add("io.github.csaf.sbom.validation.Main*")
+        excludedClasses.add("io.csaf.retrieval.demo.*")
+        excludedClasses.add("io.csaf.validation.Main*")
     }
 }
 

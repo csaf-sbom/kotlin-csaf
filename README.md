@@ -20,9 +20,9 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.csaf-sbom:csaf-schema:0.0.1")
-    implementation("io.github.csaf-sbom:csaf-import:0.0.1")
-    implementation("io.github.csaf-sbom:csaf-validation:0.0.1")
+    implementation("io.csaf:csaf-schema:0.3.0")
+    implementation("io.csaf:csaf-import:0.3.0")
+    implementation("io.csaf:csaf-validation:0.3.0")
 }
 ```
 
