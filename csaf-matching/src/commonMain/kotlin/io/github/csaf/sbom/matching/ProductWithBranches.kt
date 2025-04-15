@@ -24,7 +24,7 @@ import io.github.csaf.sbom.validation.tests.plusAssign
  * A utility class for a [Product] and a list of [Csaf.Branche]s that define the "path" from the
  * roof of the [Csaf.ProductTree] to the [Product]
  */
-data class VulnerableProduct(
+data class ProductWithBranches(
     var advisory: Csaf,
     var product: Product,
     var branches: List<Csaf.Branche>,
@@ -33,30 +33,48 @@ data class VulnerableProduct(
     val purl: Purl? = product.product_identification_helper?.purl?.let { Purl(it.toString()) }
 }
 
-fun Csaf.gatherVulnerableProducts(
+/**
+ * Gathers all [Product]s in the current document and their branches. The [predicate] is used to
+ * filter the products. If it is null, all products are returned.
+ *
+ * The function traverses the product tree and collects all branches that lead to a product (leaf
+ * nodes). It fills a list with [ProductWithBranches] objects, each containing the product and its
+ * path in the tree.
+ *
+ * @param predicate A function that takes a [Product] and returns a Boolean. If null, all products
+ *   are included.
+ * @return A list of [ProductWithBranches] objects, each containing a product and its path in the
+ *   tree.
+ */
+fun Csaf.gatherProductsWithBranches(
     predicate: ((Product) -> Boolean)? = null
-): List<VulnerableProduct> {
-    val products = mutableListOf<VulnerableProduct>()
+): List<ProductWithBranches> {
+    val products = mutableListOf<ProductWithBranches>()
     val worklist = mutableListOf<List<Csaf.Branche>>()
     val alreadySeen = mutableSetOf<Csaf.Branche>()
 
     // Start with this branches
     worklist += this.product_tree?.branches
 
+    // Work until work-list is empty
     while (worklist.isNotEmpty()) {
         val currentPath = worklist.maxBy { it.size }
         worklist.remove(currentPath)
 
+        // Jump to the "deepest" branch object
         val currentBranch = currentPath.last()
+
+        // Add it to the already-seen, to avoid loops
         alreadySeen += currentBranch
 
+        // Look at the next level of branches and loop through them
         val nextBranches = currentBranch.branches
         for (nextBranch in nextBranches ?: listOf()) {
             // We arrived at a product node, we are finished
             val product = nextBranch.product
             if (product != null && predicate?.invoke(product) != false) {
                 val vulnerableProduct =
-                    VulnerableProduct(
+                    ProductWithBranches(
                         advisory = this,
                         product = product,
                         branches = currentPath + nextBranch,
@@ -66,7 +84,7 @@ fun Csaf.gatherVulnerableProducts(
                 continue
             }
 
-            // Otherwise, continue
+            // Otherwise, continue down the tree
             worklist.add(currentPath + nextBranch)
         }
     }

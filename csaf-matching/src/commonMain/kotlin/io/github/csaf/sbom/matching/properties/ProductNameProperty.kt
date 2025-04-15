@@ -17,8 +17,8 @@
 package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.Cpe
+import io.github.csaf.sbom.matching.ProductWithBranches
 import io.github.csaf.sbom.matching.Purl
-import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 
@@ -29,11 +29,11 @@ typealias ProductNameProperty = StringProperty
  * The [ProductNamePropertyProvider] is a [PropertyProvider] that provides the name of a product as
  * a [ProductNameProperty].
  *
- * It extracts the vendor from the [VulnerableProduct.branches] or [Cpe] and returns it as a
+ * It extracts the vendor from the [ProductWithBranches.branches] or [Cpe] and returns it as a
  * [ProductNameProperty].
  */
 object ProductNamePropertyProvider : PropertyProvider<ProductNameProperty> {
-    override fun provideProperty(vulnerable: VulnerableProduct): ProductNameProperty? {
+    override fun provideProperty(vulnerable: ProductWithBranches): ProductNameProperty? {
         val name =
             vulnerable.branches.firstOrNull { it.category == Csaf.Category3.product_name }?.name
         return name?.toProperty(PropertySource.OTHER)

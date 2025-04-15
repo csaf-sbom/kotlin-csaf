@@ -17,8 +17,8 @@
 package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.Cpe
+import io.github.csaf.sbom.matching.ProductWithBranches
 import io.github.csaf.sbom.matching.Purl
-import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.schema.generated.Csaf
 import protobom.protobom.Node
 
@@ -29,11 +29,11 @@ typealias VendorProperty = StringProperty
  * The [VendorPropertyProvider] is a [PropertyProvider] that provides the vendor of a product as a
  * [VendorProperty].
  *
- * It extracts the vendor from the [VulnerableProduct.branches] or [Cpe] and returns it as a
+ * It extracts the vendor from the [ProductWithBranches.branches] or [Cpe] and returns it as a
  * [VendorProperty].
  */
 object VendorPropertyProvider : PropertyProvider<VendorProperty> {
-    override fun provideProperty(vulnerable: VulnerableProduct): VendorProperty? {
+    override fun provideProperty(vulnerable: ProductWithBranches): VendorProperty? {
         val name = vulnerable.branches.firstOrNull { it.category == Csaf.Category3.vendor }?.name
         return name?.toProperty(PropertySource.OTHER)
     }

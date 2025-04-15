@@ -97,11 +97,11 @@ fun Vers.toProductProperty(source: PropertySource): ProductVersionProperty {
  * The [ProductVersionPropertyProvider] is a [PropertyProvider] that provides the name of a product
  * as a [ProductVersionProperty].
  *
- * It extracts the version from the [VulnerableProduct.branches], [Cpe] or [Purl] and returns it as
- * a [ProductVersionProperty].
+ * It extracts the version from the [ProductWithBranches.branches], [Cpe] or [Purl] and returns it
+ * as a [ProductVersionProperty].
  */
 object ProductVersionPropertyProvider : PropertyProvider<ProductVersionProperty> {
-    override fun provideProperty(vulnerable: VulnerableProduct): ProductVersionProperty? {
+    override fun provideProperty(vulnerable: ProductWithBranches): ProductVersionProperty? {
         val version =
             vulnerable.branches.firstOrNull { it.category == Csaf.Category3.product_version }?.name
 

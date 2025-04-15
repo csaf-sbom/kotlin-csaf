@@ -77,7 +77,7 @@ val linuxVendorBranch =
 val linuxProductTree = Csaf.ProductTree(branches = listOf(linuxVendorBranch))
 
 /**
- * Describes a [VulnerableProduct] with the following attributes:
+ * Describes a [ProductWithBranches] with the following attributes:
  * - vendor: Linux
  * - product: Linux Kernel
  * - version: 4.0
@@ -86,12 +86,12 @@ val linuxProductTree = Csaf.ProductTree(branches = listOf(linuxVendorBranch))
 val linux40 =
     assertNotNull(
         goodCsaf(productTree = linuxProductTree)
-            .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_4_0" }
+            .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_4_0" }
             .firstOrNull()
     )
 
 /**
- * Describes a [VulnerableProduct] with the following attributes:
+ * Describes a [ProductWithBranches] with the following attributes:
  * - vendor: Linux
  * - product: Linux Kernel
  * - version: >= 4.0
@@ -99,12 +99,12 @@ val linux40 =
 val linuxGTE40 =
     assertNotNull(
         goodCsaf(productTree = linuxProductTree)
-            .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_GTE_4_0" }
+            .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_GTE_4_0" }
             .firstOrNull()
     )
 
 /**
- * Describes a [VulnerableProduct] with the following attributes:
+ * Describes a [ProductWithBranches] with the following attributes:
  * - vendor: Linux
  * - product: Linux Kernel
  * - version: unspecified
@@ -112,6 +112,6 @@ val linuxGTE40 =
 val linuxUnspecified =
     assertNotNull(
         goodCsaf(productTree = linuxProductTree)
-            .gatherVulnerableProducts { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
+            .gatherProductsWithBranches { it.product_id == "LINUX_KERNEL_UNSPECIFIED" }
             .firstOrNull()
     )

@@ -18,8 +18,8 @@ package io.github.csaf.sbom.matching.properties
 
 import io.github.csaf.sbom.matching.Cpe
 import io.github.csaf.sbom.matching.MatchingConfidence
+import io.github.csaf.sbom.matching.ProductWithBranches
 import io.github.csaf.sbom.matching.Purl
-import io.github.csaf.sbom.matching.VulnerableProduct
 import io.github.csaf.sbom.matching.cpe
 import io.github.csaf.sbom.matching.purl
 import protobom.protobom.Node
@@ -72,11 +72,12 @@ abstract class Property<T : Any>(val value: T, val source: PropertySource) {
  * This interface is used to provide a property one can "match" against. This can be for example a
  * name or a version.
  *
- * The property is (usually) extracted out of a [VulnerableProduct] in the [provideProperty] method.
+ * The property is (usually) extracted out of a [ProductWithBranches] in the [provideProperty]
+ * method.
  */
 interface PropertyProvider<T : Property<*>> {
 
-    fun provideProperty(vulnerable: VulnerableProduct): T?
+    fun provideProperty(vulnerable: ProductWithBranches): T?
 
     fun provideProperty(node: Node): T?
 
@@ -87,12 +88,12 @@ interface PropertyProvider<T : Property<*>> {
 
 /**
  * This extension function is used to gather all properties from a [PropertyProvider] for a
- * [VulnerableProduct].
+ * [ProductWithBranches].
  *
  * It returns a [Map] with the [PropertySource] as key and the property as value.
  */
 fun <T : Property<*>> PropertyProvider<T>.gatherVulnerableProperties(
-    vulnerable: VulnerableProduct
+    vulnerable: ProductWithBranches
 ): Map<PropertySource, T> {
     val properties = mutableMapOf<PropertySource, T>()
     this.provideProperty(vulnerable)?.let { properties[PropertySource.OTHER] = it }

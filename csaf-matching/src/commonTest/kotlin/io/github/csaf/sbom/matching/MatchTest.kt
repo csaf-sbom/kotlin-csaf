@@ -44,14 +44,14 @@ class MatchTest {
     @Test
     fun testNullGatherVulnerableProducts() {
         val csaf = goodCsaf(productTree = null)
-        val vulnerableProducts = csaf.gatherVulnerableProducts()
+        val vulnerableProducts = csaf.gatherProductsWithBranches()
         assertEquals(emptyList(), vulnerableProducts)
     }
 
     @Test
     fun testVulnerableProductPurl() {
         var vulnerableProduct =
-            VulnerableProduct(
+            ProductWithBranches(
                 advisory = goodCsaf(),
                 product = Csaf.Product(name = "Product", product_id = "PRODUCT"),
                 branches = listOf(),
@@ -59,7 +59,7 @@ class MatchTest {
         assertEquals(null, vulnerableProduct.purl)
 
         vulnerableProduct =
-            VulnerableProduct(
+            ProductWithBranches(
                 advisory = goodCsaf(),
                 product =
                     Csaf.Product(
@@ -73,7 +73,7 @@ class MatchTest {
         assertEquals(null, vulnerableProduct.purl)
 
         vulnerableProduct =
-            VulnerableProduct(
+            ProductWithBranches(
                 advisory = goodCsaf(),
                 product =
                     Csaf.Product(

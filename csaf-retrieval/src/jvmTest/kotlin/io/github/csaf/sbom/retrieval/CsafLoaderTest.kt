@@ -53,6 +53,9 @@ class CsafLoaderTest {
 
     @Test
     fun testFetchProvider() = runTest {
+        val lines = "line with CRLF\r\n".lines()
+        println(lines)
+
         val result = loader.fetchProvider("https://example.com/example-01-provider-metadata.json")
         assertTrue(
             result.isSuccess,

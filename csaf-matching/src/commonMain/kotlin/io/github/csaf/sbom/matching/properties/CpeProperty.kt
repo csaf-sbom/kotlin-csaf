@@ -20,8 +20,8 @@ import io.github.csaf.sbom.matching.Cpe
 import io.github.csaf.sbom.matching.DefiniteMatch
 import io.github.csaf.sbom.matching.DefinitelyNoMatch
 import io.github.csaf.sbom.matching.MatchingConfidence
+import io.github.csaf.sbom.matching.ProductWithBranches
 import io.github.csaf.sbom.matching.Purl
-import io.github.csaf.sbom.matching.VulnerableProduct
 import protobom.protobom.Node
 
 /**
@@ -58,7 +58,7 @@ fun Cpe.toProperty(): CpeProperty {
  * This is mostly a simple wrapper around the [CpeProperty] constructor.
  */
 object CpePropertyProvider : PropertyProvider<CpeProperty> {
-    override fun provideProperty(vulnerable: VulnerableProduct): CpeProperty? {
+    override fun provideProperty(vulnerable: ProductWithBranches): CpeProperty? {
         return null
     }
 

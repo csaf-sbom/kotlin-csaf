@@ -17,19 +17,27 @@
 package io.github.csaf.sbom.matching
 
 import io.github.csaf.sbom.schema.generated.Csaf
-import io.github.csaf.sbom.validation.tests.affectedProducts
 import protobom.protobom.Document
 import protobom.protobom.Node
 import protobom.protobom.NodeList
 
+/** A database of SBOMs represented as a list of [SBOM] instances. */
+typealias SBOMDatabase = List<Document>
+
+/** A single Bill-of-Materials (SBOM). */
+typealias SBOM = Document
+
+/** A single component in an [SBOM]. */
+typealias SBOMComponent = Node
+
 /**
- * Matcher for matching an SBOM advisories with a provided CSAF document.
+ * Matcher for matching an SBOM database with provided CSAF documents.
  *
- * @property advisories The CSAF security advisories used by this matcher.
+ * @property documents The CSAF security advisories used by this matcher.
  * @property threshold The default threshold required for a match to be included.
  */
-class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
-    var vulnerableProducts = listOf<VulnerableProduct>()
+class Matcher(val documents: List<Csaf>, val threshold: Float = 0.5f) {
+    var products = listOf<ProductWithBranches>()
 
     /**
      * The constructor checks that the given threshold is within its bounds and then extracts all
@@ -37,27 +45,19 @@ class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
      */
     init {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
-        val productIds =
-            advisories
-                .mapNotNull { it.vulnerabilities?.flatMap { vuln -> vuln.affectedProducts } }
-                .flatten()
-        val affectedProductIds = productIds
-
-        val products = advisories.flatMap { it.gatherVulnerableProducts() }
-
-        vulnerableProducts = products.filter { it.product.product_id in affectedProductIds }
+        products = documents.flatMap { it.gatherProductsWithBranches() }
     }
 
     /**
      * Matches the provided SBOM database with the CSAF advisories and determines whether they meet
      * specific criteria.
      *
-     * @param database A list of SBOM documents represented by [Document] instances.
+     * @param database A list of SBOMs represented by [SBOM] instances.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun matchDatabase(database: List<Document>, threshold: Float = this.threshold): Set<Match> {
+    fun matchDatabase(database: SBOMDatabase, threshold: Float = this.threshold): Set<Match> {
         val matches = mutableSetOf<Match>()
         for (document in database) {
             matches += match(document, threshold)
@@ -66,55 +66,55 @@ class Matcher(val advisories: List<Csaf>, val threshold: Float = 0.5f) {
     }
 
     /**
-     * Matches the provided SBOM document with the CSAF advisories and determines whether they meet
-     * specific criteria.
+     * Matches the provided SBOM with the CSAF advisories and determines whether they meet specific
+     * criteria.
      *
-     * @param document The SBOM document represented by a [Document] instance.
+     * @param sbom The SBOM represented by a [SBOM] instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun match(document: Document, threshold: Float = this.threshold): Set<Match> =
-        internalMatch((document.nodeList ?: NodeList()).nodes, threshold)
+    fun match(sbom: SBOM, threshold: Float = this.threshold): Set<Match> =
+        internalMatch((sbom.nodeList ?: NodeList()).nodes, threshold)
 
     /**
      * Matches the provided SBOM component with the CSAF advisories and determines whether they meet
      * specific criteria.
      *
-     * @param node The SBOM node represented by a [Node] instance.
+     * @param component The SBOM node represented by a [Node] instance.
      * @param threshold The minimum threshold required for a match to be included, defaults to the
      *   value of this [Matcher].
      * @return A list of [Match] objects between the SBOM node and the CSAF advisories.
      */
-    fun matchComponent(node: Node, threshold: Float = this.threshold) =
-        internalMatch(listOf(node), threshold)
+    fun matchComponent(component: SBOMComponent, threshold: Float = this.threshold) =
+        internalMatch(listOf(component), threshold)
 
     /**
-     * Matches the provided SBOM nodes with the CSAF documents and determines whether they meet
+     * Matches the provided SBOM components with the CSAF documents and determines whether they meet
      * specific criteria.
      *
-     * @param nodes A list of SBOM nodes represented by [Node] instances.
+     * @param components A list of SBOM components represented by [SBOMComponent] instances.
      * @param threshold The minimum threshold required for a match to be included.
      * @return A list of CSAF documents matching the given nodes, along with resp. match scores.
      */
-    private fun internalMatch(nodes: List<Node>, threshold: Float): Set<Match> {
+    private fun internalMatch(components: List<SBOMComponent>, threshold: Float): Set<Match> {
         require(threshold in 0.0..1.0) { "Threshold must be in the interval [0.0; 1.0]." }
 
         val matches = mutableSetOf<Match>()
 
         // Loop through all nodes
-        for (node in nodes) {
+        for (component in components) {
             // Loop through all affected products
-            for (vulnerableProduct in vulnerableProducts) {
-                // Check if the node is affected by the product
-                val confidence = matchProperties(vulnerableProduct, node)
+            for (vulnerableProduct in products) {
+                // Check if the component is affected by the product
+                val confidence = matchProperties(vulnerableProduct, component)
                 // If the confidence is above the threshold, add it to the matches
                 if (confidence.value >= threshold) {
                     matches +=
                         Match(
                             vulnerableProduct.advisory,
                             vulnerableProduct.product,
-                            node,
+                            component,
                             confidence,
                         )
                 }

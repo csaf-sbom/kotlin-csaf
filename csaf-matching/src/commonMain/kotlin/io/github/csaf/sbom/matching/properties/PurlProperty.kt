@@ -65,7 +65,7 @@ fun Purl.toProperty(): PurlProperty {
  * This is mostly a simple wrapper around the [PurlProperty] constructor.
  */
 object PurlPropertyProvider : PropertyProvider<PurlProperty> {
-    override fun provideProperty(vulnerable: VulnerableProduct): PurlProperty? {
+    override fun provideProperty(vulnerable: ProductWithBranches): PurlProperty? {
         return null
     }
 

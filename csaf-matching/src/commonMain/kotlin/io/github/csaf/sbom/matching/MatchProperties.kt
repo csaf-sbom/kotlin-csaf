@@ -39,7 +39,7 @@ import protobom.protobom.Node
  * - Finally, it matches the product version (see [ProductVersionProperty] /
  *   [ProductVersionPropertyProvider])
  */
-fun matchProperties(vulnerable: VulnerableProduct, node: Node): MatchingConfidence {
+fun matchProperties(vulnerable: ProductWithBranches, node: Node): MatchingConfidence {
     // First level of priority: CPE, Purl. If either of these is set, we can directly return with
     // high confidence
     if (vulnerable.cpe != null) {
@@ -102,7 +102,7 @@ fun <
     ProviderType : PropertyProvider<PropertyType>,
 > matchProperty(
     provider: ProviderType,
-    vulnerable: VulnerableProduct,
+    vulnerable: ProductWithBranches,
     node: Node,
     default: MatchingConfidence = DefinitelyNoMatch,
 ): MatchingConfidence {

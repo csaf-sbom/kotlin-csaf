@@ -78,7 +78,7 @@ class ProductVersionPropertyTest {
     fun testProvider() {
         var provider =
             ProductVersionPropertyProvider.provideProperty(
-                VulnerableProduct(
+                ProductWithBranches(
                     advisory = goodCsaf(),
                     product = Csaf.Product(product_id = "PID", name = "Product"),
                     branches =
