@@ -73,9 +73,9 @@ object CSAFPublisherRole : Role {
 object CSAFProviderRole : Role {
     override val roleRequirements =
         CSAFPublisherRole.roleRequirements +
-                allOf(Requirement6, Requirement7) +
+            allOf(Requirement6, Requirement7) +
             (allOf(Requirement11YearInFolder, Requirement12, Requirement13, Requirement14) or
-                    allOf(Requirement15, Requirement16, Requirement17))
+                allOf(Requirement15, Requirement16, Requirement17))
 
     override val documentRequirements = CSAFPublisherRole.documentRequirements + Requirement5
 }

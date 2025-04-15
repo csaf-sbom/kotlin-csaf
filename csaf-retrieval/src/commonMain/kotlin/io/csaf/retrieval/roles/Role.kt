@@ -28,15 +28,17 @@ interface Role {
 
     /**
      * The list of requirements, that this role needs to fulfill on its own metadata according to
-     * the standard. This can either be a single [io.csaf.retrieval.requirements.Requirement] or a combination thereof using the
-     * operators [io.csaf.retrieval.requirements.allOf]. [io.csaf.retrieval.requirements.oneOf], [io.csaf.retrieval.requirements.or].
+     * the standard. This can either be a single [io.csaf.retrieval.requirements.Requirement] or a
+     * combination thereof using the operators [io.csaf.retrieval.requirements.allOf].
+     * [io.csaf.retrieval.requirements.oneOf], [io.csaf.retrieval.requirements.or].
      */
     val roleRequirements: Requirement
 
     /**
      * The list of requirements, that this role needs to fulfill for each CSAF document according to
      * the standard. This can either be a single [Requirement] or a combination thereof using the
-     * operators [io.csaf.retrieval.requirements.allOf]. [io.csaf.retrieval.requirements.oneOf], [io.csaf.retrieval.requirements.or].
+     * operators [io.csaf.retrieval.requirements.allOf]. [io.csaf.retrieval.requirements.oneOf],
+     * [io.csaf.retrieval.requirements.or].
      */
     val documentRequirements: Requirement
 
