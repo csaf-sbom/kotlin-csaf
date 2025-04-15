@@ -9,7 +9,7 @@ plugins {
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - Matching Module")
-        description.set("Matching functionality for CSAF/ProtoBOM in Kotlin. This is the last release using the io.github.csaf-sbom namespace. Please use io.csaf instead.")
+        description.set("Matching functionality for CSAF/ProtoBOM in Kotlin")
     }
 }
 
