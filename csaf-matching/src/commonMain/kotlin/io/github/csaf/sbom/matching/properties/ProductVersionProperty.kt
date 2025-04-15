@@ -78,7 +78,7 @@ fun ProductVersion.toProperty(source: PropertySource): ProductVersionProperty {
 fun String.toProductVersion(): ProductVersion.Fixed {
     val version = this
 
-    // In an effort to sanitize the version strings, we remove training zeros and leading 'v'
+    // In an effort to sanitize the version strings, we remove trailing whitespace and leading 'v'
     // characters
     val versionSanitized = version.trimStart('v', ' ', '\t')
 

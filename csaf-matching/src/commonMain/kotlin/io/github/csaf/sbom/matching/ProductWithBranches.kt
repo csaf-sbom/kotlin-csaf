@@ -22,7 +22,7 @@ import io.github.csaf.sbom.validation.tests.plusAssign
 
 /**
  * A utility class for a [Product] and a list of [Csaf.Branche]s that define the "path" from the
- * roof of the [Csaf.ProductTree] to the [Product]
+ * root of the [Csaf.ProductTree] to the [Product]
  */
 data class ProductWithBranches(
     var advisory: Csaf,
