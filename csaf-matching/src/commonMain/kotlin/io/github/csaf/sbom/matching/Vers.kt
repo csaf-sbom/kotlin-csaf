@@ -14,8 +14,12 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.purl
+package io.github.csaf.sbom.matching
 
-import com.github.packageurl.PackageURL
+expect class Vers {
+    fun contains(version: String): Boolean
 
-actual typealias Purl = PackageURL
+    fun overlapsWith(vers: Vers): Boolean
+}
+
+expect fun parseVers(versString: String): Vers?

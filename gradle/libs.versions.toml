@@ -20,6 +20,7 @@ slf4j = "2.0.17"
 spotless = "7.0.2"
 protobuf = "4.30.2"
 pbandk = "0.16.0"
+versatile = "0.11.0"
 
 [libraries]
 kotlin-csv = { group = "com.jsoizo", name = "kotlin-csv", version.ref = "kotlin-csv" }
@@ -35,6 +36,7 @@ ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref =
 ktor-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 purl = { group = "com.github.package-url", name = "packageurl-java", version.ref = "purl" }
+versatile = { group = "io.github.nscuro", name = "versatile-core", version.ref = "versatile" }
 cpe = { group = "us.springett", name = "cpe-parser", version.ref = "cpe" }
 semver = { group = "net.swiftzer.semver", name = "semver", version.ref = "semver" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }

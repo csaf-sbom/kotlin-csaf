@@ -14,11 +14,30 @@
  * limitations under the License.
  *
  */
-package io.github.csaf.sbom.matching.cpe
+package io.github.csaf.sbom.matching
 
-import us.springett.parsers.cpe.CpeParser
-import us.springett.parsers.cpe.ICpe
+import protobom.protobom.Node
+import protobom.protobom.SoftwareIdentifierType
 
-actual typealias Cpe = ICpe
+expect class Purl(purl: String) {
+    fun canonicalize(): String
 
-actual fun parseCpe(cpe: String): Cpe = CpeParser.parse(cpe)
+    fun getScheme(): String?
+
+    fun getType(): String?
+
+    fun getNamespace(): String?
+
+    fun getName(): String
+
+    fun getVersion(): String?
+
+    fun getQualifiers(): MutableMap<String, String>?
+
+    fun getSubpath(): String?
+}
+
+val Node.purl: Purl?
+    get() {
+        return this.identifiers[SoftwareIdentifierType.PURL.value]?.let { Purl(it) }
+    }

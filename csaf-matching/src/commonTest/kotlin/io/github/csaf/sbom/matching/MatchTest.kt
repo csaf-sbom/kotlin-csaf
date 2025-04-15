@@ -16,47 +16,76 @@
  */
 package io.github.csaf.sbom.matching
 
+import io.github.csaf.sbom.schema.JsonUri
+import io.github.csaf.sbom.schema.generated.Csaf
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 
 class MatchTest {
 
     @Test
-    fun `test valid Match creation`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 0.75f)
-        assertEquals(csaf, match.csaf)
-        assertEquals(0.75f, match.score)
+    fun testMatchingConfidenceTimes() {
+        val expectedMatches =
+            mapOf(
+                Pair(DefiniteMatch, DefiniteMatch) to DefiniteMatch,
+                Pair(DefiniteMatch, MatchPackageNoVersion) to MatchPackageNoVersion,
+                Pair(DefiniteMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(DefinitelyNoMatch, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(MatchPackageNoVersion, DefinitelyNoMatch) to DefinitelyNoMatch,
+                Pair(MatchPackageNoVersion, PartialStringMatch) to
+                    CombinedMatch(listOf(MatchPackageNoVersion, PartialStringMatch)),
+            )
+        expectedMatches.forEach { pair, expectedMatch ->
+            assertEquals(expectedMatch, pair.first.times(pair.second))
+        }
     }
 
     @Test
-    fun `test Match creation with minimum score`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 0.0f)
-        assertEquals(0.0f, match.score)
+    fun testNullGatherVulnerableProducts() {
+        val csaf = goodCsaf(productTree = null)
+        val vulnerableProducts = csaf.gatherProductsWithBranches()
+        assertEquals(emptyList(), vulnerableProducts)
     }
 
     @Test
-    fun `test Match creation with maximum score`() {
-        val csaf = goodCsaf()
-        val match = Match(csaf = csaf, score = 1.0f)
-        assertEquals(1.0f, match.score)
-    }
+    fun testVulnerableProductPurl() {
+        var vulnerableProduct =
+            ProductWithBranches(
+                advisory = goodCsaf(),
+                product = Csaf.Product(name = "Product", product_id = "PRODUCT"),
+                branches = listOf(),
+            )
+        assertEquals(null, vulnerableProduct.purl)
 
-    @Test
-    fun `test Match creation with score below minimum`() {
-        val csaf = goodCsaf()
-        val exception =
-            assertFailsWith<IllegalArgumentException> { Match(csaf = csaf, score = -0.1f) }
-        assertEquals("Score must be in the interval [0.0; 1.0].", exception.message)
-    }
+        vulnerableProduct =
+            ProductWithBranches(
+                advisory = goodCsaf(),
+                product =
+                    Csaf.Product(
+                        name = "Product",
+                        product_id = "PRODUCT",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(purl = null),
+                    ),
+                branches = listOf(),
+            )
+        assertEquals(null, vulnerableProduct.purl)
 
-    @Test
-    fun `test Match creation with score above maximum`() {
-        val csaf = goodCsaf()
-        val exception =
-            assertFailsWith<IllegalArgumentException> { Match(csaf = csaf, score = 1.1f) }
-        assertEquals("Score must be in the interval [0.0; 1.0].", exception.message)
+        vulnerableProduct =
+            ProductWithBranches(
+                advisory = goodCsaf(),
+                product =
+                    Csaf.Product(
+                        name = "Product",
+                        product_id = "PRODUCT",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(
+                                purl = JsonUri("pkg:maven/io.csaf/csaf-matching@1.0.0")
+                            ),
+                    ),
+                branches = listOf(),
+            )
+        assertIs<Purl>(vulnerableProduct.purl)
     }
 }
