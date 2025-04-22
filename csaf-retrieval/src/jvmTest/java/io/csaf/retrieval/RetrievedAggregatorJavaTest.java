@@ -72,4 +72,15 @@ public class RetrievedAggregatorJavaTest {
         assertEquals(2, successCount, "Number of successful results is incorrect");
         assertEquals(2, failureCount, "Number of failed results is incorrect");
     }
+
+    @Test
+    public void testFromDomainAsync() throws ExecutionException, InterruptedException {
+        final RetrievedAggregator aggregator =
+                RetrievedAggregator.fromDomainAsync("example.com").get();
+        CompletableFuture<List<ResultCompat<RetrievedProvider>>> providersFuture = aggregator.fetchProvidersAsync();
+        assertNotNull(providersFuture);
+        List<ResultCompat<RetrievedProvider>> providers = providersFuture.get();
+        assertNotNull(providers);
+        assertFalse(providers.isEmpty(), "Providers list should not be empty");
+    }
 }
