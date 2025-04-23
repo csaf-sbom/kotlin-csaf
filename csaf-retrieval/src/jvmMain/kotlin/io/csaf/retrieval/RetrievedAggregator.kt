@@ -152,6 +152,23 @@ data class RetrievedAggregator(val json: Aggregator) : Validatable {
         }
 
         /**
+         * Retrieves a [RetrievedAggregator] asynchronously from the provided domain.
+         *
+         * @param domain The domain to retrieve the aggregator from.
+         * @param loader An optional [CsafLoader] instance. Defaults to [lazyLoader].
+         * @return A [CompletableFuture] that wraps a [RetrievedAggregator] instance upon success,
+         *   or the thrown [Throwable] in case of an error.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun fromDomainAsync(
+            domain: String,
+            loader: CsafLoader = lazyLoader,
+        ): CompletableFuture<RetrievedAggregator> {
+            return ioScope.future { fromDomain(domain, loader).getOrThrow() }
+        }
+
+        /**
          * Retrieves a [RetrievedAggregator] from a given URL.
          *
          * @param url The URL to retrieve the [RetrievedAggregator] from.
@@ -169,6 +186,29 @@ data class RetrievedAggregator(val json: Aggregator) : Validatable {
                 .mapCatching { a -> RetrievedAggregator(a).also { it.validate(ctx) } }
                 .recoverCatching { e ->
                     throw RetrievalException("Failed to load CSAF Aggregator from $url", e)
+                }
+        }
+
+        /**
+         * Retrieves a [RetrievedAggregator] from a given domain using the well-known URL
+         * `/.well-known/csaf-aggregator/aggregator.json`.
+         *
+         * @param domain The domain to retrieve the [RetrievedAggregator] from.
+         * @param loader An optional [CsafLoader] instance. Defaults to [lazyLoader].
+         * @return An instance of [RetrievedAggregator], wrapped in a [Result] monad, if successful.
+         *   A failed [Result] wrapping the thrown [Throwable] in case of an error.
+         */
+        suspend fun fromDomain(
+            domain: String,
+            loader: CsafLoader = lazyLoader,
+        ): Result<RetrievedAggregator> {
+            val ctx = RetrievalContext()
+            val wellKnownPath = "https://$domain/.well-known/csaf-aggregator/aggregator.json"
+            return loader
+                .fetchAggregator(wellKnownPath, ctx)
+                .mapCatching { a -> RetrievedAggregator(a).also { it.validate(ctx) } }
+                .recoverCatching { e ->
+                    throw RetrievalException("Failed to load CSAF Aggregator from $domain", e)
                 }
         }
     }
