@@ -23,13 +23,13 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
     }
     plugins {
-        id("pbandk") {
+        /*id("pbandk") {
             artifact = "pro.streem.pbandk:protoc-gen-pbandk-jvm:${libs.versions.pbandk.get()}:jvm8@jar"
-        }
+        }*/
     }
     generateProtoTasks {
         ofSourceSet("main").forEach { task ->
-            task.builtins {
+            /*task.builtins {
                 remove("java")
             }
             task.plugins {
@@ -44,7 +44,7 @@ protobuf {
                         kotlin.srcDir(project.files(outputDir).builtBy(task))
                     }
                 }
-            }
+            }*/
         }
     }
 }
