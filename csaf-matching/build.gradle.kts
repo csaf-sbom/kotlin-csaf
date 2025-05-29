@@ -55,7 +55,8 @@ kotlin {
             dependencies {
                 api(project(":csaf-schema"))
                 api(project(":csaf-validation"))
-                implementation(libs.pbandk.runtime)
+                // Required for compilation, thus "api" scope.
+                api(libs.pbandk.runtime)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.kotlinx.json)
