@@ -242,6 +242,16 @@ class MatcherTest {
         val result = matcher.match(sbomWithPurl)
         assertEquals(1, result.size)
         assertEquals(1.0f, result.first().confidence.value)
+
+        val first = result.firstOrNull()
+        assertNotNull(first)
+
+        val vuln = first.vulnerabilitiesWithAffectedProduct()
+        val firstVuln = vuln.firstOrNull()
+        assertEquals("CVE-1234-4000", firstVuln?.cve)
+
+        val notVuln = first.vulnerabilitiesWithNotAffectedProduct()
+        assertTrue(notVuln.isEmpty(), "Expected no vulnerabilities with not-affected product")
     }
 
     @Test
