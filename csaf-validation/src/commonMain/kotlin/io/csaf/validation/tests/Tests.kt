@@ -272,6 +272,22 @@ val Csaf.Vulnerability.affectedProducts
             this.product_status?.last_affected
 
 /**
+ * Gathers all products that are not affected by a [Csaf.Vulnerability] object.
+ *
+ * This includes:
+ * - [Csaf.ProductStatus.known_not_affected]
+ * - [Csaf.ProductStatus.first_fixed]
+ * - [Csaf.ProductStatus.fixed]
+ * - [Csaf.ProductStatus.recommended]
+ */
+val Csaf.Vulnerability.notAffectedProducts
+    get(): Collection<String> =
+        this.product_status?.known_not_affected +
+            this.product_status?.first_fixed +
+            this.product_status?.fixed +
+            this.product_status?.recommended
+
+/**
  * Implementation of
  * [Test 6.1.7](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#617-multiple-scores-with-same-version-per-product).
  */

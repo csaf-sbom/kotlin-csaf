@@ -17,6 +17,8 @@
 package io.csaf.matching
 
 import io.csaf.schema.generated.Csaf
+import io.csaf.validation.tests.affectedProducts
+import io.csaf.validation.tests.notAffectedProducts
 
 /**
  * A data class representing a match between an [Csaf.Product] to an [SBOMComponent] with given
@@ -34,3 +36,28 @@ data class Match(
     val matchedComponent: SBOMComponent,
     val confidence: MatchingConfidence,
 )
+
+/**
+ * Returns a list of vulnerabilities from the CSAF document that are associated with the product in
+ * this match through [affectedProducts].
+ *
+ * @return A list of [Csaf.Vulnerability] objects that have [affectedProducts] listed in this match.
+ */
+fun Match.vulnerabilitiesWithAffectedProduct(): List<Csaf.Vulnerability> {
+    return document.vulnerabilities?.filter {
+        it.affectedProducts.any { productId -> product.product_id == productId }
+    } ?: emptyList()
+}
+
+/**
+ * Returns a list of vulnerabilities from the CSAF document that are associated with the product in
+ * this match through [notAffectedProducts].
+ *
+ * @return A list of [Csaf.Vulnerability] objects that have [notAffectedProducts] listed in this
+ *   match.
+ */
+fun Match.vulnerabilitiesWithNotAffectedProduct(): List<Csaf.Vulnerability> {
+    return document.vulnerabilities?.filter {
+        it.notAffectedProducts.any { productId -> product.product_id == productId }
+    } ?: emptyList()
+}

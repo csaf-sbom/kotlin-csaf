@@ -1374,6 +1374,27 @@ class TestsTest {
         }
     }
 
+    @Test
+    fun `notAffectedProducts returns correct set of product IDs`() {
+        val productStatus =
+            Csaf.ProductStatus(
+                known_not_affected = setOf("prod1"),
+                first_fixed = setOf("prod2"),
+                fixed = setOf("prod3"),
+                recommended = setOf("prod4"),
+            )
+        val vuln = Csaf.Vulnerability(product_status = productStatus)
+        val result = vuln.notAffectedProducts
+        assertEquals(setOf("prod1", "prod2", "prod3", "prod4"), result)
+    }
+
+    @Test
+    fun `notAffectedProducts returns empty set when product_status is null`() {
+        val vuln = Csaf.Vulnerability(product_status = null)
+        val result = vuln.notAffectedProducts
+        assertEquals(emptySet(), result)
+    }
+
     /**
      * Short utility function to construct the path to the test file based on the test file ID for
      * mandatory tests.
