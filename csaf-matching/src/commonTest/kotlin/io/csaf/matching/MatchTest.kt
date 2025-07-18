@@ -88,4 +88,42 @@ class MatchTest {
             )
         assertIs<Purl>(vulnerableProduct.purl)
     }
+
+    @Test
+    fun testVulnerabilitiesWithAffectedProductEmpty() {
+        val empty = goodCsaf(vulnerabilities = null)
+        val match =
+            Match(
+                document = empty,
+                product =
+                    Csaf.Product(
+                        name = "Linux 0.1",
+                        product_id = "linux-0.1",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(cpe = "cpe:/a:vendor:linux:0.1::ab1"),
+                    ),
+                matchedComponent = SBOMComponent("cpe:/a:vendor:linux:0.1::ab1"),
+                confidence = DefiniteMatch,
+            )
+        assertEquals(emptyList(), match.vulnerabilitiesWithAffectedProduct())
+    }
+
+    @Test
+    fun testVulnerabilitiesWithNotAffectedProductEmpty() {
+        val empty = goodCsaf(vulnerabilities = null)
+        val match =
+            Match(
+                document = empty,
+                product =
+                    Csaf.Product(
+                        name = "Linux 0.1",
+                        product_id = "linux-0.1",
+                        product_identification_helper =
+                            Csaf.ProductIdentificationHelper(cpe = "cpe:/a:vendor:linux:0.1::ab1"),
+                    ),
+                matchedComponent = SBOMComponent("cpe:/a:vendor:linux:0.1::ab1"),
+                confidence = DefiniteMatch,
+            )
+        assertEquals(emptyList(), match.vulnerabilitiesWithNotAffectedProduct())
+    }
 }

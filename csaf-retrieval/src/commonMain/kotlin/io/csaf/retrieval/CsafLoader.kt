@@ -23,6 +23,7 @@ import io.csaf.schema.generated.ROLIEFeed
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -46,6 +47,7 @@ class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
         HttpClient(engine) {
             expectSuccess = true
             install(ContentNegotiation) { json() }
+            install(HttpRequestRetry)
         }
 
     /**
