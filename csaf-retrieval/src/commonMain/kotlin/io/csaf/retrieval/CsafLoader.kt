@@ -63,7 +63,9 @@ fun defaultHttpClient(engine: HttpClientEngine = defaultHttpClientEngine()): Htt
  * @param client An instance of HttpClient for HTTP(S) data retrieval via Ktor. Defaults to
  *   [defaultHttpClient].
  */
-class CsafLoader(engine: HttpClientEngine? = null, client: HttpClient? = null) {
+class CsafLoader
+@JvmOverloads
+constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
     private val httpClient: HttpClient =
         client ?: defaultHttpClient(engine ?: defaultHttpClientEngine())
 
