@@ -128,4 +128,14 @@ class CsafLoaderTest {
         val content = result.getOrThrow()
         assertEquals("Success on attempt 2", content)
     }
+
+    @Test
+    fun testRestriesAreLimited() = runTest {
+        val loader = CsafLoader(tooManyRequestsEngineFactory(4))
+        val result =
+            loader.fetchText("does-not-exist.com/too-many-requests.txt") {
+                assertSame(HttpStatusCode.TooManyRequests, it.status)
+            }
+        assertFalse { result.isSuccess }
+    }
 }
