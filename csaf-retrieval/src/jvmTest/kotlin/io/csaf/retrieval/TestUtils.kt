@@ -41,3 +41,24 @@ fun mockEngine() = MockEngine { request ->
         )
     }
 }
+
+fun tooManyRequestsEngineFactory(failures: Int = 1): MockEngine {
+    var attempt = 0
+
+    return MockEngine { request ->
+        attempt++
+
+        if (attempt <= failures) {
+            respondError(
+                status = HttpStatusCode.TooManyRequests,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        } else {
+            respond(
+                content = "Success on attempt $attempt",
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Text.Plain.toString()),
+            )
+        }
+    }
+}
