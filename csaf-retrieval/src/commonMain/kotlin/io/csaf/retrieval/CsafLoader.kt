@@ -50,7 +50,8 @@ fun defaultHttpClient(engine: HttpClientEngine = defaultHttpClientEngine()): Htt
             retryOnServerErrors(maxRetries = 3)
             // Retry on HTTP Too Many Requests
             retryIf(maxRetries = 3) { _, response -> response.status.value == 429 }
-            // Use default exponential backoff
+            // Use exponential backoff
+            exponentialDelay()
         }
     }
 }
