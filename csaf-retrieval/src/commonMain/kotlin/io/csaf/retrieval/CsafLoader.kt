@@ -154,8 +154,7 @@ constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
 
     /**
      * Fetch the `CSAF` fields from a `security.txt` as specified in
-     * [CSAF 7.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
-     * .
+     * [CSAF 7.1.8](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt).
      *
      * @param domain The domain from which to obtain the `security.txt`.
      * @param responseCallback An optional callback to further evaluate the [HttpResponse].
