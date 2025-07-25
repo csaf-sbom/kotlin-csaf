@@ -29,6 +29,26 @@ class CsafLoaderTest {
     }
 
     @Test
+    fun testInitializeDefaultHttpClient() {
+        assertNotNull(defaultHttpClient())
+    }
+
+    @Test
+    fun testSupplyEngineToDefaultHttpClient() {
+        assertNotNull(defaultHttpClient(mockEngine()))
+    }
+
+    @Test
+    fun testSupplyEngineToCsafLoader() {
+        assertNotNull(CsafLoader(mockEngine()))
+    }
+
+    @Test
+    fun testSupplyClientToCsafLoader() {
+        assertNotNull(CsafLoader(null, defaultHttpClient(mockEngine())))
+    }
+
+    @Test
     fun testFetchAggregator() = runTest {
         val result = loader.fetchAggregator("https://example.com/example-01-aggregator.json")
         assertTrue(
