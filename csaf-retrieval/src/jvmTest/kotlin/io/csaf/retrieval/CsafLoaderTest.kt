@@ -24,8 +24,33 @@ class CsafLoaderTest {
     private val loader = CsafLoader(mockEngine())
 
     @Test
+    fun testDefaultConstructor() {
+        assertNotNull(CsafLoader())
+    }
+
+    @Test
     fun testActualJavaHttpClientEngine() {
         assertNotNull(defaultHttpClientEngine())
+    }
+
+    @Test
+    fun testInitializeDefaultHttpClient() {
+        assertNotNull(defaultHttpClient())
+    }
+
+    @Test
+    fun testSupplyEngineToDefaultHttpClient() {
+        assertNotNull(defaultHttpClient(mockEngine()))
+    }
+
+    @Test
+    fun testSupplyEngineToCsafLoader() {
+        assertNotNull(CsafLoader(mockEngine()))
+    }
+
+    @Test
+    fun testSupplyClientToCsafLoader() {
+        assertNotNull(CsafLoader(null, defaultHttpClient(mockEngine())))
     }
 
     @Test
@@ -111,6 +136,30 @@ class CsafLoaderTest {
         val result =
             loader.fetchROLIEFeed("does-not-really-exist.json") {
                 assertSame(HttpStatusCode.NotFound, it.status)
+            }
+        assertFalse { result.isSuccess }
+    }
+
+    @Test
+    fun testRetriesOnTooManyRequests() = runTest {
+        val loader = CsafLoader(tooManyRequestsEngineFactory())
+        val result =
+            loader.fetchText("does-not-exist.com/too-many-requests.txt") {
+                assertSame(HttpStatusCode.OK, it.status)
+            }
+
+        assertTrue { result.isSuccess }
+
+        val content = result.getOrThrow()
+        assertEquals("Success on attempt 2", content)
+    }
+
+    @Test
+    fun testRestriesAreLimited() = runTest {
+        val loader = CsafLoader(tooManyRequestsEngineFactory(4))
+        val result =
+            loader.fetchText("does-not-exist.com/too-many-requests.txt") {
+                assertSame(HttpStatusCode.TooManyRequests, it.status)
             }
         assertFalse { result.isSuccess }
     }

@@ -37,18 +37,37 @@ import io.ktor.serialization.kotlinx.json.*
 expect fun defaultHttpClientEngine(): HttpClientEngine
 
 /**
+ * Creates a default [HttpClient] with retry logic and JSON support.
+ *
+ * @param engine The HTTP engine to use. Defaults to [defaultHttpClientEngine].
+ */
+fun defaultHttpClient(engine: HttpClientEngine = defaultHttpClientEngine()): HttpClient {
+    return HttpClient(engine) {
+        expectSuccess = true
+        install(ContentNegotiation) { json() }
+
+        install(HttpRequestRetry) {
+            retryOnServerErrors(maxRetries = 3)
+            // Retry on HTTP Too Many Requests
+            retryIf(maxRetries = 3) { _, response -> response.status.value == 429 }
+            // Use default exponential backoff
+        }
+    }
+}
+
+/**
  * A helper class with async functions to retrieve certain kinds of CSAF-related data.
  *
- * @param engine An instance of HttpClientEngine for HTTP(S) data retrieval via Ktor. Defaults to
+ * @param engine An instance of HttpClientEngine for the httpClient. Defaults to
  *   [defaultHttpClientEngine].
+ * @param client An instance of HttpClient for HTTP(S) data retrieval via Ktor. Defaults to
+ *   [defaultHttpClient].
  */
-class CsafLoader(engine: HttpClientEngine = defaultHttpClientEngine()) {
-    private val httpClient =
-        HttpClient(engine) {
-            expectSuccess = true
-            install(ContentNegotiation) { json() }
-            install(HttpRequestRetry)
-        }
+class CsafLoader
+@JvmOverloads
+constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
+    private val httpClient: HttpClient =
+        client ?: defaultHttpClient(engine ?: defaultHttpClientEngine())
 
     /**
      * Helper function for all other functions defined below. Performs a get request and returns the
