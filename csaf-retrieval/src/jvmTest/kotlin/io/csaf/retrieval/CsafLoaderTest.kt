@@ -24,6 +24,11 @@ class CsafLoaderTest {
     private val loader = CsafLoader(mockEngine())
 
     @Test
+    fun testDefaultConstructor() {
+        assertNotNull(CsafLoader())
+    }
+
+    @Test
     fun testActualJavaHttpClientEngine() {
         assertNotNull(defaultHttpClientEngine())
     }
