@@ -49,8 +49,31 @@ class CsafLoaderTest {
     }
 
     @Test
+    fun testFromEngineConstructorHelper() {
+        assertNotNull(CsafLoader.fromEngine(mockEngine()))
+    }
+
+    @Test
     fun testSupplyClientToCsafLoader() {
         assertNotNull(CsafLoader(null, defaultHttpClient(mockEngine())))
+    }
+
+    @Test
+    fun testFromClientConstructorHelper() {
+        assertNotNull(CsafLoader.fromClient(defaultHttpClient(mockEngine())))
+    }
+
+    @Test
+    fun testWithSettingsConstructorHelper() {
+        assertNotNull(
+            CsafLoader.withSettings(
+                maxRetries = 1,
+                retryBase = 3.0,
+                retryBaseDelayMs = 5000,
+                retryMaxDelayMs = 100000,
+                engine = mockEngine(),
+            )
+        )
     }
 
     @Test
@@ -157,6 +180,7 @@ class CsafLoaderTest {
     @Test
     fun testRestriesAreLimited() = runTest {
         val loader = CsafLoader(tooManyRequestsEngineFactory(4))
+
         val result =
             loader.fetchText("does-not-exist.com/too-many-requests.txt") {
                 assertSame(HttpStatusCode.TooManyRequests, it.status)
