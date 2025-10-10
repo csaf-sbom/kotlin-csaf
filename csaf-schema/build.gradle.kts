@@ -1,7 +1,5 @@
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.sourceSets
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
@@ -25,6 +23,9 @@ kotlin {
                 api(libs.kotlinx.datetime)
             }
             kotlin {
+                compilerOptions {
+                    optIn.add("kotlinx.serialization.ExperimentalSerializationApi")
+                }
                 srcDirs("build/generated-sources/kotlin")
             }
         }
@@ -37,25 +38,68 @@ kotlin {
     }
 }
 
-configure<JSONSchemaCodegen> {
-    configFile.set(file("src/jvmMain/resources/codegen-config.json"))
-    inputs {
-        inputFile(file("src/jvmMain/resources/schema"))
+// Define configuration for each code generation task
+data class CodegenConfig(
+    val configFile: File,
+    val inputDir: File,
+    val outputDir: File
+)
+
+val codegenConfigs = mapOf(
+    "generateCodeFromSchema" to CodegenConfig(
+        configFile = file("src/jvmMain/resources/codegen-config.json"),
+        inputDir = file("src/jvmMain/resources/schema"),
+        outputDir = file("build/generated-sources/kotlin")
+    ),
+    "generateCodeFromNonStrictSchema" to CodegenConfig(
+        configFile = file("src/jvmMain/resources/codegen-non-strict-config.json"),
+        inputDir = file("src/jvmMain/resources/schema-non-strict"),
+        outputDir = file("build/generated-sources/kotlin")
+    )
+)
+
+// Disable default JSONSchemaCodegen task
+tasks.named("generate") {
+    enabled = false
+}
+
+// Register additional tasks (skip the first one as it's the default)
+var prevTask: JSONSchemaCodegenTask? = null
+val generateTasks = codegenConfigs.map { (taskName, config) ->
+    tasks.register<JSONSchemaCodegenTask>(taskName) {
+        description = "Generate Kotlin code from JSON schema with $taskName configuration"
+        group = "code generation"
+
+        doFirst {
+            project.configure<JSONSchemaCodegen> {
+                configFile.set(config.configFile)
+                inputFile.set(config.inputDir)
+                outputDir.set(config.outputDir)
+            }
+        }
+
+        inputs.file(config.configFile).withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.dir(config.inputDir).withPathSensitivity(PathSensitivity.RELATIVE)
+        outputs.dir(config.outputDir)
+
+        // Make sure tasks don't run in parallel
+        prevTask?.let { mustRunAfter(it) }
+        prevTask = this
     }
-    outputDir.set(file("build/generated-sources/kotlin"))
 }
 
-// Configure gradle caching manually for json-kotlin-gradle, as the plugin seems to lack support for it.
-var generateTasks = tasks.withType(JSONSchemaCodegenTask::class) {
-    inputs.file("src/jvmMain/resources/codegen-config.json").withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.dir("src/jvmMain/resources/schema").withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.dir("build/generated-sources/kotlin")
+tasks.withType<Jar> {
+    dependsOn(generateTasks)
 }
 
-var jarTasks = tasks.withType<Jar>()
-jarTasks.forEach {
-    it.dependsOn(generateTasks)
+tasks.withType<DokkaTask> {
+    dependsOn(generateTasks)
 }
 
-val dokkaHtml by tasks.getting(DokkaTask::class)
-dokkaHtml.dependsOn(generateTasks)
+tasks.named("compileKotlinJvm") {
+    dependsOn(generateTasks)
+}
+
+tasks.named("jvmSourcesJar") {
+    dependsOn(generateTasks)
+}

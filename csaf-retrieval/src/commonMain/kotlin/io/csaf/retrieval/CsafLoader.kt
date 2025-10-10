@@ -40,7 +40,7 @@ expect fun defaultHttpClientEngine(): HttpClientEngine
  * Creates a default [HttpClient] with retry logic and JSON support.
  *
  * @param engine The HTTP engine to use. Defaults to [defaultHttpClientEngine].
- * @param maxRetries The amount of times that HTTP requests are retried on errors.
+ * @param maxRetries The number of times that HTTP requests are retried on errors.
  * @param retryBase The exponent for exponential delay.
  * @param retryBaseDelayMs Base delay in ms.
  * @param retryMaxDelayMs Max delay in ms.
@@ -222,7 +222,7 @@ constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
         /**
          * Initialize a [CsafLoader] with the provided settings.
          *
-         * @param maxRetries The amount of times that HTTP requests are retried on errors.
+         * @param maxRetries The number of times that HTTP requests are retried on errors.
          * @param retryBase The exponent for exponential delay.
          * @param retryBaseDelayMs Base delay in ms.
          * @param retryMaxDelayMs Max delay in ms.
