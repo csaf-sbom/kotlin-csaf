@@ -17,7 +17,7 @@ tasks.whenTaskAdded {
 // Publication settings for maven central
 mavenPublishing {
     configure(KotlinMultiplatform(
-        javadocJar = JavadocJar.Dokka("dokkaHtml"),
+        javadocJar = JavadocJar.Dokka("dokkaGenerateHtml"),
         sourcesJar = true,
     ))
     coordinates(project.group.toString(), project.name, version.toString())

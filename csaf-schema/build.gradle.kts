@@ -1,6 +1,5 @@
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
-import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
@@ -92,7 +91,8 @@ tasks.withType<Jar> {
     dependsOn(generateTasks)
 }
 
-tasks.withType<DokkaTask> {
+// Ensure Dokka v2 tasks run after code generation
+tasks.matching { it.name.startsWith("dokkaGenerate") }.configureEach {
     dependsOn(generateTasks)
 }
 
