@@ -17,6 +17,13 @@
 package io.csaf.retrieval
 
 import io.ktor.http.*
+import io.ktor.util.network.hostname
+import io.ktor.util.network.port
+import java.net.InetSocketAddress
+import java.net.ProxySelector
+import java.net.URI
+import java.net.http.HttpClient
+import kotlin.jvm.optionals.getOrNull
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 
@@ -31,6 +38,30 @@ class CsafLoaderTest {
     @Test
     fun testActualJavaHttpClientEngine() {
         assertNotNull(defaultHttpClientEngine())
+    }
+
+    @Test
+    fun testConfigWithProxy() {
+        val builder = HttpClient.newBuilder()
+        with(builder) { optionalProxy(ProxySelector.of(InetSocketAddress("localhost", 8080))) }
+        val client = builder.build()
+        assertNotNull(client)
+
+        val proxy = client.proxy().getOrNull()?.select(URI("https://www.csaf.io"))?.firstOrNull()
+        assertNotNull(proxy)
+        assertEquals("localhost", proxy.address().hostname)
+        assertEquals(8080, proxy.address().port)
+    }
+
+    @Test
+    fun testConfigWithOutProxy() {
+        val builder = HttpClient.newBuilder()
+        with(builder) { optionalProxy(null) }
+        val client = builder.build()
+        assertNotNull(client)
+
+        val proxy = client.proxy().getOrNull()?.select(URI("https://www.csaf.io"))?.firstOrNull()
+        assertNull(proxy)
     }
 
     @Test

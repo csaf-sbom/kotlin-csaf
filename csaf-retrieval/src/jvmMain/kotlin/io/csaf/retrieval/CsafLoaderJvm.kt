@@ -16,6 +16,21 @@
  */
 package io.csaf.retrieval
 
-import io.ktor.client.engine.java.Java
+import io.ktor.client.engine.java.*
+import java.net.ProxySelector
+import java.net.http.HttpClient
 
-actual fun defaultHttpClientEngine() = Java.create()
+actual fun defaultHttpClientEngine() = javaClientEngine(null)
+
+/** Creates a [Java] client engine with an optional [ProxySelector]. */
+fun javaClientEngine(selector: ProxySelector?) = Java.create { config { optionalProxy(selector) } }
+
+/**
+ * A little helper function that is extracted so we can test it without lazy loading the actual
+ * config in the HTTP client.
+ */
+internal fun HttpClient.Builder.optionalProxy(selector: ProxySelector?) {
+    if (selector != null) {
+        proxy(selector)
+    }
+}
