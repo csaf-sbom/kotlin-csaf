@@ -17,6 +17,8 @@
 package io.csaf.retrieval
 
 import io.ktor.http.*
+import io.ktor.network.sockets.InetSocketAddress
+import java.net.ProxySelector
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 
@@ -31,6 +33,13 @@ class CsafLoaderTest {
     @Test
     fun testActualJavaHttpClientEngine() {
         assertNotNull(defaultHttpClientEngine())
+    }
+
+    @Test
+    fun testActualJavaProxySelector() {
+        assertNotNull(
+            javaClientEngine(ProxySelector.of(java.net.InetSocketAddress("localhost", 80)))
+        )
     }
 
     @Test

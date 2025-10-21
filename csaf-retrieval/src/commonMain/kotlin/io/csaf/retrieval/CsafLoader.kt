@@ -235,12 +235,12 @@ constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
             retryBase: Double = 2.0,
             retryBaseDelayMs: Long = 1000,
             retryMaxDelayMs: Long = 60000,
-            engine: HttpClientEngine? = null,
+            engine: HttpClientEngine = defaultHttpClientEngine(),
         ): CsafLoader =
             CsafLoader(
                 client =
                     defaultHttpClient(
-                        engine = engine ?: defaultHttpClientEngine(),
+                        engine = engine,
                         maxRetries = maxRetries,
                         retryBase = retryBase,
                         retryBaseDelayMs = retryBaseDelayMs,
