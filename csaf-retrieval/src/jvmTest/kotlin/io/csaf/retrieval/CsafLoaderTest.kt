@@ -17,6 +17,13 @@
 package io.csaf.retrieval
 
 import io.ktor.http.*
+import io.ktor.util.network.hostname
+import io.ktor.util.network.port
+import java.net.InetSocketAddress
+import java.net.ProxySelector
+import java.net.URI
+import java.net.http.HttpClient
+import kotlin.jvm.optionals.getOrNull
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 
@@ -31,6 +38,30 @@ class CsafLoaderTest {
     @Test
     fun testActualJavaHttpClientEngine() {
         assertNotNull(defaultHttpClientEngine())
+    }
+
+    @Test
+    fun testConfigWithProxy() {
+        val builder = HttpClient.newBuilder()
+        with(builder) { optionalProxy(ProxySelector.of(InetSocketAddress("localhost", 8080))) }
+        val client = builder.build()
+        assertNotNull(client)
+
+        val proxy = client.proxy().getOrNull()?.select(URI("https://www.csaf.io"))?.firstOrNull()
+        assertNotNull(proxy)
+        assertEquals("localhost", proxy.address().hostname)
+        assertEquals(8080, proxy.address().port)
+    }
+
+    @Test
+    fun testConfigWithOutProxy() {
+        val builder = HttpClient.newBuilder()
+        with(builder) { optionalProxy(null) }
+        val client = builder.build()
+        assertNotNull(client)
+
+        val proxy = client.proxy().getOrNull()?.select(URI("https://www.csaf.io"))?.firstOrNull()
+        assertNull(proxy)
     }
 
     @Test
@@ -49,8 +80,31 @@ class CsafLoaderTest {
     }
 
     @Test
+    fun testFromEngineConstructorHelper() {
+        assertNotNull(CsafLoader.fromEngine(mockEngine()))
+    }
+
+    @Test
     fun testSupplyClientToCsafLoader() {
         assertNotNull(CsafLoader(null, defaultHttpClient(mockEngine())))
+    }
+
+    @Test
+    fun testFromClientConstructorHelper() {
+        assertNotNull(CsafLoader.fromClient(defaultHttpClient(mockEngine())))
+    }
+
+    @Test
+    fun testWithSettingsConstructorHelper() {
+        assertNotNull(
+            CsafLoader.withSettings(
+                maxRetries = 1,
+                retryBase = 3.0,
+                retryBaseDelayMs = 5000,
+                retryMaxDelayMs = 100000,
+                engine = mockEngine(),
+            )
+        )
     }
 
     @Test
@@ -157,6 +211,7 @@ class CsafLoaderTest {
     @Test
     fun testRestriesAreLimited() = runTest {
         val loader = CsafLoader(tooManyRequestsEngineFactory(4))
+
         val result =
             loader.fetchText("does-not-exist.com/too-many-requests.txt") {
                 assertSame(HttpStatusCode.TooManyRequests, it.status)

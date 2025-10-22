@@ -40,18 +40,35 @@ expect fun defaultHttpClientEngine(): HttpClientEngine
  * Creates a default [HttpClient] with retry logic and JSON support.
  *
  * @param engine The HTTP engine to use. Defaults to [defaultHttpClientEngine].
+ * @param maxRetries The number of times that HTTP requests are retried on errors.
+ * @param retryBase The exponent for exponential delay.
+ * @param retryBaseDelayMs Base delay in ms.
+ * @param retryMaxDelayMs Max delay in ms.
+ * @return Configured [HttpClient].
  */
-fun defaultHttpClient(engine: HttpClientEngine = defaultHttpClientEngine()): HttpClient {
+@JvmOverloads
+fun defaultHttpClient(
+    engine: HttpClientEngine = defaultHttpClientEngine(),
+    maxRetries: Int = 3,
+    retryBase: Double = 2.0,
+    retryBaseDelayMs: Long = 1000,
+    retryMaxDelayMs: Long = 60000,
+): HttpClient {
     return HttpClient(engine) {
         expectSuccess = true
+
         install(ContentNegotiation) { json() }
 
         install(HttpRequestRetry) {
-            retryOnServerErrors(maxRetries = 3)
+            retryOnServerErrors(maxRetries = maxRetries)
             // Retry on HTTP Too Many Requests
-            retryIf(maxRetries = 3) { _, response -> response.status.value == 429 }
+            retryIf(maxRetries = maxRetries) { _, response -> response.status.value == 429 }
             // Use exponential backoff
-            exponentialDelay()
+            exponentialDelay(
+                base = retryBase,
+                baseDelayMs = retryBaseDelayMs,
+                maxDelayMs = retryMaxDelayMs,
+            )
         }
     }
 }
@@ -184,7 +201,51 @@ constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
             }
 
     companion object {
-        val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
+        @JvmStatic val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
         internal var defaultLoaderFactory: (() -> CsafLoader) = { CsafLoader() }
+
+        /**
+         * Initialize a [CsafLoader] with the provided [HttpClient].
+         *
+         * @param client [HttpClient] used for preforming requests.
+         */
+        @JvmStatic fun fromClient(client: HttpClient): CsafLoader = CsafLoader(client = client)
+
+        /**
+         * Initialize a [CsafLoader] with the provided [HttpClientEngine].
+         *
+         * @param engine [HttpClientEngine] passed to default [HttpClient].
+         */
+        @JvmStatic
+        fun fromEngine(engine: HttpClientEngine): CsafLoader = CsafLoader(engine = engine)
+
+        /**
+         * Initialize a [CsafLoader] with the provided settings.
+         *
+         * @param maxRetries The number of times that HTTP requests are retried on errors.
+         * @param retryBase The exponent for exponential delay.
+         * @param retryBaseDelayMs Base delay in ms.
+         * @param retryMaxDelayMs Max delay in ms.
+         * @param engine The HTTP engine to use. Defaults to [defaultHttpClientEngine].
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun withSettings(
+            maxRetries: Int = 3,
+            retryBase: Double = 2.0,
+            retryBaseDelayMs: Long = 1000,
+            retryMaxDelayMs: Long = 60000,
+            engine: HttpClientEngine = defaultHttpClientEngine(),
+        ): CsafLoader =
+            CsafLoader(
+                client =
+                    defaultHttpClient(
+                        engine = engine,
+                        maxRetries = maxRetries,
+                        retryBase = retryBase,
+                        retryBaseDelayMs = retryBaseDelayMs,
+                        retryMaxDelayMs = retryMaxDelayMs,
+                    )
+            )
     }
 }

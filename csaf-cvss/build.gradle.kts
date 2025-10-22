@@ -16,3 +16,13 @@ kotlin {
         }
     }
 }
+
+dokka {
+    dokkaSourceSets.named("commonMain") {
+        suppress.set(true)
+    }
+    dokkaSourceSets.named("jvmMain") {
+        // prevent Dokka from depending on suppressed commonMain
+        dependentSourceSets.clear()
+    }
+}
