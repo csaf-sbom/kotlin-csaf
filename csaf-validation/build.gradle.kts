@@ -3,7 +3,6 @@ import groovy.json.JsonOutput
 import groovy.xml.XmlParser
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegen
 import net.pwall.json.kotlin.codegen.gradle.JSONSchemaCodegenTask
-import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     id("buildlogic.kotlin-library-conventions")
@@ -57,8 +56,11 @@ var jarTasks = tasks.withType<Jar>()
 jarTasks.forEach {
     it.dependsOn(generateTasks)
 }
-val dokkaHtml by tasks.getting(DokkaTask::class)
-dokkaHtml.dependsOn(generateTasks)
+
+// Ensure all Dokka v2 tasks run after code generation to avoid implicit dependency issues
+tasks.matching { it.name.startsWith("dokkaGenerate") }.configureEach {
+    dependsOn(generateTasks)
+}
 
 open class IncrementalReverseTask : DefaultTask() {
 
@@ -77,7 +79,7 @@ open class IncrementalReverseTask : DefaultTask() {
         val root = XmlParser().parseText(text)
         val list = root.value() as List<groovy.util.Node>
         val weaknessesNode = list[0].value() as List<groovy.util.Node>
-        var map = mapOf("weaknesses" to weaknessesNode.map {
+        val map = mapOf("weaknesses" to weaknessesNode.map {
             mapOf("id" to "CWE-${it.attribute("ID")}", "name" to it.attribute("Name"))
         })
 
