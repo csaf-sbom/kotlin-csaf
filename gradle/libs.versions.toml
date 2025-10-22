@@ -4,7 +4,7 @@ dokka = "2.1.0"
 # for dependency CVE fix
 woodstox = "6.7.0"
 ktor = "3.2.2"
-kotlin = "2.1.10"
+kotlin = "2.2.0"
 kotlin-csv = "1.10.0"
 kotlin-logging = "7.0.7"
 kotlinx-coroutines = "1.10.2"
