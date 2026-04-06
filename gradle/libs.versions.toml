@@ -20,7 +20,7 @@ slf4j = "2.0.17"
 spotless = "8.0.0"
 protobuf = "4.31.1"
 pbandk = "0.16.0"
-versatile = "0.13.0"
+versatile = "0.18.0"
 
 [libraries]
 kotlin-csv = { group = "com.jsoizo", name = "kotlin-csv", version.ref = "kotlin-csv" }
