@@ -6,16 +6,20 @@ plugins {
     id("buildlogic.kotlin-library-conventions")
 }
 
+// The com.google.protobuf plugin (0.9.5) requires the 'java' plugin.
+// Kotlin 2.3.0 disallows 'java' alongside KMP, so we suppress the check task here.
+tasks.named("checkKotlinGradlePluginConfigurationErrors") { enabled = false }
+
+dependencies {
+    // Needed for google/protobuf/timestamp.proto to be found by protoc
+    compileOnly(libs.protobuf.java)
+}
+
 mavenPublishing {
     pom {
         name.set("Kotlin CSAF - Matching Module")
         description.set("Matching functionality for CSAF/ProtoBOM in Kotlin")
     }
-}
-
-dependencies {
-    // Needed for google/protobuf/timestamp.proto
-    compileOnly(libs.protobuf.java)
 }
 
 protobuf {
@@ -28,7 +32,7 @@ protobuf {
         }
     }
     generateProtoTasks {
-        ofSourceSet("main").forEach { task ->
+        all().forEach { task ->
             task.builtins {
                 remove("java")
             }
