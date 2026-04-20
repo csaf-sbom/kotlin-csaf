@@ -25,7 +25,6 @@ kotlin {
         jvmToolchain(21)
     }
     jvm {
-        withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -41,3 +40,7 @@ kotlin {
     }
 }
 
+// Ensure Java sources are compiled with UTF-8 encoding
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
