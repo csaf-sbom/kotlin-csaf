@@ -16,6 +16,7 @@
  */
 package io.csaf.matching
 
+import io.csaf.schema.JsonUri
 import io.csaf.schema.generated.Csaf
 import kotlin.test.assertNotNull
 
@@ -75,6 +76,33 @@ val linuxVendorBranch =
     )
 
 val linuxProductTree = Csaf.ProductTree(branches = listOf(linuxVendorBranch))
+
+/**
+ * A product tree that defines its products only in `full_product_names` and has no branches (see
+ * issue #234).
+ */
+val fullProductNamesOnlyTree =
+    Csaf.ProductTree(
+        full_product_names =
+            listOf(
+                Csaf.Product(
+                    name = "Example Product 1-1 1.1.1",
+                    product_id = "CSAFPID-01",
+                    product_identification_helper =
+                        Csaf.ProductIdentificationHelper(
+                            purl = JsonUri("pkg:generic/example/product-1@1.1.1")
+                        ),
+                ),
+                Csaf.Product(
+                    name = "Example Product 1-2 1.1.2",
+                    product_id = "CSAFPID-02",
+                    product_identification_helper =
+                        Csaf.ProductIdentificationHelper(
+                            purl = JsonUri("pkg:generic/example/product-2@1.1.2")
+                        ),
+                ),
+            )
+    )
 
 /**
  * Describes a [ProductWithBranches] with the following attributes:

@@ -37,9 +37,10 @@ data class ProductWithBranches(
  * Gathers all [Product]s in the current document and their branches. The [predicate] is used to
  * filter the products. If it is null, all products are returned.
  *
- * The function traverses the product tree and collects all branches that lead to a product (leaf
- * nodes). It fills a list with [ProductWithBranches] objects, each containing the product and its
- * path in the tree.
+ * The function first collects all products in `full_product_names` (with an empty path). It then
+ * traverses the product tree and collects all branches that lead to a product (leaf nodes). It
+ * fills a list with [ProductWithBranches] objects, each containing the product and its path in the
+ * tree.
  *
  * @param predicate A function that takes a [Product] and returns a Boolean. If null, all products
  *   are included.
@@ -52,6 +53,13 @@ fun Csaf.gatherProductsWithBranches(
     val products = mutableListOf<ProductWithBranches>()
     val worklist = mutableListOf<List<Csaf.Branche>>()
     val alreadySeen = mutableSetOf<Csaf.Branche>()
+
+    // Products defined in `full_product_names` are complete product definitions without a path
+    for (product in this.product_tree?.full_product_names.orEmpty()) {
+        if (predicate?.invoke(product) != false) {
+            products += ProductWithBranches(advisory = this, product = product, branches = listOf())
+        }
+    }
 
     // Start with this branches
     worklist += this.product_tree?.branches

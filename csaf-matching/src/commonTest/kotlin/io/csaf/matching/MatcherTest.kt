@@ -255,6 +255,50 @@ class MatcherTest {
     }
 
     @Test
+    fun `test match finds products defined in full_product_names`() {
+        val csafDoc =
+            goodCsaf(
+                productTree = fullProductNamesOnlyTree,
+                vulnerabilities =
+                    goodVulnerabilities(
+                        goodProductStatus(
+                            firstAffected = null,
+                            firstFixed = null,
+                            knownAffected = setOf("CSAFPID-01", "CSAFPID-02"),
+                            knownNotAffected = null,
+                            lastAffected = null,
+                            recommended = null,
+                            fixed = null,
+                            underInvestigation = null,
+                        )
+                    ),
+            )
+        val matcher = Matcher(listOf(csafDoc))
+
+        val sbom =
+            Document(
+                nodeList =
+                    NodeList(
+                        listOf(
+                                "pkg:generic/example/product-1@1.1.1",
+                                "pkg:generic/example/product-2@1.1.2",
+                            )
+                            .map {
+                                Node(identifiers = mapOf(SoftwareIdentifierType.PURL.value to it))
+                            }
+                    )
+            )
+
+        val affected =
+            matcher
+                .match(sbom)
+                .filter { it.vulnerabilitiesWithAffectedProduct().isNotEmpty() }
+                .map { it.product.product_id }
+                .sorted()
+        assertEquals(listOf("CSAFPID-01", "CSAFPID-02"), affected)
+    }
+
+    @Test
     fun `test match and match process valid CPEs correctly`() {
         val csafDoc = goodCsaf()
         val matcher = Matcher(listOf(csafDoc), threshold = 0.5f)
