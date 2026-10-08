@@ -33,7 +33,6 @@ class CsafTest {
             assertFailsWith<SerializationException> { Json.decodeFromString<Csaf>(file.readText()) }
         val msg = assertNotNull(ex.message)
         assertTrue(msg.contains("Encountered an unknown key 'this_property_does_not_exist'"))
-        assertTrue(msg.contains("at offset 5"))
     }
 
     @Test

@@ -24,6 +24,12 @@ kover {
         excludedClasses.add("com.google.protobuf.*")
         excludedClasses.add("protobom.protobom.*")
 
+        // Ignore generated DefaultImpls classes for Kotlin interfaces with default methods
+        excludedClasses.add("io.csaf.retrieval.roles.Role\$DefaultImpls")
+        excludedClasses.add("io.csaf.validation.Test\$DefaultImpls")
+        excludedClasses.add("io.csaf.retrieval.Validatable\$DefaultImpls")
+        excludedClasses.add("io.csaf.matching.MatchingConfidence\$DefaultImpls")
+
         // Ignore main classes, since they are for demo only - might be removed in the future
         excludedClasses.add("io.csaf.retrieval.demo.*")
         excludedClasses.add("io.csaf.validation.Main*")
