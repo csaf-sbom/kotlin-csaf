@@ -189,8 +189,9 @@ fun goodVulnerabilities() =
                         cvss_v2 =
                             Csaf.CvssV2(
                                 version = "2.0",
-                                vectorString = "AV:N/AC:L/Au:N/C:C/I:C/A:C",
-                                baseScore = 9.0,
+                                vectorString =
+                                    "AV:N/AC:L/Au:N/C:C/I:C/A:C/E:POC/RL:OF/RC:C/CDP:LM/TD:ND/CR:ND/IR:ND/AR:ND",
+                                baseScore = 10.0,
                                 accessVector = Csaf.AccessVector.NETWORK,
                                 accessComplexity = Csaf.AccessComplexity.LOW,
                                 authentication = Csaf.Authentication.NONE,
@@ -208,8 +209,8 @@ fun goodVulnerabilities() =
                                 integrityRequirement = Csaf.ConfidentialityRequirement.NOT_DEFINED,
                                 availabilityRequirement =
                                     Csaf.ConfidentialityRequirement.NOT_DEFINED,
-                                temporalScore = 9.0,
-                                environmentalScore = 9.0,
+                                temporalScore = 7.8,
+                                environmentalScore = 8.5,
                             ),
                     )
                 ),

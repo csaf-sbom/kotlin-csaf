@@ -386,7 +386,12 @@ object Test619InvalidCVSSComputation : Test {
                 // Check the following properties for validity
                 for (entry in test619V2PropertiesMap) {
                     val documentValue = entry.key.get(it)
-                    val calculatedValue = entry.value.get(calc)
+                    // Metric properties are wrapped in a MetricValue, whereas the document
+                    // contains the plain enum value
+                    val calculatedValue =
+                        entry.value.get(calc).let { v ->
+                            if (v is MetricValue<*>) v.enumValue else v
+                        }
 
                     // Compare the values. Since it is allowed to skip values in the CSAF document,
                     // we only compare non-null values
