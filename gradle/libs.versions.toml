@@ -3,12 +3,12 @@ codegen = "0.108.2"
 dokka = "2.1.0"
 # for dependency CVE fix
 woodstox = "6.7.0"
-ktor = "3.4.2"
+ktor = "3.6.0"
 kotlin = "2.3.0"
 kotlin-csv = "1.10.0"
 kotlin-logging = "7.0.7"
 kotlinx-coroutines = "1.10.2"
-kotlinx-json = "1.9.0"
+kotlinx-json = "1.11.0"
 kotlinx-datetime = "0.6.2"
 kover = "0.9.1"
 mockk = "1.14.0"
@@ -20,7 +20,7 @@ slf4j = "2.0.17"
 spotless = "8.0.0"
 protobuf = "4.31.1"
 pbandk = "0.16.0"
-versatile = "0.19.0"
+versatile = "0.26.1"
 
 [libraries]
 kotlin-csv = { group = "com.jsoizo", name = "kotlin-csv", version.ref = "kotlin-csv" }
