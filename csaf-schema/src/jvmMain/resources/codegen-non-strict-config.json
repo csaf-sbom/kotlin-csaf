@@ -1,0 +1,17 @@
+{
+  "packageName": "io.csaf.schema.generated",
+  "annotations": {
+    "classes": {
+      "kotlinx.serialization.json.JsonIgnoreUnknownKeys": null,
+      "kotlinx.serialization.Serializable": null
+    }
+  },
+  "customClasses": {
+    "format": {
+      "uri": "io.csaf.schema.JsonUri",
+      "date-time": "kotlinx.datetime.Instant",
+      "generic": "kotlinx.serialization.json.JsonObject"
+    }
+  },
+  "decimalClassName": "kotlin.Double"
+}

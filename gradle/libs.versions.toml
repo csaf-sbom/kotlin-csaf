@@ -1,25 +1,26 @@
 [versions]
 codegen = "0.108.2"
-dokka = "1.9.20"
+dokka = "2.1.0"
 # for dependency CVE fix
 woodstox = "6.7.0"
-ktor = "3.1.1"
-kotlin = "2.1.10"
+ktor = "3.4.2"
+kotlin = "2.3.0"
 kotlin-csv = "1.10.0"
-kotlin-logging = "7.0.5"
-kotlinx-coroutines = "1.10.1"
-kotlinx-json = "1.8.0"
+kotlin-logging = "7.0.7"
+kotlinx-coroutines = "1.10.2"
+kotlinx-json = "1.9.0"
 kotlinx-datetime = "0.6.2"
 kover = "0.9.1"
-mockk = "1.13.17"
+mockk = "1.14.0"
 publish = "0.31.0"
 purl = "1.5.0"
-cpe = "2.1.0"
-semver = "2.0.0"
+cpe = "3.0.0"
+semver = "2.1.0"
 slf4j = "2.0.17"
-spotless = "7.0.2"
-protobuf = "4.30.0"
+spotless = "8.0.0"
+protobuf = "4.31.1"
 pbandk = "0.16.0"
+versatile = "0.19.0"
 
 [libraries]
 kotlin-csv = { group = "com.jsoizo", name = "kotlin-csv", version.ref = "kotlin-csv" }
@@ -35,6 +36,7 @@ ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref =
 ktor-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 purl = { group = "com.github.package-url", name = "packageurl-java", version.ref = "purl" }
+versatile = { group = "io.github.nscuro", name = "versatile-core", version.ref = "versatile" }
 cpe = { group = "us.springett", name = "cpe-parser", version.ref = "cpe" }
 semver = { group = "net.swiftzer.semver", name = "semver", version.ref = "semver" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -58,4 +60,4 @@ slf4j = ["slf4j-api", "slf4j-jdk14"]
 
 [plugins]
 download = { id = "de.undercouch.download", version = "5.6.0" }
-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+protobuf = { id = "com.google.protobuf", version = "0.9.5" }

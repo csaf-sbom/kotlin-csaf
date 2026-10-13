@@ -12,7 +12,7 @@ In order to use or develop this library, Java needs to be installed in your targ
 
 The main use case for this project is for developers who want to integrate support for CSAF in their Java/Kotlin-based project. In order to do so, the following will serve as a quickstart guide.
 
-First, `kotlin-csaf` needs to be added as a dependency in your build system, such as Maven or Gradle. We currently publish artefacts on Maven Central under the namespace `io.github.csaf-sbom`, so they can be easily specified as a dependency, for example in Gradle using the Kotlin syntax:
+First, `kotlin-csaf` needs to be added as a dependency in your build system, such as Maven or Gradle. We currently publish artefacts on Maven Central under the namespace `io.csaf`, so they can be easily specified as a dependency, for example in Gradle using the Kotlin syntax:
 
 ```Kotlin
 repositories {
@@ -20,9 +20,9 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.csaf-sbom:csaf-schema:0.0.1")
-    implementation("io.github.csaf-sbom:csaf-import:0.0.1")
-    implementation("io.github.csaf-sbom:csaf-validation:0.0.1")
+    implementation("io.csaf:csaf-schema:0.3.0")
+    implementation("io.csaf:csaf-import:0.3.0")
+    implementation("io.csaf:csaf-validation:0.3.0")
 }
 ```
 

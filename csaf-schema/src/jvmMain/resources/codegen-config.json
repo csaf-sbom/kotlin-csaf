@@ -1,5 +1,5 @@
 {
-  "packageName": "io.github.csaf.sbom.schema.generated",
+  "packageName": "io.csaf.schema.generated",
   "annotations": {
     "classes": {
       "kotlinx.serialization.Serializable": null
@@ -7,7 +7,7 @@
   },
   "customClasses": {
     "format": {
-      "uri": "io.github.csaf.sbom.schema.JsonUri",
+      "uri": "io.csaf.schema.JsonUri",
       "date-time": "kotlinx.datetime.Instant",
       "generic": "kotlinx.serialization.json.JsonObject"
     }

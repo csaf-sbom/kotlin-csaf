@@ -17,7 +17,7 @@ tasks.whenTaskAdded {
 // Publication settings for maven central
 mavenPublishing {
     configure(KotlinMultiplatform(
-        javadocJar = JavadocJar.Dokka("dokkaHtml"),
+        javadocJar = JavadocJar.Dokka("dokkaGenerateHtml"),
         sourcesJar = true,
     ))
     coordinates(project.group.toString(), project.name, version.toString())
@@ -45,4 +45,19 @@ mavenPublishing {
 
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
+}
+
+// Conditionally disable signing for non-Maven Central publishing tasks (for local test publishing)
+gradle.taskGraph.whenReady {
+    val isPublishingToMavenCentral = allTasks.any {
+        it.name.contains("publishToMavenCentral")
+    }
+
+    if (!isPublishingToMavenCentral) {
+        allTasks.forEach { task ->
+            if (task.name.startsWith("sign")) {
+                task.enabled = false
+            }
+        }
+    }
 }

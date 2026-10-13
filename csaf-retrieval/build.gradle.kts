@@ -15,7 +15,7 @@ kotlin {
             dependencies {
                 api(project(":csaf-schema"))
                 api(project(":csaf-validation"))
-                implementation(libs.ktor.client.core)
+                api(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.kotlinx.json)
                 implementation(libs.kotlinx.coroutines)
@@ -26,7 +26,7 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                implementation(libs.ktor.client.java)
+                api(libs.ktor.client.java)
                 implementation(libs.bundles.slf4j)
             }
         }
