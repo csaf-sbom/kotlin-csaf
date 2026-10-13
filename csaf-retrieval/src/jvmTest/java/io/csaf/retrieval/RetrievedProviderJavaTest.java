@@ -36,7 +36,7 @@ public class RetrievedProviderJavaTest {
     public RetrievedProviderJavaTest() {
         loader = new CsafLoader(TestUtilsKt.mockEngine());
         //noinspection KotlinInternalInJava
-        CsafLoader.Companion.setDefaultLoaderFactory$csaf_retrieval(() -> loader);
+        CsafLoader.Companion.setDefaultLoaderFactoryForTesting(() -> loader);
     }
 
     @Test
