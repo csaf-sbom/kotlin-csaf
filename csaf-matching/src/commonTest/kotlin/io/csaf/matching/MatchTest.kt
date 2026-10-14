@@ -49,6 +49,22 @@ class MatchTest {
     }
 
     @Test
+    fun testGatherProductsFromFullProductNames() {
+        val csaf = goodCsaf(productTree = fullProductNamesOnlyTree)
+        val products = csaf.gatherProductsWithBranches()
+        assertEquals(listOf("CSAFPID-01", "CSAFPID-02"), products.map { it.product.product_id })
+        // Products in `full_product_names` have no path through the branches
+        assertEquals(listOf(emptyList()), products.map { it.branches }.distinct())
+    }
+
+    @Test
+    fun testGatherProductsFromFullProductNamesWithPredicate() {
+        val csaf = goodCsaf(productTree = fullProductNamesOnlyTree)
+        val products = csaf.gatherProductsWithBranches { it.product_id == "CSAFPID-02" }
+        assertEquals(listOf("CSAFPID-02"), products.map { it.product.product_id })
+    }
+
+    @Test
     fun testVulnerableProductPurl() {
         var vulnerableProduct =
             ProductWithBranches(
