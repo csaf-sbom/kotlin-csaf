@@ -44,3 +44,14 @@ kotlin {
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
+
+// The Kotlin Gradle plugin pins Bouncy Castle to a vulnerable 1.80.x range in this internal configuration.
+// Force the fixed version (>= 1.85). Even the latest Kotlin release 2.4.21 only pulls in 1.84, so this override is
+// still needed; re-check when a newer Kotlin version ships and remove it once Kotlin itself uses Bouncy Castle >= 1.85.
+configurations.matching { it.name == "kotlinBouncyCastleConfiguration" }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.bouncycastle") {
+            useVersion("1.85")
+        }
+    }
+}
