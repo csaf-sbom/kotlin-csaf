@@ -202,6 +202,7 @@ constructor(engine: HttpClientEngine? = null, client: HttpClient? = null) {
 
     companion object {
         @JvmStatic val lazyLoader: CsafLoader by lazy { defaultLoaderFactory() }
+        @set:JvmName("setDefaultLoaderFactoryForTesting")
         internal var defaultLoaderFactory: (() -> CsafLoader) = { CsafLoader() }
 
         /**

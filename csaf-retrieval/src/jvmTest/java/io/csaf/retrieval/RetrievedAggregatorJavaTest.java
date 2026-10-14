@@ -33,7 +33,7 @@ public class RetrievedAggregatorJavaTest {
     public RetrievedAggregatorJavaTest() {
         loader = new CsafLoader(TestUtilsKt.mockEngine());
         //noinspection KotlinInternalInJava
-        CsafLoader.Companion.setDefaultLoaderFactory$csaf_retrieval(() -> loader);
+        CsafLoader.Companion.setDefaultLoaderFactoryForTesting(() -> loader);
     }
 
     @Test
